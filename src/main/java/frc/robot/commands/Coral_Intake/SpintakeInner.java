@@ -5,7 +5,6 @@
 package frc.robot.commands.Coral_Intake;
 
 import frc.robot.subsystems.Coral_Intake;
-import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
