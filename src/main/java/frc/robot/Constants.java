@@ -22,8 +22,14 @@ public final class Constants {
   public static class CAN {
     public static final int PCM = 0;
     public static final int PDP = 0;
-
+    public static final int algaeExtensionMotor = 1;
+    public static final int algaeSpinMotor = 2;
     
+  }
+  
+  public static class Voltage {
+    public static final int algaeExtensionVoltage = 5;
+    public static final int algaeSpinVoltage = 5;
   }
 
   public static class Swerve {
