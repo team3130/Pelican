@@ -8,19 +8,19 @@ import frc.robot.subsystems.Coral_Intake;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example command that uses an example subsystem. */
-public class SpintakeOuter extends Command {
+public class Spintake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Coral_Intake subsystem;
 
 
-  public SpintakeOuter(Coral_Intake subsystem) {
+  public Spintake(Coral_Intake subsystem) {
     this.subsystem = subsystem;
     addRequirements(subsystem);
   }
 
   @Override
   public void initialize() {
-    subsystem.setOuterSpeed(0); //TODO
+    subsystem.setSpeed(0); //TODO
   }
 
   @Override
@@ -28,7 +28,7 @@ public class SpintakeOuter extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    subsystem.stopOuter();
+    subsystem.stop();
   }
 
   @Override

@@ -6,35 +6,29 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 
 public class Coral_Intake extends SubsystemBase {
 
-    private final TalonFX outerMotor;
-    private final TalonFX innerMotor;
+    private final TalonFX intakeMotor;
 
   public Coral_Intake() {
-    outerMotor = new TalonFX(Constants.Coral_Intake.CAN_CoralOuter);
-    innerMotor = new TalonFX(Constants.Coral_Intake.CAN_CoralInner);
+     intakeMotor = new TalonFX(Constants.Coral_Intake.CAN_CoralMotor);
+     intakeMotor.getConfigurator().apply(new TalonFXConfiguration());
   }
 
   // setters for outer and inner intake motors
-  public void setOuterSpeed(double speed) {
-    outerMotor.set(speed);
+  public void setSpeed(double speed) {intakeMotor.set(speed);}
+
+
+  public void stop() {
+    intakeMotor.set(0);
   }
 
-  public void setInnerSpeed(double speed) {
-    innerMotor.set(speed);
-  }
-
-  public void stopOuter() {
-    outerMotor.set(0);
-  }
-
-  public void stopInner() {
-    innerMotor.set(0);
-  }
 
   @Override
   public void periodic() {

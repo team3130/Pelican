@@ -213,7 +213,6 @@ public final class Constants {
 
   
   public static class Coral_Intake {
-    public static final int CAN_CoralOuter = 0; //TODO
-    public static final int CAN_CoralInner = 0; //TODO
+    public static final int CAN_CoralMotor = 0; //TODO
   }
 }
