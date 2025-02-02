@@ -185,3 +185,43 @@ compile_commands.json
 
 # Eclipse generated file for annotation processors
 .factorypath
+### Team ERROR 3130 additions ###
+# CMake
+cmake-build-*/
+
+
+# File-based project format
+*.iws
+
+
+# IntelliJ
+out/
+.idea/
+*.iml
+
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+
+.vscode/settings.json
+
+
+simgui-ds.json
+
+
+simgui-window.json
+
+
+simgui.json
+
+
+.SysId/
+
