@@ -23,7 +23,14 @@ public final class Constants {
     public static final int PCM = 0;
     public static final int PDP = 0;
 
+    public static final int elevatorLeadingMotor = 1;
+    public static final int elevatorFollowingMotor = 2;
+
     
+  }
+
+  public static class IDs {
+    public static final int elevatorLimitDIO = 1;
   }
 
   public static class Swerve {
