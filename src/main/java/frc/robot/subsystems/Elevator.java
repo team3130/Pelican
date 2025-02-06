@@ -158,6 +158,12 @@ public class Elevator extends SubsystemBase {
   public double getElevatorSpeed() {
     return elevatorSpeed;
   }
+  public double smartLift(double setpoint){
+    return elevatorController.calculator(getElevatorEncoderPosition(), setpoint);
+  }
+  public void moveElevatorAtSpeed(double speed){
+    elevatorMotors.set(ControlMode.PercentOutput, speed);
+  }
   public void setElevatorSpeed(double speed){
     elevatorSpeed = speed;
   }
