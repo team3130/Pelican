@@ -210,4 +210,9 @@ public final class Constants {
     public static final int AXS_RJOYSTICK_Y = 5;
   }
   public static final boolean navxReversed = false;
+
+  
+  public static class Coral_Intake {
+    public static final int CAN_CoralMotor = 0; //TODO
+  }
 }
