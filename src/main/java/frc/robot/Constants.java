@@ -20,10 +20,38 @@ public final class Constants {
   public static final boolean pitMode = false;
 
   public static class CAN {
-    public static final int PCM = 0;
-    public static final int PDP = 0;
+    public static final int Pigeon = 23;
 
-    
+    public static final int PCM = 21;
+    public static final int PDP = 22;
+
+    public static final int ElevatorLeft = -1;
+    public static final int ElevatorRight = -1;
+
+    public static final int CoralIntake = -1;
+    public static final int CoralIntakePivot = -1;
+
+    public static final int AlgaeIntake = -1;
+    public static final int AlgaeIntakeActuation = -1;
+
+    public static final int Manipulator = -1;
+
+    public static final int Climber = -1;
+  }
+
+  public static class IDs {
+    public static final int ElevatorLimitSwitch = -1;
+    public static final int ElevatorEncoder = -1;
+
+    public static final int IntakeLimitSwitch = -1;
+
+    public static final int ManipulatorFirstBeam = -1;
+    public static final int ManipulatorSecondBeam = -1;
+
+    public static final int ClimberLimitSwitchHome = -1;
+    public static final int ClimberLimitSwitchExtended = -1;
+
+    public static final int CoralIntakeActuationPNMChannel = -1;
   }
 
   public static class Swerve {
@@ -43,24 +71,24 @@ public final class Constants {
 
     // SWERVE CAN NUMBERED LIKE CARTESIAN COORDIANTE QUADRANTS (dont think this is true anymore ngl)
     // front right
-    public final static int MOD_ONE_STEER = 0;
-    public final static int MOD_ONE_DRIVE = 0;
+    public final static int MOD_ONE_STEER = 6;
+    public final static int MOD_ONE_DRIVE = 7;
 
     // back right
-    public final static int MOD_TWO_STEER = 0;
-    public final static int MOD_TWO_DRIVE = 0;
+    public final static int MOD_TWO_STEER = 9;
+    public final static int MOD_TWO_DRIVE = 8;
 
     // back left
-    public final static int MOD_THREE_STEER = 0;
-    public final static int MOD_THREE_DRIVE = 0;
+    public final static int MOD_THREE_STEER = 11;
+    public final static int MOD_THREE_DRIVE = 10;
 
-    public final static int MOD_FOUR_STEER = 0;
-    public final static int MOD_FOUR_DRIVE = 0;
+    public final static int MOD_FOUR_STEER = 13;
+    public final static int MOD_FOUR_DRIVE = 12;
     // front left
-    public final static int MOD_ONE_CANCODER = 0;
-    public final static int MOD_TWO_CANCODER = 0;
-    public final static int MOD_THREE_CANCODER = 0;
-    public final static int MOD_FOUR_CANCODER = 0;
+    public final static int MOD_ONE_CANCODER = 1;
+    public final static int MOD_TWO_CANCODER = 2;
+    public final static int MOD_THREE_CANCODER = 3;
+    public final static int MOD_FOUR_CANCODER = 4;
 
     // Order should match side
     public static final int[] turningID = new int[] {MOD_ONE_STEER, MOD_TWO_STEER, MOD_THREE_STEER, MOD_FOUR_STEER};
@@ -69,9 +97,9 @@ public final class Constants {
 
     /* Length and width as measured as distances between center of wheels */
     // the left-to-right distance between the drivetrain wheels, should be measured from center to center
-    public static final double trackWidth = 0;
+    public static final double trackWidth = 0.629;
     // the front-to-back distance between the drivetrain wheels, should be measured from center to center
-    public static final double wheelBase = 0;
+    public static final double wheelBase = 0.629;
 
     public static final Translation2d[] moduleTranslations = {
             new Translation2d(wheelBase / 2.0, trackWidth / 2.0), // 1 pos neg
@@ -82,27 +110,27 @@ public final class Constants {
 
     // / 3.54 with 8 volts of voltage compensation and 4.19 with 10 volts
     // 4.8 max speed, 5 acceleration, drops to 9.6
-    public final static double kPhysicalMaxSpeedMetersPerSecond = 4;
+    public final static double kPhysicalMaxSpeedMetersPerSecond = 1;
     public final static double kDeadband = 0.055;
-    public final static double kMaxAccelerationDrive = 5;
+    public final static double kMaxAccelerationDrive = 1.25;
     public final static double kMaxAccelerationAngularDrive = 1.0*Math.PI;
 
-    public final static double kP_FrontLeft = 0;
+    public final static double kP_FrontLeft = 1;
     public final static double kI_FrontLeft = 0;
     public final static double kD_FrontLeft = 0;
     public final static double kF_FrontLeft = 0;
 
-    public final static double kP_FrontRight = 0;
+    public final static double kP_FrontRight = 1;
     public final static double kI_FrontRight = 0;
     public final static double kD_FrontRight = 0;
     public final static double kF_FrontRight = 0;
 
-    public final static double kP_BackRight = 0;
+    public final static double kP_BackRight = 1;
     public final static double kI_BackRight = 0;
     public final static double kD_BackRight = 0;
     public final static double kF_BackRight = 0;
 
-    public final static double kP_BackLeft = 0;
+    public final static double kP_BackLeft = 1;
     public final static double kI_BackLeft = 0;
     public final static double kD_BackLeft = 0;
     public final static double kF_BackLeft = 0;
@@ -120,19 +148,19 @@ public final class Constants {
   }
 
   public static class SwerveEncoderOffsets {
-    public static final double MOD_ONE_OFFSET = 0;
-    public static final double MOD_TWO_OFFSET = 0;
-    public static final double MOD_THREE_OFFSET = 0;
-    public static final double MOD_FOUR_OFFSET = 0;
+    public static final double MOD_ONE_OFFSET = 0.110840;
+    public static final double MOD_TWO_OFFSET = 0.069580;
+    public static final double MOD_THREE_OFFSET = -0.378906;
+    public static final double MOD_FOUR_OFFSET = 0.425049;
     public static final double[] kCANCoderOffsets = new double[] {MOD_ONE_OFFSET, MOD_TWO_OFFSET, MOD_THREE_OFFSET, MOD_FOUR_OFFSET};
   }
 
   // gear ratios and/or ticks per rev, etc.
   public static class SwerveConversions {
-    public final static double frontDriveGearRatio = 0;
-    public final static double backDriveGearRatio = 0;
-    public final static double frontSteerGearRatio = 0; 
-    public final static double backSteerGearRatio = 0; 
+    public final static double frontDriveGearRatio = 5.9; // Checked 12/18/24
+    public final static double backDriveGearRatio = 6.75; //Checked 12/18/24
+    public final static double frontSteerGearRatio = 18.75; // Checked 12/18/24
+    public final static double backSteerGearRatio = 21.42857; // Checked 12/18/24
     public static final double wheelDiameter = Units.inchesToMeters(3.9);
     public static final double wheelCircumference = wheelDiameter * Math.PI;
     public final static double frontDriveRotToMeters = wheelDiameter * Math.PI * (1/(frontDriveGearRatio)); // multiply by
@@ -152,10 +180,10 @@ public final class Constants {
     public static final int BTN_TRIANGLE = 4;
     public static final int BTN_LBUMPER = 5;
     public static final int BTN_RBUMPER = 6;
-  
+
     public static final int BTN_LJOYSTICK_PRESS = 11;
     public static final int BTN_RJOYSTICK_PRESS = 12;
-  
+
     // Gamepad POV List
     public static final int POV_UNPRESSED = -1;
     public static final int POV_N = 0;
@@ -166,7 +194,7 @@ public final class Constants {
     public static final int POV_SW = 225;
     public static final int POV_W = 270;
     public static final int POV_NW = 315;
-  
+
     // Gamepad Axis List
     public static final int AXS_LJOYSTICKX = 0;
     public static final int AXS_LJOYSTICKY = 1;
@@ -176,20 +204,20 @@ public final class Constants {
     public static final int AXS_RJOYSTICK_Y = 5;
     }
   
-  public static class XBox {
+  public static class Xbox {
     // Gamepad Button List
     public static final int BTN_A = 1;
     public static final int BTN_B = 2;
     public static final int BTN_X = 3;
     public static final int BTN_Y = 4;
-  
+
     public static final int BTN_LBUMPER = 5;
     public static final int BTN_RBUMPER = 6;
     public static final int BTN_WINDOW = 7;
     public static final int BTN_MENU = 8;
     public static final int BTN_LJOYSTICK_PRESS = 9;
     public static final int BTN_RJOYSTICK_PRESS = 10;
-  
+
     // Gamepad POV List
     public static final int POV_UNPRESSED = -1;
     public static final int POV_N = 0;
@@ -200,7 +228,7 @@ public final class Constants {
     public static final int POV_SW = 225;
     public static final int POV_W = 270;
     public static final int POV_NW = 315;
-  
+
     // Gamepad Axis List
     public static final int AXS_LJOYSTICK_X = 0;
     public static final int AXS_LJOYSTICK_Y = 1;
