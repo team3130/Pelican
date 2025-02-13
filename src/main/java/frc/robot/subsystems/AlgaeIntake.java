@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,12 +17,16 @@ public class AlgaeIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final TalonSRX intake;
   private final TalonSRX actuation;
+  private final DigitalInput limitSwitch;
 
   private double intakeSpeed = 0.5;
   private double actuationSpeed = 0.5;
+  private double setpoint = 0;
   public AlgaeIntake() {
     intake = new TalonSRX(Constants.CAN.AlgaeIntake);
     actuation = new TalonSRX(Constants.CAN.AlgaeIntakeActuation);
+    limitSwitch = new DigitalInput(Constants.IDs.AlgaeIntakeLimitSwitch);
+
 
     intake.configFactoryDefault();
     intake.setInverted(false);
@@ -54,6 +59,14 @@ public class AlgaeIntake extends SubsystemBase {
   public double getActuationSpeed() {return actuationSpeed;}
   public void setActuationSpeed(double value) {actuationSpeed = value;}
 
+  public double getActuationPosition() {return intake.getSelectedSensorPosition();}
+  public void setActuationPosition(double value) {intake.setSelectedSensorPosition(0);}
+
+  public double getSetpoint() {return setpoint;}
+  public void setSetpoint(double value) {setpoint = value;}
+
+  public boolean getSwitch() {return limitSwitch.get();}
+
   /**
    * Initializes the data we send on shuffleboard
    * Calls the default init sendable for Subsystem Bases
@@ -65,6 +78,9 @@ public class AlgaeIntake extends SubsystemBase {
 
       builder.addDoubleProperty("Intake Speed", this::getIntakeSpeed, this::setIntakeSpeed);
       builder.addDoubleProperty("Actuation Speed", this::getActuationSpeed, this::setActuationSpeed);
+      builder.addDoubleProperty("Actuation Position", this::getActuationPosition, this::setActuationPosition);
+
+      builder.addBooleanProperty("Limit Switch", this::getSwitch, null);
     }
   }
 

@@ -27,14 +27,15 @@ public class GoToHome extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(climber.isZeroed()) {
-      climber.goToHome();
-    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    if(climber.isZeroed()) {
+      climber.goToHome();
+    }
+  }
 
   // Called once the command ends or is interrupted.
   @Override

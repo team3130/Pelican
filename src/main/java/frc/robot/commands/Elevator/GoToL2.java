@@ -26,6 +26,12 @@ public class GoToL2 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
+  }
+
+  // Called every time the scheduler runs while the command is scheduled.
+  @Override
+  public void execute() {
     if(elevator.isZeroed()) {
       elevator.goToL2();
     } else {
@@ -33,10 +39,6 @@ public class GoToL2 extends Command {
       elevator.goToL2();
     }
   }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

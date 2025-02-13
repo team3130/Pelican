@@ -26,17 +26,19 @@ public class GoToMinPosition extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
+  }
+
+  // Called every time the scheduler runs while the command is scheduled.
+  @Override
+  public void execute() {
     if(elevator.isZeroed()) {
-      elevator.goToL1();
+      elevator.goToMinPosition();
     } else {
       elevator.goToHome();
       elevator.goToMinPosition();
     }
   }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

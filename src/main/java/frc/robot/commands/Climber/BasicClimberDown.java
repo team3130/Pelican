@@ -26,12 +26,12 @@ public class BasicClimberDown extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    climber.climbDown();
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {climber.climbDown();}
 
   // Called once the command ends or is interrupted.
   @Override

@@ -4,9 +4,18 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import frc.robot.commands.AlgaeIntake.ActuateAlgaeIntake;
+import frc.robot.commands.AlgaeIntake.RunAlgaeIntake;
+import frc.robot.commands.AlgaeIntake.RunAlgaeOuttake;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Chassis.ResetOdometryForward;
+import frc.robot.commands.CoralIntake.UnlimitedCoralOuttake;
+import frc.robot.commands.Elevator.*;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.commands.Manipulator.OneSwitchLimitedManipIntake;
+import frc.robot.commands.Manipulator.OneSwitchLimitedManipOuttake;
+import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -20,11 +29,15 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final Chassis chassis = new Chassis();
+  private final Manipulator manip = new Manipulator();
+  private final Elevator elevator = new Elevator();
+  private final CoralIntake coralIntake = new CoralIntake();
+  private final Climber climber = new Climber();
+  private final AlgaeIntake algaeIntake = new AlgaeIntake();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(1);
-
+  private final CommandPS5Controller driverController = new CommandPS5Controller(0);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
@@ -41,13 +54,22 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    driverController.R2().whileTrue(new OneSwitchLimitedManipOuttake(manip, elevator));
+    driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    driverController.L1().whileTrue(new GoToMinPosition(elevator)); //loading position
+    driverController.R1().whileTrue(new GoToL4(elevator));
+    driverController.povDown().whileTrue(new GoToL3(elevator));
+    driverController.circle().whileTrue(new GoToL2(elevator));
+    driverController.triangle().whileTrue(new GoToL1(elevator));
+
+    driverController.cross().whileTrue(new ActuateAlgaeIntake(algaeIntake));
+    driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
+    driverController.L3().whileTrue(new RunAlgaeOuttake(algaeIntake));
+
+    driverController.povUp().whileTrue(new ResetOdometryForward(chassis));
+
+    driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
   }
 
   /**
