@@ -6,12 +6,8 @@ package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.fasterxml.jackson.databind.util.Named;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -35,7 +31,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public final SlewRateLimiter driveLimiter = new SlewRateLimiter(0.5, -1, 0);
+  public final SlewRateLimiter xLimiter = new SlewRateLimiter(0.5, -2, 0);
+  public final SlewRateLimiter yLimiter = new SlewRateLimiter(0.5, -2, 0);
   public final SlewRateLimiter steerLimiter = new SlewRateLimiter(1);
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
@@ -128,8 +125,8 @@ public class RobotContainer {
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             driveTrain.applyRequest(() ->
-                    drive.withVelocityX(driveLimiter.calculate(-driverController.getLeftY() * Constants.Swerve.maxSpeed)) // Drive forward with negative Y (forward)
-                            .withVelocityY(driveLimiter.calculate(-driverController.getLeftX() * Constants.Swerve.maxSpeed)) // Drive left with negative X (left)
+                    drive.withVelocityX(xLimiter.calculate(-driverController.getLeftY() * Constants.Swerve.maxSpeed)) // Drive forward with negative Y (forward)
+                            .withVelocityY(yLimiter.calculate(-driverController.getLeftX() * Constants.Swerve.maxSpeed)) // Drive left with negative X (left)
                             .withRotationalRate(steerLimiter.calculate(-driverController.getRightX() * Constants.Swerve.maxAngularRate)) // Drive counterclockwise with negative X (left)
             )
     );

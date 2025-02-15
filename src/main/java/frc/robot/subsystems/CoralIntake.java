@@ -18,7 +18,7 @@ public class CoralIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final TalonSRX intake;
   private final TalonSRX actuation;
-  private double intakeSpeed = 0.33;
+  private double intakeSpeed = 0.5;
   private double actuationSpeed = 0.2;
 
   public CoralIntake() {
