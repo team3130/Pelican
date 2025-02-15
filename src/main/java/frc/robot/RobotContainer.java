@@ -54,9 +54,9 @@ public class RobotContainer {
 
   public final CommandSwerveDrivetrain driveTrain = frc.robot.TunerConstants.createDrivetrain();
 
-// Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
-  //private final SendableChooser<Command> autoChooser;
+
+  private final SendableChooser<Command> autoChooser;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     manip = new Manipulator();
@@ -80,8 +80,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Limited Coral Intake", new LimitedCoralIntake(coralIntake, manip));
     NamedCommands.registerCommand("UnLimited Coral Outtake", new UnlimitedCoralOuttake(coralIntake));
 
-    //autoChooser = AutoBuilder.buildAutoChooser();
-    //SmartDashboard.putData("Auto Chooser", autoChooser);
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // Configure the trigger bindings
     configureBindings();
@@ -154,9 +154,9 @@ public class RobotContainer {
     SmartDashboard.putData(elevator);
   }
 
-  //public Command pick() {
-    //return autoChooser.getSelected();
-  //}
+  public Command pick() {
+    return autoChooser.getSelected();
+  }
 
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
