@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
 /** An example command that uses an example subsystem. */
-public class GoToL3Basic extends Command {
+public class GoToL4Basic extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
 
@@ -17,7 +17,7 @@ public class GoToL3Basic extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL3Basic(Elevator elevator) {
+  public GoToL4Basic(Elevator elevator) {
     this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
@@ -32,9 +32,9 @@ public class GoToL3Basic extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(elevator.getPosition() > elevator.getL3()) {
+    if(elevator.getPosition() > elevator.getL4()) {
       elevator.goDown();
-    }else if(elevator.getPosition() < elevator.getL3()) {
+    }else if(elevator.getPosition() < elevator.getL4()) {
       elevator.goUp();
     }
   }
@@ -48,6 +48,6 @@ public class GoToL3Basic extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.getPosition() < elevator.getL3() + 5 && elevator.getPosition() > elevator.getL3() - 5;
+      return elevator.getPosition() < elevator.getL4() + 1&& elevator.getPosition() > elevator.getL4() - 1;
   }
 }

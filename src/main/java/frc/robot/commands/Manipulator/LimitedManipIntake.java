@@ -36,9 +36,9 @@ public class LimitedManipIntake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (elevator.isAtMinPosition()) {
+    //if (elevator.isAtMinPosition()) {
       manip.runManip();
-    }
+    //}
   }
 
   // Called once the command ends or is interrupted.

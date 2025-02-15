@@ -4,15 +4,15 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StrictFollower;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,8 +21,8 @@ import frc.robot.Constants;
 public class Elevator extends SubsystemBase {
   private final TalonFX leftMotor;
   private final TalonFX rightMotor;
-  private final DigitalInput limitSwitch;
-  private final CANcoder encoder;
+  private final DigitalInput bottomLimitSwitch;
+  private final DigitalInput topLimitSwitch;
 
   private double home = 0;
   private double minPosition = 0;
@@ -50,21 +50,20 @@ public class Elevator extends SubsystemBase {
   public Elevator() {
     leftMotor = new TalonFX(Constants.CAN.ElevatorLeft);
     rightMotor = new TalonFX(Constants.CAN.ElevatorRight);
-    limitSwitch = new DigitalInput(Constants.IDs.ElevatorLimitSwitch);
-    encoder = new CANcoder(Constants.IDs.ElevatorEncoder);
+    bottomLimitSwitch = new DigitalInput(Constants.IDs.ElevatorBottomLimitSwitch);
+    topLimitSwitch = new DigitalInput(Constants.IDs.ElevatorTopLimitSwitch);
 
-    encoder.getConfigurator().apply(new CANcoderConfiguration());
-
-    rightMotor.setControl(new StrictFollower(leftMotor.getDeviceID()));
+    rightMotor.setControl(new Follower(leftMotor.getDeviceID(), true));
 
     leftMotor.getConfigurator().apply(new TalonFXConfiguration());
     rightMotor.getConfigurator().apply(new TalonFXConfiguration());
 
-    leftMotor.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
-    rightMotor.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+    leftMotor.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+
+    leftMotor.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
+    rightMotor.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
 
     leftMotor.getConfigurator().apply(new CurrentLimitsConfigs().withSupplyCurrentLimitEnable(true).withSupplyCurrentLimit(6));
-    rightMotor.getConfigurator().apply(new CurrentLimitsConfigs().withSupplyCurrentLimitEnable(true).withSupplyCurrentLimit(6));
 
     voltRequest0 = new MotionMagicDutyCycle(0);
     slot0Configs = new Slot0Configs().withGravityType(GravityTypeValue.Elevator_Static);
@@ -81,11 +80,11 @@ public class Elevator extends SubsystemBase {
   }
 
   public void goDown() {
-    leftMotor.set(-0.2);
+    leftMotor.set(-0.4);
   }
 
   public void goUp() {
-    leftMotor.set(0.2);
+    leftMotor.set(0.4);
   }
 
   public void goToSetpoint(double setpoint) {
@@ -94,7 +93,7 @@ public class Elevator extends SubsystemBase {
 
   public void goToHome() {
     goDown();
-    if(brokeLimitSwitch()) {
+    if(brokeBottomLimitSwitch()) {
       setPosition(0);
       setZeroed(true);
     }
@@ -154,10 +153,11 @@ public class Elevator extends SubsystemBase {
     setAtL4(true);
   }
 
-  public double getPosition() {return encoder.getPosition().getValueAsDouble();}
-  public void setPosition(double value) {encoder.setPosition(value);}
+  public double getPosition() {return leftMotor.getPosition().getValueAsDouble();}
+  public void setPosition(double value) {leftMotor.setPosition(value);}
 
-  public boolean brokeLimitSwitch() {return limitSwitch.get();}
+  public boolean brokeBottomLimitSwitch() {return !bottomLimitSwitch.get();}
+  public boolean brokeTopLimitSwitch() {return !topLimitSwitch.get();}
 
   public boolean isZeroed() {return zeroed;}
   public boolean isAtHome() {return atHome;}
@@ -203,9 +203,18 @@ public class Elevator extends SubsystemBase {
   public double getSlot0kI() {return slot0kI;}
   public double getSlot0kD() {return slot0kD;}
   public void setSlot0kG(double value) {slot0kG = value;}
-  public void setSlot0kP(double value) {slot0kG = value;}
-  public void setSlot0kI(double value) {slot0kG = value;}
-  public void setSlot0kD(double value) {slot0kG = value;}
+  public void setSlot0kP(double value) {slot0kP = value;}
+  public void setSlot0kI(double value) {slot0kI = value;}
+  public void setSlot0kD(double value) {slot0kD = value;}
+
+  public void updateElevatorPID() {
+    slot0Configs.kG = slot0kG;
+    slot0Configs.kP = slot0kP;
+    slot0Configs.kI = slot0kI;
+    slot0Configs.kD = slot0kD;
+
+    leftMotor.getConfigurator().apply(slot0Configs);
+  }
 
 
   /**
@@ -231,8 +240,9 @@ public class Elevator extends SubsystemBase {
       builder.addDoubleProperty("Slot 0 kI", this::getSlot0kI, this::setSlot0kI);
       builder.addDoubleProperty("Slot 0 kD", this::getSlot0kD, this::setSlot0kD);
 
-      builder.addBooleanProperty("Broke Limit", this::brokeLimitSwitch, null);
-      builder.addBooleanProperty("At Zeroed", this::isZeroed, this::setZeroed);
+      builder.addBooleanProperty("Broke Bottom Limit", this::brokeBottomLimitSwitch, null);
+      builder.addBooleanProperty("Broke Top Limit", this::brokeTopLimitSwitch, null);
+      builder.addBooleanProperty("Is Zeroed", this::isZeroed, this::setZeroed);
       builder.addBooleanProperty("At Home", this::isAtHome, this::setAtHome);
       builder.addBooleanProperty("At Min Position", this::isAtMinPosition, this::setAtMinPosition);
       builder.addBooleanProperty("At L1", this::isAtL1, this::setAtL1);

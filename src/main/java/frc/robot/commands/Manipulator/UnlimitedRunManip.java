@@ -5,20 +5,23 @@
 package frc.robot.commands.Manipulator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
 public class UnlimitedRunManip extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
+  private final Elevator elevator;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param manip The subsystem used by this command.
    */
-  public UnlimitedRunManip(Manipulator manip) {
+  public UnlimitedRunManip(Manipulator manip, Elevator elevator) {
     this.manip = manip;
+    this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip);
   }
@@ -31,7 +34,11 @@ public class UnlimitedRunManip extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {manip.runManip();}
+  public void execute() {
+    //if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
+      manip.runManip();
+    //}
+  }
 
   // Called once the command ends or is interrupted.
   @Override

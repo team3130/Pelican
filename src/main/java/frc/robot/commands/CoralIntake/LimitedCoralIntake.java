@@ -6,19 +6,22 @@ package frc.robot.commands.CoralIntake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CoralIntake;
+import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
 public class LimitedCoralIntake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final CoralIntake coralIntake;
+  private final Manipulator manip;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param coralIntake The subsystem used by this command.
    */
-  public LimitedCoralIntake(CoralIntake coralIntake) {
+  public LimitedCoralIntake(CoralIntake coralIntake, Manipulator manip) {
     this.coralIntake = coralIntake;
+    this.manip = manip;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(coralIntake);
   }
@@ -42,6 +45,6 @@ public class LimitedCoralIntake extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return coralIntake.brokeLimit();
+    return manip.getFirstBeam();
   }
 }

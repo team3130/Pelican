@@ -50,6 +50,6 @@ public class GoToL1 extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.getPosition() < elevator.getMinPosition() || elevator.getPosition() > elevator.getMaxPosition();
+      return elevator.brokeBottomLimitSwitch() || elevator.brokeTopLimitSwitch();
   }
 }

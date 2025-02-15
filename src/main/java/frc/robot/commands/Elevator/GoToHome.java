@@ -6,7 +6,6 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.ExampleSubsystem;
 
 /** An example command that uses an example subsystem. */
 public class GoToHome extends Command {
@@ -41,6 +40,6 @@ public class GoToHome extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return elevator.brokeLimitSwitch();
+    return elevator.brokeBottomLimitSwitch() || elevator.brokeTopLimitSwitch();
   }
 }

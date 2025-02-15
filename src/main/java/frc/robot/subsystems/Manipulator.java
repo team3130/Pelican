@@ -18,14 +18,14 @@ public class Manipulator extends SubsystemBase {
   private final DigitalInput firstBeam;
   private final DigitalInput secondBeam;
 
-  private double manipSpeed = 0.2;
+  private double manipSpeed = 0.4;
   public Manipulator() {
     manip = new TalonSRX(Constants.CAN.Manipulator);
     firstBeam = new DigitalInput(Constants.IDs.ManipulatorFirstBeam);
     secondBeam = new DigitalInput(Constants.IDs.ManipulatorSecondBeam);
 
     manip.configFactoryDefault();
-    manip.setInverted(false);
+    manip.setInverted(true);
   }
 
   public void runManip() {
@@ -38,8 +38,8 @@ public class Manipulator extends SubsystemBase {
     manip.set(ControlMode.PercentOutput, 0);
   }
 
-  public boolean getFirstBeam() {return firstBeam.get();}
-  public boolean getSecondBeam() {return secondBeam.get();}
+  public boolean getFirstBeam() {return !firstBeam.get();}
+  public boolean getSecondBeam() {return !secondBeam.get();}
 
   public double getManipSpeed() {return manipSpeed;}
   public void setManipSpeed(double value) {manipSpeed = value;}
@@ -48,8 +48,8 @@ public class Manipulator extends SubsystemBase {
     if (Constants.debugMode) {
       builder.setSmartDashboardType("Manipulator");
 
-      builder.addBooleanProperty("First Beam", this::getFirstBeam, null);
-      builder.addBooleanProperty("Second Beam", this::getSecondBeam, null);
+      builder.addBooleanProperty("Manip First Beam", this::getFirstBeam, null);
+      builder.addBooleanProperty("Manip Second Beam", this::getSecondBeam, null);
 
       builder.addDoubleProperty("Manipulator Speed", this::getManipSpeed, this::setManipSpeed);
     }

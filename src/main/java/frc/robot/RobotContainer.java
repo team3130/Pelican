@@ -4,17 +4,24 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.fasterxml.jackson.databind.util.Named;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
-import frc.robot.commands.AlgaeIntake.ActuateAlgaeIntake;
-import frc.robot.commands.AlgaeIntake.RunAlgaeIntake;
-import frc.robot.commands.AlgaeIntake.RunAlgaeOuttake;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
-import frc.robot.commands.Chassis.ResetOdometryForward;
+import frc.robot.commands.CoralIntake.LimitedCoralIntake;
+import frc.robot.commands.CoralIntake.UnlimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralOuttake;
 import frc.robot.commands.Elevator.*;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.Manipulator.OneSwitchLimitedManipIntake;
-import frc.robot.commands.Manipulator.OneSwitchLimitedManipOuttake;
+import frc.robot.commands.Manipulator.*;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -28,20 +35,57 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  public final SlewRateLimiter driveLimiter = new SlewRateLimiter(0.5, -1, 0);
+  public final SlewRateLimiter steerLimiter = new SlewRateLimiter(1);
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final Chassis chassis = new Chassis();
-  private final Manipulator manip = new Manipulator();
-  private final Elevator elevator = new Elevator();
-  private final CoralIntake coralIntake = new CoralIntake();
-  private final Climber climber = new Climber();
-  private final AlgaeIntake algaeIntake = new AlgaeIntake();
+  private final Manipulator manip;
+  private final Elevator elevator;
+  private final CoralIntake coralIntake;
+  private final AlgaeIntake algaeIntake;
+  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+          .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
+          .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
+  private final Telemetry logger = new Telemetry(Constants.Swerve.maxSpeed);
+
+  private final CommandXboxController operatorController = new CommandXboxController(1);
+
+  public final CommandSwerveDrivetrain driveTrain = frc.robot.TunerConstants.createDrivetrain();
+
+// Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
+  //private final SendableChooser<Command> autoChooser;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    manip = new Manipulator();
+    elevator = new Elevator();
+    coralIntake = new CoralIntake();
+    algaeIntake = new AlgaeIntake();
+
+    NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
+    NamedCommands.registerCommand("UnLimited Manip Outtake", new LimitedManipOuttake(manip, elevator));
+
+    NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator));
+    NamedCommands.registerCommand("Go L4", new GoToL4(elevator));
+    NamedCommands.registerCommand("Go L3", new GoToL3(elevator));
+    NamedCommands.registerCommand("Go L2", new GoToL2(elevator));
+    NamedCommands.registerCommand("Go L1", new GoToL1(elevator));
+
+    NamedCommands.registerCommand("Toggle Algae Intake", new ActuateAlgaeIntake(algaeIntake));
+    NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
+    NamedCommands.registerCommand("Run Algae Outtake", new RunAlgaeOuttake(algaeIntake));
+
+    NamedCommands.registerCommand("Limited Coral Intake", new LimitedCoralIntake(coralIntake, manip));
+    NamedCommands.registerCommand("UnLimited Coral Outtake", new UnlimitedCoralOuttake(coralIntake));
+
+    //autoChooser = AutoBuilder.buildAutoChooser();
+    //SmartDashboard.putData("Auto Chooser", autoChooser);
+
     // Configure the trigger bindings
     configureBindings();
+    exportSmartDashboardData();
   }
 
   /**
@@ -54,23 +98,68 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverController.R2().whileTrue(new OneSwitchLimitedManipOuttake(manip, elevator));
-    driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
+    driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
+    //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
-    driverController.L1().whileTrue(new GoToMinPosition(elevator)); //loading position
-    driverController.R1().whileTrue(new GoToL4(elevator));
-    driverController.povDown().whileTrue(new GoToL3(elevator));
-    driverController.circle().whileTrue(new GoToL2(elevator));
-    driverController.triangle().whileTrue(new GoToL1(elevator));
+    //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
 
-    driverController.cross().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
-    driverController.L3().whileTrue(new RunAlgaeOuttake(algaeIntake));
+    //driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
+    //driverController.R1().onTrue(new GoToL4Basic(elevator));
+    driverController.povDown().whileTrue(new GoToL3Basic(elevator));
+    driverController.circle().whileTrue(new GoToL2Basic(elevator));
+    //driverController.triangle().onTrue(new GoToL1(elevator));
 
-    driverController.povUp().whileTrue(new ResetOdometryForward(chassis));
+    driverController.L1().whileTrue(new GoDown(elevator));
+    driverController.R1().whileTrue(new GoUp(elevator));
+
+    //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
+    //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
+    operatorController.y().whileTrue(new ActuateAlgaeIntake(algaeIntake));
+    operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
+    //driverController.L1().whileTrue(new RunAlgaeOuttake(algaeIntake));
+
+    //driverController.povUp().whileTrue(new ResetOdometryForward(chassis));
 
     driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
+
+    // Note that X is defined as forward according to WPILib convention,
+    // and Y is defined as to the left according to WPILib convention.
+    driveTrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+            driveTrain.applyRequest(() ->
+                    drive.withVelocityX(driveLimiter.calculate(-driverController.getLeftY() * Constants.Swerve.maxSpeed)) // Drive forward with negative Y (forward)
+                            .withVelocityY(driveLimiter.calculate(-driverController.getLeftX() * Constants.Swerve.maxSpeed)) // Drive left with negative X (left)
+                            .withRotationalRate(steerLimiter.calculate(-driverController.getRightX() * Constants.Swerve.maxAngularRate)) // Drive counterclockwise with negative X (left)
+            )
+    );
+
+    // Run SysId routines when holding back/start and X/Y.
+    // Note that each routine should be run exactly once in a single log.
+    operatorController.back().and(operatorController.y()).whileTrue(driveTrain.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    operatorController.back().and(operatorController.x()).whileTrue(driveTrain.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    operatorController.start().and(operatorController.y()).whileTrue(driveTrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    operatorController.start().and(operatorController.x()).whileTrue(driveTrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+    // reset the field-centric heading on left bumper press
+    driverController.povUp().onTrue(driveTrain.runOnce(() -> driveTrain.seedFieldCentric()));
+
+    driveTrain.registerTelemetry(logger::telemeterize);
   }
+
+  public void exportSmartDashboardData() {
+    SmartDashboard.putData(manip);
+    SmartDashboard.putData(coralIntake);
+    SmartDashboard.putData(algaeIntake);
+    SmartDashboard.putData(elevator);
+  }
+
+  //public Command pick() {
+    //return autoChooser.getSelected();
+  //}
+
+  public Command elevatorHome() {return new GoToHome(elevator);}
+  public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

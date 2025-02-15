@@ -26,7 +26,7 @@ public class GoUp extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    elevator.updateElevatorPID();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -40,6 +40,6 @@ public class GoUp extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return elevator.getPosition() > elevator.getMaxPosition();
+    return elevator.brokeTopLimitSwitch();
   }
 }

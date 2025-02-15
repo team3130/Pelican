@@ -4,8 +4,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+
+import static edu.wpi.first.units.Units.*;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -20,141 +21,58 @@ public final class Constants {
   public static final boolean pitMode = false;
 
   public static class CAN {
-    public static final int Pigeon = 23;
+    public static final int Pigeon = 20;
 
     public static final int PCM = 21;
-    public static final int PDP = 22;
+    public static final int PDP = -1;
 
-    public static final int ElevatorLeft = -1;
-    public static final int ElevatorRight = -1;
+    public static final int ElevatorLeft = 18;
+    public static final int ElevatorRight = 19;
 
-    public static final int CoralIntake = -1;
+    public static final int CoralIntake = 14;
     public static final int CoralIntakePivot = -1;
 
-    public static final int AlgaeIntake = -1;
-    public static final int AlgaeIntakeActuation = -1;
+    public static final int AlgaeIntake = 16;
+    public static final int AlgaeIntakeActuation = 15;
 
-    public static final int Manipulator = -1;
+    public static final int Manipulator = 13;
 
     public static final int Climber = -1;
   }
 
   public static class IDs {
-    public static final int ElevatorLimitSwitch = -1;
-    public static final int ElevatorEncoder = -1;
+    public static final int ElevatorBottomLimitSwitch = 0;
+    public static final int ElevatorTopLimitSwitch = 2;
+    //public static final int ElevatorEncoder = 1;
 
-    public static final int IntakeLimitSwitch = -1;
+    //public static final int IntakeLimitSwitch = 2;
 
-    public static final int ManipulatorFirstBeam = -1;
-    public static final int ManipulatorSecondBeam = -1;
+    public static final int ManipulatorFirstBeam = 3;
+    public static final int ManipulatorSecondBeam = 4;
 
-    public static final int ClimberLimitSwitchHome = -1;
-    public static final int ClimberLimitSwitchExtended = -1;
+    public static final int ClimberLimitSwitchHome = 5;
+    public static final int ClimberLimitSwitchExtended = 6;
 
-    public static final int CoralIntakeActuationPNMChannel = -1;
+    //public static final int CoralIntakeActuationPNMChannel = 7;
 
-    public static final int AlgaeIntakeLimitSwitch = -1;
+    public static final int AlgaeIntakeLimitSwitch = 1;
   }
 
   public static class Swerve {
+    public static double maxSpeed = frc.robot.TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    public static double maxAngularRate = RotationsPerSecond.of(0.1).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     public static double maxSteerVoltage = 4d;
     public static double maxDriveVoltage = 10d;
 
     public static double tuningDesiredVelocity = 2d;
-
-
-
-    public static double slot0_kS = 0; // DONT USE KS
-    public static double slot0_kV = 0; // measured 3/19/24
-    public static double slot0_kP = 0; // measured 3/14/24
-    public static double slot0_kI = 0;
-    public static double slot0_kD = 0;
-
-
-    // SWERVE CAN NUMBERED LIKE CARTESIAN COORDIANTE QUADRANTS (dont think this is true anymore ngl)
-    // front right
-    public final static int MOD_ONE_STEER = 6;
-    public final static int MOD_ONE_DRIVE = 7;
-
-    // back right
-    public final static int MOD_TWO_STEER = 9;
-    public final static int MOD_TWO_DRIVE = 8;
-
-    // back left
-    public final static int MOD_THREE_STEER = 11;
-    public final static int MOD_THREE_DRIVE = 10;
-
-    public final static int MOD_FOUR_STEER = 13;
-    public final static int MOD_FOUR_DRIVE = 12;
-    // front left
-    public final static int MOD_ONE_CANCODER = 1;
-    public final static int MOD_TWO_CANCODER = 2;
-    public final static int MOD_THREE_CANCODER = 3;
-    public final static int MOD_FOUR_CANCODER = 4;
-
-    // Order should match side
-    public static final int[] turningID = new int[] {MOD_ONE_STEER, MOD_TWO_STEER, MOD_THREE_STEER, MOD_FOUR_STEER};
-    public static final int[] spinningID = new int[] {MOD_ONE_DRIVE, MOD_TWO_DRIVE, MOD_THREE_DRIVE, MOD_FOUR_DRIVE};
-    public final static int[] CANCoders = new int[] {MOD_ONE_CANCODER, MOD_TWO_CANCODER, MOD_THREE_CANCODER, MOD_FOUR_CANCODER};
-
-    /* Length and width as measured as distances between center of wheels */
-    // the left-to-right distance between the drivetrain wheels, should be measured from center to center
-    public static final double trackWidth = 0.629;
-    // the front-to-back distance between the drivetrain wheels, should be measured from center to center
-    public static final double wheelBase = 0.629;
-
-    public static final Translation2d[] moduleTranslations = {
-            new Translation2d(wheelBase / 2.0, trackWidth / 2.0), // 1 pos neg
-            new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, trackWidth / 2.0) // 4, pos pos
-    };
 
     // / 3.54 with 8 volts of voltage compensation and 4.19 with 10 volts
     // 4.8 max speed, 5 acceleration, drops to 9.6
     public final static double kPhysicalMaxSpeedMetersPerSecond = 1;
     public final static double kDeadband = 0.055;
     public final static double kMaxAccelerationDrive = 1.25;
-    public final static double kMaxAccelerationAngularDrive = 1.0*Math.PI;
+    public final static double kMaxAccelerationAngularDrive = 1.0 * Math.PI;
 
-    public final static double kP_FrontLeft = 1;
-    public final static double kI_FrontLeft = 0;
-    public final static double kD_FrontLeft = 0;
-    public final static double kF_FrontLeft = 0;
-
-    public final static double kP_FrontRight = 1;
-    public final static double kI_FrontRight = 0;
-    public final static double kD_FrontRight = 0;
-    public final static double kF_FrontRight = 0;
-
-    public final static double kP_BackRight = 1;
-    public final static double kI_BackRight = 0;
-    public final static double kD_BackRight = 0;
-    public final static double kF_BackRight = 0;
-
-    public final static double kP_BackLeft = 1;
-    public final static double kI_BackLeft = 0;
-    public final static double kD_BackLeft = 0;
-    public final static double kF_BackLeft = 0;
-    public final static double[] kP_Swerve = new double[] {kP_FrontLeft, kP_FrontRight, kP_BackRight, kP_BackLeft};
-    public final static double[] kI_Swerve = new double[] {kI_FrontLeft, kI_FrontRight, kI_BackRight, kI_BackLeft};
-    public final static double[] kD_Swerve = new double[] {kD_FrontLeft, kD_FrontRight, kD_BackRight, kD_BackLeft};
-    public final static double[] kF_Swerve = new double[] {kF_FrontLeft, kF_FrontRight, kF_BackRight, kF_BackLeft};
-  }
-
-  public static class SwerveModules {
-    public static final int one = 0;
-    public static final int two = 1;
-    public static final int three = 2;
-    public static final int four = 3;
-  }
-
-  public static class SwerveEncoderOffsets {
-    public static final double MOD_ONE_OFFSET = 0.110840;
-    public static final double MOD_TWO_OFFSET = 0.069580;
-    public static final double MOD_THREE_OFFSET = -0.378906;
-    public static final double MOD_FOUR_OFFSET = 0.425049;
-    public static final double[] kCANCoderOffsets = new double[] {MOD_ONE_OFFSET, MOD_TWO_OFFSET, MOD_THREE_OFFSET, MOD_FOUR_OFFSET};
   }
 
   // gear ratios and/or ticks per rev, etc.

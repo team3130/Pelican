@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -16,16 +17,16 @@ import frc.robot.Constants;
 public class CoralIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final TalonSRX intake;
-  private final Solenoid actuation;
-  private final DigitalInput limit;
-  private double intakeSpeed = 0.2;
+  private final TalonSRX actuation;
+  private double intakeSpeed = 0.33;
+  private double actuationSpeed = 0.2;
 
   public CoralIntake() {
     intake = new TalonSRX(Constants.CAN.CoralIntake);
-    actuation = new Solenoid(Constants.CAN.PCM, PneumaticsModuleType.CTREPCM, Constants.IDs.CoralIntakeActuationPNMChannel);
-    limit = new DigitalInput(Constants.IDs.IntakeLimitSwitch);
+    actuation = new TalonSRX(Constants.CAN.CoralIntakePivot);
 
-    actuation.set(false);
+    actuation.configFactoryDefault();
+    actuation.setInverted(true);
 
     intake.configFactoryDefault();
     intake.setInverted(false);
@@ -43,16 +44,14 @@ public class CoralIntake extends SubsystemBase {
     intake.set(ControlMode.PercentOutput, -intakeSpeed);
   }
 
-  public void deactuate() {actuation.set(false);}
+  public void deactuate() {actuation.set(TalonSRXControlMode.PercentOutput, actuationSpeed);}
 
   public void actuate() {
-    actuation.set(true);
+    actuation.set(TalonSRXControlMode.PercentOutput, -actuationSpeed);
   }
 
   public double getIntakeSpeed() {return intakeSpeed;}
   public void setIntakeSpeed(double value) {intakeSpeed = value;}
-
-  public boolean brokeLimit() {return limit.get();}
 
   /**
    * Initializes the data we send on shuffleboard
@@ -64,7 +63,6 @@ public class CoralIntake extends SubsystemBase {
       builder.setSmartDashboardType("Coral Intake");
 
       builder.addDoubleProperty("Intake Speed", this::getIntakeSpeed, this::setIntakeSpeed);
-      builder.addBooleanProperty("Intake Limit", this::brokeLimit, null);
     }
   }
 

@@ -35,9 +35,9 @@ public class OneSwitchLimitedManipOuttake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
+    //if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
       manip.runManip();
-    }
+    //}
   }
 
   // Called once the command ends or is interrupted.

@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AlgaeIntake;
 
 /** An example command that uses an example subsystem. */
-public class ActuateAlgaeIntake extends Command {
+public class ToggleAlgaeActuation extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final AlgaeIntake algaeIntake;
 
@@ -17,7 +17,7 @@ public class ActuateAlgaeIntake extends Command {
    *
    * @param algaeIntake The subsystem used by this command.
    */
-  public ActuateAlgaeIntake(AlgaeIntake algaeIntake) {
+  public ToggleAlgaeActuation(AlgaeIntake algaeIntake) {
     this.algaeIntake = algaeIntake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(algaeIntake);
@@ -26,22 +26,32 @@ public class ActuateAlgaeIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    algaeIntake.actuateIntake();
+    if (algaeIntake.getActuationPosition() == 0) {
+      algaeIntake.actuateIntake();
+    } else {
+      algaeIntake.deactuateIntake();
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {algaeIntake.stopActuation();}
+  public void end(boolean interrupted) {
+    algaeIntake.stopActuation();
+    algaeIntake.setActuated(!algaeIntake.getActuated());
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return algaeIntake.getActuationPosition() >= algaeIntake.getSetpoint();
+    if(algaeIntake.getActuationPosition() == 0) {
+      return algaeIntake.getSwitch();
+    } else {
+      return algaeIntake.getActuationPosition() >= algaeIntake.getSetpoint();
+    }
   }
 }
