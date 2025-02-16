@@ -7,7 +7,10 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -31,9 +34,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public final SlewRateLimiter xLimiter = new SlewRateLimiter(0.5, -2, 0);
-  public final SlewRateLimiter yLimiter = new SlewRateLimiter(0.5, -2, 0);
-  public final SlewRateLimiter steerLimiter = new SlewRateLimiter(1);
+  private double initialSlewValue = 0;
+  public final SlewRateLimiter xLimiter = new SlewRateLimiter(1);
+  public final SlewRateLimiter yLimiter = new SlewRateLimiter(1);
+  public final SlewRateLimiter driveLimiter = new SlewRateLimiter(0.5, -2, 0);
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
@@ -96,6 +100,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
+    driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
@@ -124,11 +129,7 @@ public class RobotContainer {
     // and Y is defined as to the left according to WPILib convention.
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            driveTrain.applyRequest(() ->
-                    drive.withVelocityX(xLimiter.calculate(-driverController.getLeftY() * Constants.Swerve.maxSpeed)) // Drive forward with negative Y (forward)
-                            .withVelocityY(yLimiter.calculate(-driverController.getLeftX() * Constants.Swerve.maxSpeed)) // Drive left with negative X (left)
-                            .withRotationalRate(steerLimiter.calculate(-driverController.getRightX() * Constants.Swerve.maxAngularRate)) // Drive counterclockwise with negative X (left)
-            )
+            driveTrain.applyRequest(this::accelLimitVectorDrive)
     );
 
     // Run SysId routines when holding back/start and X/Y.
@@ -166,5 +167,29 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return Autos.exampleAuto(m_exampleSubsystem);
+  }
+
+  public SwerveRequest driveRequest() {
+    double xAxis = -driverController.getLeftY();
+    double yAxis = -driverController.getLeftX();
+    double xAxisSign = Math.signum(xAxis);
+    double yAxisSign = Math.signum(yAxis);
+    return drive.withVelocityX(xAxisSign * xLimiter.calculate(Math.abs(xAxis) * Constants.Swerve.maxSpeed)) // Drive forward with negative Y (forward)
+            .withVelocityY(yAxisSign * yLimiter.calculate(Math.abs(yAxis) * Constants.Swerve.maxSpeed)) // Drive left with negative X (left)
+            .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
+  }
+
+  public SwerveRequest accelLimitVectorDrive() {
+    double xAxis = -driverController.getLeftY() * Constants.Swerve.maxSpeed;
+    double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
+    double rotation = -driverController.getRightX() * Constants.Swerve.maxSpeed;
+    Translation2d vector = new Translation2d(xAxis, yAxis);
+    double mag = driveLimiter.calculate(vector.getNorm());
+    double limit = 0.05/mag;
+    SlewRateLimiter thetaLimiter = new SlewRateLimiter(limit, -limit, initialSlewValue);
+    double angle = thetaLimiter.calculate(vector.getAngle().getRadians());
+    vector = new Translation2d(mag, angle);
+    initialSlewValue = angle;
+    return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
   }
 }
