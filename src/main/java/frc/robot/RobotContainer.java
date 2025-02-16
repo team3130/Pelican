@@ -7,10 +7,14 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathSharedStore;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -34,17 +38,17 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private double initialSlewValue = 0;
   public final SlewRateLimiter xLimiter = new SlewRateLimiter(1);
   public final SlewRateLimiter yLimiter = new SlewRateLimiter(1);
-  public final SlewRateLimiter driveLimiter = new SlewRateLimiter(0.5, -2, 0);
+  public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(0.5, -2, 0);
+  public final MySlewRateLimiter thetaLimiter = new MySlewRateLimiter(0);
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-          .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
+          .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.05) // Add a 10% deadband
           .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -186,10 +190,16 @@ public class RobotContainer {
     Translation2d vector = new Translation2d(xAxis, yAxis);
     double mag = driveLimiter.calculate(vector.getNorm());
     double limit = 0.05/mag;
-    SlewRateLimiter thetaLimiter = new SlewRateLimiter(limit, -limit, initialSlewValue);
+    thetaLimiter.updateValues(limit, -limit);
     double angle = thetaLimiter.calculate(vector.getAngle().getRadians());
-    vector = new Translation2d(mag, angle);
-    initialSlewValue = angle;
+    vector = new Translation2d(mag, new Rotation2d(angle));
+    thetaLimiter.reset(angle);
+    SmartDashboard.putData("Slew Rate", new Sendable() {
+      @Override
+      public void initSendable(SendableBuilder sendableBuilder) {
+        sendableBuilder.addDoubleProperty("Theta Limit", () -> limit, null);
+      }
+    });
     return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
   }
 }
