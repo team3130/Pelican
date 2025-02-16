@@ -7,14 +7,9 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.MathSharedStore;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -103,7 +98,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
+    driverController.R2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
@@ -177,24 +172,21 @@ public class RobotContainer {
   public SwerveRequest driveRequest() {
     double xAxis = -driverController.getLeftY();
     double yAxis = -driverController.getLeftX();
-    double xAxisSign = Math.signum(xAxis);
-    double yAxisSign = Math.signum(yAxis);
-    return drive.withVelocityX(xAxisSign * xLimiter.calculate(Math.abs(xAxis) * Constants.Swerve.maxSpeed)) // Drive forward with negative Y (forward)
-            .withVelocityY(yAxisSign * yLimiter.calculate(Math.abs(yAxis) * Constants.Swerve.maxSpeed)) // Drive left with negative X (left)
+    return drive.withVelocityX(xAxis * Constants.Swerve.maxSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(yAxis * Constants.Swerve.maxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
   }
 
   public SwerveRequest accelLimitVectorDrive() {
     double xAxis = -driverController.getLeftY() * Constants.Swerve.maxSpeed;
     double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
-    double rotation = -driverController.getRightX() * Constants.Swerve.maxSpeed;
+    double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     Translation2d vector = new Translation2d(xAxis, yAxis);
     double mag = driveLimiter.calculate(vector.getNorm());
     double limit = 4/mag;
     thetaLimiter.updateValues(limit, -limit);
     double angle = thetaLimiter.calculate(vector.getAngle().getRadians());
     vector = new Translation2d(mag, new Rotation2d(angle));
-    thetaLimiter.reset(angle);
     return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
   }
 }
