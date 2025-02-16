@@ -2,8 +2,11 @@ package frc.robot;
 
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class MySlewRateLimiter {
+public class MySlewRateLimiter implements Sendable {
     private double positiveRateLimit;
     private double negativeRateLimit;
     private double prevVal;
@@ -40,5 +43,11 @@ public class MySlewRateLimiter {
     public void updateValues(double positiveRateLimit, double negativeRateLimit) {
         this.positiveRateLimit = positiveRateLimit;
         this.negativeRateLimit = negativeRateLimit;
+    }
+
+    public void initSendable(SendableBuilder builder) {
+        builder.setSmartDashboardType("MySlewRateLimiter");
+
+        builder.addDoubleProperty("Positive Rate Limit", () -> positiveRateLimit, null);
     }
 }

@@ -154,6 +154,7 @@ public class RobotContainer {
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
+    SmartDashboard.putData(thetaLimiter);
   }
 
   //public Command pick() {
@@ -189,17 +190,11 @@ public class RobotContainer {
     double rotation = -driverController.getRightX() * Constants.Swerve.maxSpeed;
     Translation2d vector = new Translation2d(xAxis, yAxis);
     double mag = driveLimiter.calculate(vector.getNorm());
-    double limit = 0.05/mag;
+    double limit = 4/mag;
     thetaLimiter.updateValues(limit, -limit);
     double angle = thetaLimiter.calculate(vector.getAngle().getRadians());
     vector = new Translation2d(mag, new Rotation2d(angle));
     thetaLimiter.reset(angle);
-    SmartDashboard.putData("Slew Rate", new Sendable() {
-      @Override
-      public void initSendable(SendableBuilder sendableBuilder) {
-        sendableBuilder.addDoubleProperty("Theta Limit", () -> limit, null);
-      }
-    });
     return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
   }
 }
