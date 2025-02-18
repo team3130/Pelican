@@ -33,17 +33,15 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public final SlewRateLimiter xLimiter = new SlewRateLimiter(1);
-  public final SlewRateLimiter yLimiter = new SlewRateLimiter(1);
   public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(0.5, -2, 0);
-  public final MySlewRateLimiter thetaLimiter = new MySlewRateLimiter(0);
+  public final MySlewRateLimiter thetaLimiter;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-          .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.05) // Add a 10% deadband
+          .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
           .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -59,6 +57,7 @@ public class RobotContainer {
   //private final SendableChooser<Command> autoChooser;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    thetaLimiter = new MySlewRateLimiter(0);
     manip = new Manipulator();
     elevator = new Elevator();
     coralIntake = new CoralIntake();
@@ -181,12 +180,17 @@ public class RobotContainer {
     double xAxis = -driverController.getLeftY() * Constants.Swerve.maxSpeed;
     double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
-    Translation2d vector = new Translation2d(xAxis, yAxis);
-    double mag = driveLimiter.calculate(vector.getNorm());
-    double limit = 4/mag;
-    thetaLimiter.updateValues(limit, -limit);
-    double angle = thetaLimiter.calculate(vector.getAngle().getRadians());
-    vector = new Translation2d(mag, new Rotation2d(angle));
-    return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+    double deadband = 0.09 * Constants.Swerve.maxSpeed;
+    if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
+      return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+    } else {
+      Translation2d vector = new Translation2d(xAxis, yAxis);
+      double mag = driveLimiter.calculate(vector.getNorm());
+      double limit = 4 / mag;
+      thetaLimiter.updateValues(limit, -limit);
+      double angle = thetaLimiter.calculate(vector.getAngle().getRadians());
+      vector = new Translation2d(mag, new Rotation2d(angle));
+      return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+    }
   }
 }

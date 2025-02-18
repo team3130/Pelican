@@ -44,10 +44,13 @@ public class MySlewRateLimiter implements Sendable {
         this.positiveRateLimit = positiveRateLimit;
         this.negativeRateLimit = negativeRateLimit;
     }
+     public double getPositiveRateLimit() {return positiveRateLimit;}
 
     public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("MySlewRateLimiter");
+        if (Constants.debugMode) {
+            builder.setSmartDashboardType("Slew Rate Limiter");
 
-        builder.addDoubleProperty("Positive Rate Limit", () -> positiveRateLimit, null);
+            builder.addDoubleProperty("Positive Rate Limit", this::getPositiveRateLimit, null);
+        }
     }
 }
