@@ -27,6 +27,7 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.MySlewRateLimiter;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -186,7 +187,9 @@ public class RobotContainer {
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
       return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
-    } else {
+    } else if(((/*current angle is less than -pi/2*/true) && (targetVector.getAngle > (Math.PI/2)))||((false/*current angle is greater than pi/2 */)&&(targetVector.getAngle < (-Math.PI/2)))){
+      return drive.withVelocityX(-xAxis).withVelocityY(-yAxis).withRotationalRate(rotation);
+    }else {
       Translation2d vector = new Translation2d(xAxis, yAxis);
       double mag = driveLimiter.calculate(vector.getNorm());
       double limit = 4 / mag;

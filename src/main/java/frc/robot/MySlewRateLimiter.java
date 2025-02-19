@@ -67,8 +67,7 @@ public class MySlewRateLimiter implements Sendable {
     public double getPositiveRateLimit() {return positiveRateLimit;}
 
     public Translation2d wrapAngle(Translation2d targetVector, CommandSwerveDrivetrain driveTrain) {
-        Translation2d currentVector =
-                driveTrain.getState().Pose.getTranslation();
+        Translation2d currentVector = driveTrain.getState().Pose.getTranslation();
         Rotation2d delta = targetVector.getAngle().minus(currentVector.getAngle());
         return Math.abs(delta.getDegrees()) > 90.0 ?
                 new Translation2d(-targetVector.getNorm(), targetVector.getAngle().rotateBy(Rotation2d.kPi))
