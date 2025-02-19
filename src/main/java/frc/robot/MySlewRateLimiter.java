@@ -16,6 +16,7 @@ public class MySlewRateLimiter implements Sendable {
     private double negativeRateLimit;
     private double prevVal;
     private double prevTime;
+    public double delta;
 
     public MySlewRateLimiter(double positiveRateLimit, double negativeRateLimit, double initialValue) {
         this.positiveRateLimit = positiveRateLimit;
@@ -65,7 +66,14 @@ public class MySlewRateLimiter implements Sendable {
         this.negativeRateLimit = negativeRateLimit;
     }
     public double getPositiveRateLimit() {return positiveRateLimit;}
-
+    public boolean reverseDrive(){
+        if (delta > 180){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     public Translation2d wrapAngle(Translation2d targetVector, CommandSwerveDrivetrain driveTrain) {
         Translation2d currentVector = driveTrain.getState().Pose.getTranslation();
         Rotation2d delta = targetVector.getAngle().minus(currentVector.getAngle());
