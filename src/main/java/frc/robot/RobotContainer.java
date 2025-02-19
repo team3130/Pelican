@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -188,7 +189,7 @@ public class RobotContainer {
       double mag = driveLimiter.calculate(vector.getNorm());
       double limit = 4 / mag;
       thetaLimiter.updateValues(limit, -limit);
-      double angle = thetaLimiter.calculate(vector.getAngle().getRadians());
+      double angle = MathUtil.angleModulus(thetaLimiter.calculate(vector.getAngle().getRadians()));
       vector = new Translation2d(mag, new Rotation2d(angle));
       return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
     }
