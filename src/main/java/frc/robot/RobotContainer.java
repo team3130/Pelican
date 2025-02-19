@@ -198,7 +198,10 @@ public class RobotContainer {
       double angleDesiredGhost = Math.acos((vector.getX()*newVector.getX() + vector.getY()*newVector.getY())/(desiredMag*ghostMag));
       double angleDesiredCurrent = Math.acos((currentVector.getX()*vector.getX() + currentVector.getY()*vector.getY())/(desiredMag*currentMag));
       if(angleDesiredGhost > angleDesiredCurrent) {
-        rotation *= -1;
+        return drive.withVelocityX(newVector.getX()).withVelocityY(newVector.getY()).withRotationalRate(-rotation);
+      }
+      if((|new Rotation2d(driveTrain.getModule(0).getCurrentState().angle.getRadians()))| > vector.getAngle()){
+        return drive.withVelocityX(newVector.getX()).withVelocityY(newVector.getY()).withRotationalRate(-rotation);
       }
       newVector = new Translation2d(mag, new Rotation2d(angle));
       return drive.withVelocityX(newVector.getX()).withVelocityY(newVector.getY()).withRotationalRate(rotation);
