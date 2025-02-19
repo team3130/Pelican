@@ -190,8 +190,18 @@ public class RobotContainer {
       double limit = 4 / mag;
       thetaLimiter.updateValues(limit, -limit);
       double angle = MathUtil.angleModulus(thetaLimiter.calculate(vector.getAngle().getRadians()));
-      vector = new Translation2d(mag, new Rotation2d(angle));
-      return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      Translation2d newVector = new Translation2d(mag, new Rotation2d(angle));
+      Translation2d currentVector = new Translation2d(1, new Rotation2d(driveTrain.getModule(0).getCurrentState().angle.getRadians()));
+      double currentMag = Math.sqrt(Math.pow(currentVector.getX(), 2) + Math.pow(currentVector.getY(), 2));
+      double desiredMag = Math.sqrt(Math.pow(vector.getX(), 2) + Math.pow(vector.getY(), 2));
+      double ghostMag = Math.sqrt(Math.pow(newVector.getX(), 2) + Math.pow(newVector.getY(), 2));
+      double angleDesiredGhost = Math.acos((vector.getX()*newVector.getX() + vector.getY()*newVector.getY())/(desiredMag*ghostMag));
+      double angleDesiredCurrent = Math.acos((currentVector.getX()*vector.getX() + currentVector.getY()*vector.getY())/(desiredMag*currentMag));
+      if(angleDesiredGhost > angleDesiredCurrent) {
+        rotation *= -1;
+      }
+      newVector = new Translation2d(mag, new Rotation2d(angle));
+      return drive.withVelocityX(newVector.getX()).withVelocityY(newVector.getY()).withRotationalRate(rotation);
     }
   }
 }
