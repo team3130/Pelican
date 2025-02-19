@@ -11,6 +11,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.Kinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -189,8 +191,12 @@ public class RobotContainer {
       double mag = driveLimiter.calculate(vector.getNorm());
       double limit = 4 / mag;
       thetaLimiter.updateValues(limit, -limit);
-      double angle = MathUtil.angleModulus(thetaLimiter.calculate(vector.getAngle().getRadians()));
-      vector = new Translation2d(mag, new Rotation2d(angle));
+      //theoretically the first wrapper works and the second wrapper does not do anything, if it doesnt work and the second one does
+      //then it only wraps 180 and not 90 so we know which one works. if neither work then neither work and we test individually or
+      //revisit logic
+      vector = thetaLimiter.wrapAngle(vector, driveTrain); //an 90 degree optimizer for whole vector
+      Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //an 180 degree optimizer for angle only
+      vector = new Translation2d(mag, angle);
       return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
     }
   }
