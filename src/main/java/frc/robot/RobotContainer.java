@@ -185,6 +185,9 @@ public class RobotContainer {
     double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
+    System.out.println("xAxis"+xAxis);
+    System.out.println("yAxis"+yAxis);
+    System.out.println("reversal" + driveLimiter.reverseDrive());
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
       return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
     } else if(driveLimiter.reverseDrive()){
