@@ -101,7 +101,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverController.R2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
@@ -185,14 +185,9 @@ public class RobotContainer {
     double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
-    System.out.println("xAxis"+xAxis);
-    System.out.println("yAxis"+yAxis);
-    System.out.println("reversal" + driveLimiter.reverseDrive());
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
       return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
-    } else if(driveLimiter.reverseDrive()){
-      return drive.withVelocityX(-xAxis).withVelocityY(-yAxis).withRotationalRate(rotation);
-    }else {
+    } else {
       Translation2d vector = new Translation2d(xAxis, yAxis);
       double mag = driveLimiter.calculate(vector.getNorm());
       double limit = 4 / mag;
@@ -203,7 +198,7 @@ public class RobotContainer {
       vector = thetaLimiter.wrapAngle(vector, driveTrain); //an 90 degree optimizer for whole vector
       Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //an 180 degree optimizer for angle only
       vector = new Translation2d(mag, angle);
-      return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
     }
   }
 }
