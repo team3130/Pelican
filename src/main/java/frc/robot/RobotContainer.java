@@ -100,20 +100,20 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverController.R2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
-    //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
+    //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     //driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
     //driverController.R1().onTrue(new GoToL4Basic(elevator));
-    driverController.povDown().whileTrue(new GoToL3Basic(elevator));
+    driverController.povDown().whileTrue(new GoToL3(elevator));
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
 
-    driverController.L1().whileTrue(new GoDown(elevator));
-    driverController.R1().whileTrue(new GoUp(elevator));
+    driverController.L1().whileTrue(new GoToL1(elevator));
+    driverController.R1().whileTrue(new GoToMinPosition(elevator));
 
     //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
     //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
@@ -180,8 +180,8 @@ public class RobotContainer {
   }
 
   public SwerveRequest accelLimitVectorDrive() {
-    double xAxis = -driverController.getLeftY() * Constants.Swerve.maxSpeed;
-    double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
+    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * Constants.Swerve.maxSpeed;
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
@@ -194,8 +194,9 @@ public class RobotContainer {
       //theoretically the first wrapper works and the second wrapper does not do anything, if it doesnt work and the second one does
       //then it only wraps 180 and not 90 so we know which one works. if neither work then neither work and we test individually or
       //revisit logic
-      vector = thetaLimiter.wrapAngle(vector, driveTrain); //an 90 degree optimizer for whole vector
+      //vector = thetaLimiter.wrapAngle(vector, driveTrain); //an 90 degree optimizer for whole vector
       Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //an 180 degree optimizer for angle only
+      //System.out.println(angle.getRadians());
       vector = new Translation2d(mag, angle);
       return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
     }

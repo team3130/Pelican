@@ -26,11 +26,11 @@ public class Elevator extends SubsystemBase {
 
   private double home = 0;
   private double minPosition = 0;
-  private double L1 = 0;
-  private double L2 = 0;
-  private double L3 = 0;
-  private double L4 = 0;
-  private double maxPosition = 0;
+  private double L1 = 47;
+  private double L2 = 59;
+  private double L3 = 85;
+  private double L4 = 135;
+  private double maxPosition = 137;
 
   private final MotionMagicDutyCycle voltRequest0;
   private Slot0Configs slot0Configs;

@@ -43,7 +43,7 @@ public class MySlewRateLimiter implements Sendable {
         double delta = input - this.prevVal;
         if(delta > Math.PI) {
             delta -= Math.PI * 2;
-        } else if(delta < Math.PI * 2) {
+        } else if(delta < Math.PI) {
             delta += Math.PI * 2;
         }
         this.prevVal += MathUtil.clamp(delta, this.negativeRateLimit * elapsedTime, this.positiveRateLimit * elapsedTime);
@@ -68,7 +68,8 @@ public class MySlewRateLimiter implements Sendable {
 
     public Translation2d wrapAngle(Translation2d targetVector, CommandSwerveDrivetrain driveTrain) {
         Translation2d currentVector =
-                driveTrain.getState().Pose.getTranslation();
+                new Translation2d(driveTrain.getKinematics().toChassisSpeeds(driveTrain.getState().ModuleStates).vxMetersPerSecond,
+                        driveTrain.getKinematics().toChassisSpeeds(driveTrain.getState().ModuleStates).vxMetersPerSecond);
         Rotation2d delta = targetVector.getAngle().minus(currentVector.getAngle());
         return Math.abs(delta.getDegrees()) > 90.0 ?
                 new Translation2d(-targetVector.getNorm(), targetVector.getAngle().rotateBy(Rotation2d.kPi))
@@ -76,10 +77,9 @@ public class MySlewRateLimiter implements Sendable {
     }
 
     public void initSendable(SendableBuilder builder) {
-        if (Constants.debugMode) {
-            builder.setSmartDashboardType("Slew Rate Limiter");
+        builder.setSmartDashboardType("Slew Rate Limiter");
 
-            builder.addDoubleProperty("Positive Rate Limit", this::getPositiveRateLimit, null);
-        }
+        builder.addDoubleProperty("Positive Rate Limit", this::getPositiveRateLimit, null);
+        builder.addDoubleProperty("Last Value", this::lastValue, null);
     }
 }
