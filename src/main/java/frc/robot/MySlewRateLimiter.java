@@ -43,7 +43,7 @@ public class MySlewRateLimiter implements Sendable {
         double delta = input - this.prevVal;
         if(delta > Math.PI) {
             delta -= Math.PI * 2;
-        } else if(delta < Math.PI) {
+        } else if(delta < -Math.PI) {
             delta += Math.PI * 2;
         }
         this.prevVal += MathUtil.clamp(delta, this.negativeRateLimit * elapsedTime, this.positiveRateLimit * elapsedTime);
