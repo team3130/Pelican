@@ -48,6 +48,7 @@ public class MySlewRateLimiter implements Sendable {
         }
         this.prevVal += MathUtil.clamp(delta, this.negativeRateLimit * elapsedTime, this.positiveRateLimit * elapsedTime);
         this.prevTime = currentTime;
+        this.prevVal = MathUtil.angleModulus(this.prevVal);
         return this.prevVal;
     }
 

@@ -112,8 +112,10 @@ public class RobotContainer {
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
 
-    driverController.L1().whileTrue(new GoToL1(elevator));
-    driverController.R1().whileTrue(new GoToMinPosition(elevator));
+    //driverController.L1().whileTrue(new GoToL1(elevator));
+    driverController.L1().whileTrue(new GoDown(elevator));
+    //driverController.R1().whileTrue(new GoToMinPosition(elevator));
+    driverController.R1().whileTrue(new GoUp(elevator));
 
     //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
     //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
