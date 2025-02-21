@@ -147,6 +147,17 @@ public class RobotContainer {
     driveTrain.registerTelemetry(logger::telemeterize);
   }
 
+  public double getMaxSpeed(){
+    double maxSpeedReal;
+    if (elevator.brokeBottomLimitSwitch()){
+      maxSpeedReal = Constants.Swerve.maxSpeed;
+    } else if(elevator.brokeTopLimitSwitch()){
+      maxSpeedReal = Constants.Swerve.maxSpeedFullExtend;
+    } else{
+      maxSpeedReal = Constants.Swerve.maxSpeedExtended;
+    }
+    return maxSpeedReal;
+  }
   public void exportSmartDashboardData() {
     SmartDashboard.putData(manip);
     SmartDashboard.putData(coralIntake);
@@ -181,8 +192,8 @@ public class RobotContainer {
   }
 
   public SwerveRequest accelLimitVectorDrive() {
-    double xAxis = -driverController.getLeftY() * Constants.Swerve.maxSpeed;
-    double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
+    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getMaxSpeed();
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
