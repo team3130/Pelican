@@ -200,7 +200,7 @@ public class RobotContainer {
       if(angleDesiredGhost > angleDesiredCurrent) {
         return drive.withVelocityX(newVector.getX()).withVelocityY(newVector.getY()).withRotationalRate(-rotation);
       }
-      if((|new Rotation2d(driveTrain.getModule(0).getCurrentState().angle.getRadians()))| > vector.getAngle()){
+      if((new Rotation2d(driveTrain.getModule(0).getCurrentState().angle.getRadians())) > vector.getAngle()){
         return drive.withVelocityX(newVector.getX()).withVelocityY(newVector.getY()).withRotationalRate(-rotation);
       }
       newVector = new Translation2d(mag, new Rotation2d(angle));
