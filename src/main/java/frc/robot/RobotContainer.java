@@ -193,7 +193,7 @@ public class RobotContainer {
 
   public SwerveRequest accelLimitVectorDrive() {
     double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getMaxSpeed();
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getMaxSpeed();
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
