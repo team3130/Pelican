@@ -60,8 +60,8 @@ public final class Constants {
 
   public static class Swerve {
     public static double maxSpeed = 2.5; // NOT kSpeedAt12Volts
-    public static double maxSpeedExtended = 1;
-    public static double maxSpeedFullExtend =.5;
+    public static double maxSpeedExtended = 1.75;
+    public static double maxSpeedFullExtend = 1;
     public static double maxAngularRate = RotationsPerSecond.of(0.25).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
     public static double maxSteerVoltage = 4d;
     public static double maxDriveVoltage = 10d;

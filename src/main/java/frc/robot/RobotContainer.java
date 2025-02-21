@@ -103,6 +103,7 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    operatorController.b().whileTrue(new UnlimitedRunManip(manip, elevator));
     //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
