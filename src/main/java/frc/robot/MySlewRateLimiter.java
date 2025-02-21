@@ -40,13 +40,7 @@ public class MySlewRateLimiter implements Sendable {
     public double angleCalculate(double input) {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - this.prevTime;
-        double delta = input - this.prevVal;
-        if(delta > Math.PI) {
-            delta -= Math.PI * 2;
-        } else if(delta < -Math.PI) {
-            delta += Math.PI * 2;
-        }
-        this.prevVal += MathUtil.clamp(delta, this.negativeRateLimit * elapsedTime, this.positiveRateLimit * elapsedTime);
+        this.prevVal += MathUtil.clamp(getDelta(input), this.negativeRateLimit * elapsedTime, this.positiveRateLimit * elapsedTime);
         this.prevTime = currentTime;
         this.prevVal = MathUtil.angleModulus(this.prevVal);
         return this.prevVal;
@@ -66,6 +60,16 @@ public class MySlewRateLimiter implements Sendable {
         this.negativeRateLimit = negativeRateLimit;
     }
     public double getPositiveRateLimit() {return positiveRateLimit;}
+
+    public double getDelta(double input) {
+        double delta = input - this.prevVal;
+        if(delta > Math.PI) {
+            delta -= Math.PI * 2;
+        } else if(delta < -Math.PI) {
+            delta += Math.PI * 2;
+        }
+        return delta;
+    }
 
     public Translation2d wrapAngle(Translation2d targetVector, CommandSwerveDrivetrain driveTrain) {
         Translation2d currentVector =
