@@ -28,6 +28,16 @@ public class MySlewRateLimiter implements Sendable {
         this(rateLimit, -rateLimit, (double)0.0F);
     }
 
+    public double getDelta(double input) {
+        double delta = input - this.prevVal;
+        if(delta > Math.PI) {
+            delta -= Math.PI * 2;
+        } else if(delta < -Math.PI) {
+            delta += Math.PI * 2;
+        }
+        return delta;
+    }
+
     public double calculate(double input) {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - this.prevTime;
@@ -40,13 +50,7 @@ public class MySlewRateLimiter implements Sendable {
     public double angleCalculate(double input) {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - this.prevTime;
-        double delta = input - this.prevVal;
-        if(delta > Math.PI) {
-            delta -= Math.PI * 2;
-        } else if(delta < -Math.PI) {
-            delta += Math.PI * 2;
-        }
-        this.prevVal += MathUtil.clamp(delta, this.negativeRateLimit * elapsedTime, this.positiveRateLimit * elapsedTime);
+        this.prevVal += MathUtil.clamp(getDelta(input), this.negativeRateLimit * elapsedTime, this.positiveRateLimit * elapsedTime);
         this.prevTime = currentTime;
         return this.prevVal;
     }

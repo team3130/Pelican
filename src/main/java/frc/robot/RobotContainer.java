@@ -188,7 +188,18 @@ public class RobotContainer {
       return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
     } else {
       Translation2d vector = new Translation2d(xAxis, yAxis);
-      double mag = driveLimiter.calculate(vector.getNorm());
+
+      double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());;
+      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
+      if(mag < 4/Math.PI) {
+        vector = new Translation2d(mag, vector.getAngle().getRadians());
+        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      }
+      if(Math.cos(theta) <= 0) {
+        vector = new Translation2d(mag, thetaLimiter.lastValue());
+        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      }
+
       double limit = 4 / mag;
       thetaLimiter.updateValues(limit, -limit);
       //theoretically the first wrapper works and the second wrapper does not do anything, if it doesnt work and the second one does
