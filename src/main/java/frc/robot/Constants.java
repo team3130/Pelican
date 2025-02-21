@@ -62,6 +62,8 @@ public final class Constants {
     public static double maxSpeed = 2.5; // NOT kSpeedAt12Volts
     public static double maxSpeedExtended = 1.5;
     public static double maxSpeedFullExtend = 1;
+    public static double donutPeriod = 1; //1 = 2pi seconds per revolution, 2 = pi seconds per revolution
+    public static double donutDiameter = (2) * donutPeriod; //change the first value to change the diameter to that many meters
     public static double maxAngularRate = RotationsPerSecond.of(0.25).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
     public static double maxSteerVoltage = 4d;
     public static double maxDriveVoltage = 10d;

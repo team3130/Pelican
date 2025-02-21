@@ -13,10 +13,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
+import frc.robot.Constants.Xbox;
 import frc.robot.commands.Autos;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralIntake;
@@ -44,6 +46,7 @@ public class RobotContainer {
   private final Elevator elevator;
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
+  private Timer timer;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
           .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
@@ -126,7 +129,7 @@ public class RobotContainer {
 
     driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-
+    
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
     driveTrain.setDefaultCommand(
@@ -190,15 +193,34 @@ public class RobotContainer {
             .withVelocityY(yAxis * Constants.Swerve.maxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
   }
+  public SwerveRequest donuts(){
+    timer = new Timer();
+    timer.reset();
+    timer.start();
+    double timerVal = timer.get();
+    return drive.withVelocityX(Constants.Swerve.donutDiameter* Math.sin(timerVal*Constants.Swerve.donutPeriod))
+    .withVelocityY(Constants.Swerve.donutDiameter*Math.cos(timerVal*Constants.Swerve.donutPeriod))
+    .withRotationalRate(Constants.Swerve.donutPeriod);
+  }
 
   public SwerveRequest accelLimitVectorDrive() {
     double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getMaxSpeed();
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getMaxSpeed();
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
+    boolean donutsBool = false;
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
       return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
-    } else {
+    } else if (donutsBool){
+      timer = new Timer();
+      timer.reset();
+      timer.start();
+      double timerVal = timer.get();
+      return drive.withVelocityX(Constants.Swerve.donutDiameter* Math.sin(timerVal*Constants.Swerve.donutPeriod))
+      .withVelocityY(Constants.Swerve.donutDiameter*Math.cos(timerVal*Constants.Swerve.donutPeriod))
+      .withRotationalRate(Constants.Swerve.donutPeriod);
+    }
+      else {
       Translation2d vector = new Translation2d(xAxis, yAxis);
       double mag = driveLimiter.calculate(vector.getNorm());
       double limit = 4 / mag;
