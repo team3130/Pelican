@@ -103,7 +103,6 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
-    operatorController.b().whileTrue(new UnlimitedRunManip(manip, elevator));
     //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
@@ -116,17 +115,30 @@ public class RobotContainer {
 
     driverController.L1().whileTrue(new GoDown(elevator));
     driverController.R1().whileTrue(new GoUp(elevator));
+    driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
     //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
-    operatorController.y().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
+    operatorController.a().whileTrue(new GoToHome(elevator));
+    operatorController.b().whileTrue(new GoToL2(elevator));
+    operatorController.x().whileTrue(new GoToL3(elevator));
+    operatorController.y().whileTrue(new GoToL4(elevator));
+    operatorController.povDown().whileTrue(new GoToL1(elevator));
+
+    operatorController.rightBumper().whileTrue(new ActuateAlgaeIntake(algaeIntake));
+    operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
+    operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
+    operatorController.povDown().whileTrue(new RunAlgaeOuttake(algaeIntake));
+
+    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
+    operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
     //driverController.L1().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
     //driverController.povUp().whileTrue(new ResetOdometryForward(chassis));
 
-    driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
-    driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
+    
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
@@ -194,7 +206,7 @@ public class RobotContainer {
 
   public SwerveRequest accelLimitVectorDrive() {
     double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getMaxSpeed();
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getMaxSpeed();
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
