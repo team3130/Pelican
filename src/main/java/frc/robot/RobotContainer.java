@@ -177,6 +177,10 @@ public class RobotContainer {
             .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
   }
 
+  public CommandSwerveDrivetrain getDriveTrain() {
+    return driveTrain;
+  }
+  
   public SwerveRequest accelLimitVectorDrive() {
     double xAxis = -driverController.getLeftY() * Constants.Swerve.maxSpeed;
     double yAxis = -driverController.getLeftX() * Constants.Swerve.maxSpeed;
