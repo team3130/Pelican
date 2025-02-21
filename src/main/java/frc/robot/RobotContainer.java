@@ -208,16 +208,20 @@ public class RobotContainer {
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getMaxSpeed();
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
-    boolean donutsBool = false;
+    boolean donutsBool;
+    timer = new Timer();
+    if(operatorController.getRightTriggerAxis() > 0.2){
+      donutsBool = true;
+      timer.start();
+    } else {
+      donutsBool = false;
+      timer.reset();
+    }
     if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
       return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
     } else if (donutsBool){
-      timer = new Timer();
-      timer.reset();
-      timer.start();
-      double timerVal = timer.get();
-      return drive.withVelocityX(Constants.Swerve.donutDiameter* Math.sin(timerVal*Constants.Swerve.donutPeriod))
-      .withVelocityY(Constants.Swerve.donutDiameter*Math.cos(timerVal*Constants.Swerve.donutPeriod))
+      return drive.withVelocityX(Constants.Swerve.donutDiameter* Math.sin(timer.get()*Constants.Swerve.donutPeriod))
+      .withVelocityY(Constants.Swerve.donutDiameter*Math.cos(timer.get()*Constants.Swerve.donutPeriod))
       .withRotationalRate(Constants.Swerve.donutPeriod);
     }
       else {
