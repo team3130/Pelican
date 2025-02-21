@@ -121,15 +121,15 @@ public class RobotContainer {
     //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
     //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
     operatorController.a().whileTrue(new GoToHome(elevator));
-    operatorController.b().whileTrue(new GoToL2(elevator));
-    operatorController.x().whileTrue(new GoToL3(elevator));
-    operatorController.y().whileTrue(new GoToL4(elevator));
+    operatorController.b().whileTrue(new GoToL2Basic(elevator));
+    operatorController.x().whileTrue(new GoToL3Basic(elevator));
+    operatorController.y().whileTrue(new GoToL4Basic(elevator));
     operatorController.povDown().whileTrue(new GoToL1(elevator));
 
     operatorController.rightBumper().whileTrue(new ActuateAlgaeIntake(algaeIntake));
     operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
     operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
-    operatorController.povDown().whileTrue(new RunAlgaeOuttake(algaeIntake));
+    operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
     operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
     operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
