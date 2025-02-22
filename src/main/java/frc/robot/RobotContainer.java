@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -210,7 +211,8 @@ public class RobotContainer {
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
     boolean donutsBool;
     timer = new Timer();
-    if(operatorController.getRightTriggerAxis() > 0.2){
+    double donutTest = operatorController.getRightX();
+    if(donutTest > .5){
       donutsBool = true;
       timer.start();
     } else {
