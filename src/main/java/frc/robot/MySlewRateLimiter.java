@@ -61,6 +61,10 @@ public class MySlewRateLimiter implements Sendable {
     }
     public double getPositiveRateLimit() {return positiveRateLimit;}
 
+    public double getElapsedTime() {
+        return MathSharedStore.getTimestamp() - prevTime;
+    }
+
     public double getDelta(double input) {
         double delta = input - this.prevVal;
         if(delta > Math.PI) {
