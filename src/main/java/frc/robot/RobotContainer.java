@@ -72,6 +72,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Go L3", new GoToL3(elevator));
     NamedCommands.registerCommand("Go L2", new GoToL2(elevator));
     NamedCommands.registerCommand("Go L1", new GoToL1(elevator));
+    NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator));
 
     NamedCommands.registerCommand("Toggle Algae Intake", new ActuateAlgaeIntake(algaeIntake));
     NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
@@ -80,12 +81,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("Limited Coral Intake", new LimitedCoralIntake(coralIntake, manip));
     NamedCommands.registerCommand("UnLimited Coral Outtake", new UnlimitedCoralOuttake(coralIntake));
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-
     // Configure the trigger bindings
     configureBindings();
     exportSmartDashboardData();
+
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   /**
@@ -99,12 +100,12 @@ public class RobotContainer {
    */
   private void configureBindings() {
     driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
-    //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
+    driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
 
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
 
     //driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
-    //driverController.R1().onTrue(new GoToL4Basic(elevator));
+    driverController.R3().whileTrue(new GoToL4Basic(elevator));
     driverController.povDown().whileTrue(new GoToL3Basic(elevator));
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
@@ -127,12 +128,7 @@ public class RobotContainer {
     // and Y is defined as to the left according to WPILib convention.
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            driveTrain.applyRequest(() ->
-                    drive.withVelocityX(driveLimiter.calculate(-driverController.getLeftY() * Constants.Swerve.maxSpeed)) // Drive forward with negative Y (forward)
-                            .withVelocityY(driveLimiter.calculate(-driverController.getLeftX() * Constants.Swerve.maxSpeed)) // Drive left with negative X (left)
-                            .withRotationalRate(steerLimiter.calculate(-driverController.getRightX() * Constants.Swerve.maxAngularRate)) // Drive counterclockwise with negative X (left)
-            )
-    );
+            driveTrain.applyRequest(this::modularDriveRequest));
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
@@ -160,6 +156,21 @@ public class RobotContainer {
 
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
+
+  public SwerveRequest modularDriveRequest() {
+    double maxSpeed = 0;
+    if(elevator.brokeBottomLimitSwitch()) {
+      maxSpeed = Constants.Swerve.maxSpeed;
+    } else if(elevator.brokeTopLimitSwitch()) {
+      maxSpeed = Constants.Swerve.maxSpeedFullExtended;
+    } else {
+      maxSpeed = Constants.Swerve.maxSpeedPartiallyExtended;
+    }
+    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * maxSpeed;
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * maxSpeed;
+    double rotation = -driverController.getRightX() * Math.abs(driverController.getRightX()) * maxSpeed;
+    return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

@@ -2,25 +2,28 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.Elevator;
+package frc.robot.commands.Manipulator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
-public class GoToL4Basic extends Command {
+public class UnlimitedReverseRunManip extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+  private final Manipulator manip;
   private final Elevator elevator;
 
   /**
    * Creates a new ExampleCommand.
    *
-   * @param elevator The subsystem used by this command.
+   * @param manip The subsystem used by this command.
    */
-  public GoToL4Basic(Elevator elevator) {
+  public UnlimitedReverseRunManip(Manipulator manip, Elevator elevator) {
+    this.manip = manip;
     this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(elevator);
+    addRequirements(manip);
   }
 
   // Called when the command is initially scheduled.
@@ -32,22 +35,20 @@ public class GoToL4Basic extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(elevator.getPosition() > elevator.getL4()) {
-      elevator.goDown();
-    }else if(elevator.getPosition() < elevator.getL4()) {
-      elevator.goUp();
-    }
+    //if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
+      manip.reverseManip();
+    //}
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    elevator.stop();
+    manip.stopManip();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.getPosition() < elevator.getL4() + 1 && elevator.getPosition() > elevator.getL4() - 1;
+    return false;
   }
 }
