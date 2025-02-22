@@ -206,12 +206,7 @@ public class RobotContainer {
 
       double limit = 4 / mag;
       thetaLimiter.updateValues(limit, -limit);
-      //theoretically the first wrapper works and the second wrapper does not do anything, if it doesnt work and the second one does
-      //then it only wraps 180 and not 90 so we know which one works. if neither work then neither work and we test individually or
-      //revisit logic
-      //vector = thetaLimiter.wrapAngle(vector, driveTrain); //an 90 degree optimizer for whole vector
-      Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //an 180 degree optimizer for angle only
-      //System.out.println(angle.getRadians());
+      Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
       vector = new Translation2d(mag, angle);
       return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
     }
