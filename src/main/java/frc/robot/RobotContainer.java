@@ -197,10 +197,12 @@ public class RobotContainer {
       double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
       if(mag < 4/Math.PI) {
         vector = new Translation2d(mag, vector.getAngle());
+        thetaLimiter.reset(vector.getAngle().getRadians());
         return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
       if(Math.cos(theta) <= 0) {
         vector = new Translation2d(mag, new Rotation2d(thetaLimiter.lastValue()));
+        thetaLimiter.reset(thetaLimiter.lastValue());
         return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
 
