@@ -119,10 +119,23 @@ public class RobotContainer {
     operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //driverController.L1().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
-    //driverController.povUp().whileTrue(new ResetOdometryForward(chassis));
-
     driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
+
+    operatorController.a().whileTrue(new GoToHome(elevator));
+    operatorController.b().whileTrue(new GoToL2Basic(elevator));
+    operatorController.x().whileTrue(new GoToL3Basic(elevator));
+    operatorController.y().whileTrue(new GoToL4Basic(elevator));
+    operatorController.povDown().whileTrue(new GoToL1Basic(elevator));
+
+    operatorController.rightBumper().whileTrue(new ActuateAlgaeIntake(algaeIntake));
+    operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
+    operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
+    operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
+
+    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
+    operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
