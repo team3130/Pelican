@@ -38,6 +38,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(0.5, -2, 0);
   public final MySlewRateLimiter thetaLimiter;
+  public boolean isAngleReal = false;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
@@ -186,32 +187,34 @@ public class RobotContainer {
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     double deadband = 0.09 * Constants.Swerve.maxSpeed;
-    if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
-      thetaLimiter.reset(0);
-      driveLimiter.reset(0);
-      return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+    boolean withinDeadband = -deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband;
+    Translation2d vector = new Translation2d(xAxis, yAxis);
+    if(!isAngleReal) {
+      if(withinDeadband) {
+        thetaLimiter.reset(0);
+        driveLimiter.reset(0);
+        return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+      } else {
+        isAngleReal = true;
+        thetaLimiter.reset(vector.getAngle().getRadians());
+        double mag = driveLimiter.calculate(vector.getNorm());
+        vector = new Translation2d(mag, vector.getAngle());
+        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      }
     } else {
-      Translation2d vector = new Translation2d(xAxis, yAxis);
-
-      double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());;
-      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
-      mag = Math.max(mag, 0);
-      if(driveLimiter.lastValue() == 0) {
-        vector = new Translation2d(mag, vector.getAngle());
-        thetaLimiter.reset(vector.getAngle().getRadians());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-      }
+      double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
       if(Math.cos(theta) <= 0) {
-        vector = new Translation2d(mag, new Rotation2d(thetaLimiter.lastValue()));
+        vector = new Translation2d(0, 0);
         thetaLimiter.reset(thetaLimiter.lastValue());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+        double mag = driveLimiter.calculate(vector.getNorm());
+        if(withinDeadband) {
+          isAngleReal = false;
+        } else {
+          vector = new Translation2d(mag, new Rotation2d(thetaLimiter.lastValue()));
+        }
+          return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
-      if(mag < 4/Math.PI * thetaLimiter.getElapsedTime()) {
-        vector = new Translation2d(mag, vector.getAngle());
-        thetaLimiter.reset(vector.getAngle().getRadians());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-      }
-
+      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
       double limit = 4 / mag;
       thetaLimiter.updateValues(limit, -limit);
       Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
