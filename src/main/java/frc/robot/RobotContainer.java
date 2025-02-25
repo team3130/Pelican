@@ -7,12 +7,8 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.Kinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -38,7 +34,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(0.5, -2, 0);
   public final MySlewRateLimiter thetaLimiter;
-  public boolean isAngleReal = false;
+  private final double thetaLimiterConstant = 4;
+  private boolean isAngleReal = false;
+  private final double deadband = 0.09 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
@@ -182,15 +180,17 @@ public class RobotContainer {
             .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
   }
 
+  public boolean isWithinDeadband(double x, double y) {
+    return ((-deadband <= x) && (x <= deadband) && (-deadband <= y) && (y <= deadband));
+  }
+
   public SwerveRequest accelLimitVectorDrive() {
     double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * Constants.Swerve.maxSpeed;
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
-    double deadband = 0.09 * Constants.Swerve.maxSpeed;
-    boolean withinDeadband = -deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband;
     Translation2d vector = new Translation2d(xAxis, yAxis);
     if(!isAngleReal) {
-      if(withinDeadband) {
+      if(isWithinDeadband(xAxis, yAxis)) {
         thetaLimiter.reset(0);
         driveLimiter.reset(0);
         return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
@@ -204,18 +204,17 @@ public class RobotContainer {
     } else {
       double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
       if(Math.cos(theta) <= 0) {
-        vector = new Translation2d(0, 0);
         thetaLimiter.reset(thetaLimiter.lastValue());
-        double mag = driveLimiter.calculate(vector.getNorm());
-        if(withinDeadband) {
+        double newMag = driveLimiter.calculate(0);
+        vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
+        if(isWithinDeadband(vector.getX(), vector.getY())) {
           isAngleReal = false;
-        } else {
-          vector = new Translation2d(mag, new Rotation2d(thetaLimiter.lastValue()));
+          vector = new Translation2d(0, 0);
         }
           return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
       double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
-      double limit = 4 / mag;
+      double limit = thetaLimiterConstant/mag;
       thetaLimiter.updateValues(limit, -limit);
       Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
       vector = new Translation2d(mag, angle);
