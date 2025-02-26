@@ -16,6 +16,12 @@ public class MySlewRateLimiter implements Sendable {
     private double negativeRateLimit;
     private double prevVal;
     private double prevTime;
+    private final double posRateLimitSlope = -(Constants.Swerve.maxAccelerationFromRest / TunerConstants.kSpeedAt12Volts.magnitude());
+    private final double posRateLimitYIntersect = Constants.Swerve.maxAccelerationFromRest;
+
+    public double getLinearPositiveRateLimit(Translation2d vector){
+        return vector.getNorm() * posRateLimitSlope;
+    }
 
     public MySlewRateLimiter(double positiveRateLimit, double negativeRateLimit, double initialValue) {
         this.positiveRateLimit = positiveRateLimit;
@@ -58,6 +64,10 @@ public class MySlewRateLimiter implements Sendable {
     public void updateValues(double positiveRateLimit, double negativeRateLimit) {
         this.positiveRateLimit = positiveRateLimit;
         this.negativeRateLimit = negativeRateLimit;
+    }
+
+    public void setPositiveRateLimit(double positiveRateLimit) {
+        this.positiveRateLimit = positiveRateLimit;
     }
     public double getPositiveRateLimit() {return positiveRateLimit;}
 

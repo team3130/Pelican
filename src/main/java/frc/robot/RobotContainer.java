@@ -32,11 +32,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(0.5, -2, 0);
+  public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
+
   public final MySlewRateLimiter thetaLimiter;
   private final double thetaLimiterConstant = 4;
   private boolean isAngleReal = false;
-  private final double deadband = 0.09 * Constants.Swerve.maxSpeed;
+  private final double deadband = 0.01 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
@@ -54,10 +55,13 @@ public class RobotContainer {
 
   public final CommandSwerveDrivetrain driveTrain = frc.robot.TunerConstants.createDrivetrain();
 
-// Replace with CommandPS4Controller or CommandJoystick if needed
+  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
   //private final SendableChooser<Command> autoChooser;
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     thetaLimiter = new MySlewRateLimiter(0);
     manip = new Manipulator();
@@ -180,8 +184,8 @@ public class RobotContainer {
             .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
   }
 
-  public boolean isWithinDeadband(double x, double y) {
-    return ((-deadband <= x) && (x <= deadband) && (-deadband <= y) && (y <= deadband));
+  public boolean isWithinDeadband(Translation2d vector) {
+    return (vector.getNorm() <= deadband);
   }
 
   public SwerveRequest accelLimitVectorDrive() {
@@ -190,29 +194,32 @@ public class RobotContainer {
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     Translation2d vector = new Translation2d(xAxis, yAxis);
     if(!isAngleReal) {
-      if(isWithinDeadband(xAxis, yAxis)) {
+      if(isWithinDeadband(vector)) {
         thetaLimiter.reset(0);
         driveLimiter.reset(0);
         return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
       } else {
         isAngleReal = true;
         thetaLimiter.reset(vector.getAngle().getRadians());
+        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
         double mag = driveLimiter.calculate(vector.getNorm());
         vector = new Translation2d(mag, vector.getAngle());
         return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
     } else {
       double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
-      if(Math.cos(theta) <= 0) {
+      if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) {
         thetaLimiter.reset(thetaLimiter.lastValue());
+        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
         double newMag = driveLimiter.calculate(0);
         vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
-        if(isWithinDeadband(vector.getX(), vector.getY())) {
+        if(isWithinDeadband(vector)) {
           isAngleReal = false;
           vector = new Translation2d(0, 0);
         }
           return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
+      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
       double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
       double limit = thetaLimiterConstant/mag;
       thetaLimiter.updateValues(limit, -limit);
