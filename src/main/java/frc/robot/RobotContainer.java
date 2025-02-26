@@ -193,12 +193,20 @@ public class RobotContainer {
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     Translation2d vector = new Translation2d(xAxis, yAxis);
+<<<<<<< HEAD
+    if(!isAngleReal) { // Checking if robot was moving in previous state
+      if(isWithinDeadband(xAxis, yAxis)) { // Deadband
+=======
     if(!isAngleReal) {
       if(isWithinDeadband(vector)) {
+<<<<<<< Updated upstream
+=======
+>>>>>>> aa1912faa675be1b1e276f9b724770a3185bac37
+>>>>>>> Stashed changes
         thetaLimiter.reset(0);
         driveLimiter.reset(0);
         return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
-      } else {
+      } else { // Robot starts moving, so resetting thetaLimiter
         isAngleReal = true;
         thetaLimiter.reset(vector.getAngle().getRadians());
         driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
@@ -206,21 +214,44 @@ public class RobotContainer {
         vector = new Translation2d(mag, vector.getAngle());
         return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
-    } else {
+    } else { // Robot was moving in previous state
       double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
+<<<<<<< Updated upstream
       if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) {
+=======
+<<<<<<< HEAD
+      if(Math.cos(theta) <= 0) { // If turn is over 90 degrees, stop before turning
+=======
+      if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) {
+>>>>>>> aa1912faa675be1b1e276f9b724770a3185bac37
+>>>>>>> Stashed changes
         thetaLimiter.reset(thetaLimiter.lastValue());
         driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
         double newMag = driveLimiter.calculate(0);
         vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
+<<<<<<< Updated upstream
         if(isWithinDeadband(vector)) {
+=======
+<<<<<<< HEAD
+        if(isWithinDeadband(vector.getX(), vector.getY())) { // If ghost magnitude is below deadband, stop
+=======
+        if(isWithinDeadband(vector)) {
+>>>>>>> aa1912faa675be1b1e276f9b724770a3185bac37
+>>>>>>> Stashed changes
           isAngleReal = false;
           vector = new Translation2d(0, 0);
         }
           return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Desired magnitude is throttled by angle turned
+=======
+>>>>>>> Stashed changes
       driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
       double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
+>>>>>>> aa1912faa675be1b1e276f9b724770a3185bac37
       double limit = thetaLimiterConstant/mag;
       thetaLimiter.updateValues(limit, -limit);
       Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
