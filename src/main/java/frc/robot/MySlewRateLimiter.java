@@ -20,7 +20,7 @@ public class MySlewRateLimiter implements Sendable {
     private final double posRateLimitYIntersect = Constants.Swerve.maxAccelerationFromRest;
 
     public double getLinearPositiveRateLimit(Translation2d vector){
-        return vector.getNorm() * posRateLimitSlope;
+        return vector.getNorm() * posRateLimitSlope + posRateLimitYIntersect;
     }
 
     public MySlewRateLimiter(double positiveRateLimit, double negativeRateLimit, double initialValue) {

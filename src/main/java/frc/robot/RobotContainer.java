@@ -193,12 +193,12 @@ public class RobotContainer {
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     Translation2d vector = new Translation2d(xAxis, yAxis);
-    if(!isAngleReal) {
-      if(isWithinDeadband(vector)) {
+    if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
+      if(isWithinDeadband(vector)) { // Checking if within deadband
         thetaLimiter.reset(0);
         driveLimiter.reset(0);
         return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
-      } else {
+      } else { // Robot starts moving
         isAngleReal = true;
         thetaLimiter.reset(vector.getAngle().getRadians());
         driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
@@ -206,21 +206,21 @@ public class RobotContainer {
         vector = new Translation2d(mag, vector.getAngle());
         return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
-    } else {
+    } else { // Robot was moving last cycle
       double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
-      if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) {
+      if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) { // If turn is greater than 90 degrees, slow to a stop
         thetaLimiter.reset(thetaLimiter.lastValue());
         driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
         double newMag = driveLimiter.calculate(0);
         vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
-        if(isWithinDeadband(vector)) {
+        if(isWithinDeadband(vector)) { // If new mag is within deadband, slow to a stop
           isAngleReal = false;
           vector = new Translation2d(0, 0);
         }
           return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
       driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
-      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
+      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Throttle desired vector by angle turned before calculating new magnitude
       double limit = thetaLimiterConstant/mag;
       thetaLimiter.updateValues(limit, -limit);
       Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
