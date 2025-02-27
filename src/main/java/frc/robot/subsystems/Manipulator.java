@@ -39,7 +39,7 @@ public class Manipulator extends SubsystemBase {
   }
 
   public boolean getFirstBeam() {return !firstBeam.get();}
-  public boolean getSecondBeam() {return !secondBeam.get();}
+  public boolean getSecondBeam() {return secondBeam.get();}
 
   public double getManipSpeed() {return manipSpeed;}
   public void setManipSpeed(double value) {manipSpeed = value;}

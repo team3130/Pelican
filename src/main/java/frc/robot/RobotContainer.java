@@ -65,14 +65,17 @@ public class RobotContainer {
     algaeIntake = new AlgaeIntake();
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
-    NamedCommands.registerCommand("UnLimited Manip Outtake", new LimitedManipOuttake(manip, elevator));
+    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator));
+    NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
 
+    NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
     NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator));
     NamedCommands.registerCommand("Go L4", new GoToL4(elevator));
     NamedCommands.registerCommand("Go L3", new GoToL3(elevator));
     NamedCommands.registerCommand("Go L2", new GoToL2(elevator));
     NamedCommands.registerCommand("Go L1", new GoToL1(elevator));
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator));
+    NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator));
 
     NamedCommands.registerCommand("Toggle Algae Intake", new ActuateAlgaeIntake(algaeIntake));
     NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
@@ -105,43 +108,44 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
 
     //driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
-    driverController.R3().whileTrue(new GoToL4Basic(elevator));
-    driverController.povDown().whileTrue(new GoToL3Basic(elevator));
+    driverController.R1().whileTrue(new GoToL4Basic(elevator));
+    driverController.cross().whileTrue(new GoToL3Basic(elevator));
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
 
     driverController.L1().whileTrue(new GoDown(elevator));
-    driverController.R1().whileTrue(new GoUp(elevator));
+    driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
     //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
-    operatorController.y().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
+    //operatorController.y().whileTrue(new ActuateAlgaeIntake(algaeIntake));
+    //operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //driverController.L1().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
     driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
-    operatorController.a().whileTrue(new GoToHome(elevator));
-    operatorController.b().whileTrue(new GoToL2Basic(elevator));
-    operatorController.x().whileTrue(new GoToL3Basic(elevator));
-    operatorController.y().whileTrue(new GoToL4Basic(elevator));
-    operatorController.povDown().whileTrue(new GoToL1Basic(elevator));
+    //operatorController.a().whileTrue(new GoToHome(elevator));
+    //operatorController.b().whileTrue(new GoToL2Basic(elevator));
+    //operatorController.x().whileTrue(new GoToL3Basic(elevator));
+    //operatorController.y().whileTrue(new GoToL4Basic(elevator));
+    //operatorController.povDown().whileTrue(new GoToL1Basic(elevator));
 
-    operatorController.rightBumper().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
-    operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
-    operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
+    //operatorController.rightBumper().whileTrue(new ActuateAlgaeIntake(algaeIntake));
+    //operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
+    //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
+    //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
     operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
-    operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
+    operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            driveTrain.applyRequest(this::modularDriveRequest));
+            driveTrain.applyRequest(this::elevatorPercentDrive));
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
@@ -181,7 +185,20 @@ public class RobotContainer {
     }
     double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * maxSpeed;
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * maxSpeed;
-    double rotation = -driverController.getRightX() * Math.abs(driverController.getRightX()) * maxSpeed;
+    double rotation = -driverController.getRightX() * Math.abs(driverController.getRightX()) * Constants.Swerve.maxAngularRate;
+    return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+  }
+
+  public SwerveRequest elevatorPercentDrive() {
+    double maxSpeed = 2.75;
+    double minSpeed = 1;
+    double range = maxSpeed - minSpeed;
+    double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
+    double realSpeed = maxSpeed - untranslatedSpeed;
+
+    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * realSpeed;
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * realSpeed;
+    double rotation = -driverController.getRightX() * Math.abs(driverController.getRightX()) * Constants.Swerve.maxAngularRate;
     return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
   }
 

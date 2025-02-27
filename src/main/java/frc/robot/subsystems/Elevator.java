@@ -28,7 +28,7 @@ public class Elevator extends SubsystemBase {
   private double minPosition = 0;
   private double L1 = 47;
   private double L2 = 59;
-  private double L3 = 85;
+  private double L3 = 90;
   private double L4 = 135;
   private double maxPosition = 137;
 

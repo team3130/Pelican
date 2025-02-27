@@ -5,15 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "Go Home"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "LeftMove"
+            "pathName": "MiddleMoveReef"
           }
         }
       ]
