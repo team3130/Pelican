@@ -6,9 +6,11 @@ package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -181,32 +183,23 @@ public class RobotContainer {
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
 
-  public SwerveRequest modularDriveRequest() {
-    double maxSpeed = 0;
+  public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {
-      maxSpeed = Constants.Swerve.maxSpeed;
+      return Constants.Swerve.maxSpeed;
     } else if(elevator.brokeTopLimitSwitch()) {
-      maxSpeed = Constants.Swerve.maxSpeedFullExtended;
+      return Constants.Swerve.maxSpeedFullExtended;
     } else {
-      maxSpeed = Constants.Swerve.maxSpeedPartiallyExtended;
+      return Constants.Swerve.maxSpeedPartiallyExtended;
     }
-    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * maxSpeed;
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * maxSpeed;
-    double rotation = -driverController.getRightX() * Math.abs(driverController.getRightX()) * Constants.Swerve.maxAngularRate;
-    return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
   }
 
-  public SwerveRequest elevatorPercentDrive() {
+  public double getElevatorPercentSpeed() {
     double maxSpeed = 2.75;
     double minSpeed = 1;
     double range = maxSpeed - minSpeed;
     double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
     double realSpeed = maxSpeed - untranslatedSpeed;
-
-    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * realSpeed;
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * realSpeed;
-    double rotation = -driverController.getRightX() * Math.abs(driverController.getRightX()) * Constants.Swerve.maxAngularRate;
-    return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+    return realSpeed;
   }
 
   /**
@@ -232,8 +225,8 @@ public class RobotContainer {
   }
 
   public SwerveRequest accelLimitVectorDrive() {
-    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * Constants.Swerve.maxSpeed;
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
+    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getElevatorPercentSpeed();
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getElevatorPercentSpeed();
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
     Translation2d vector = new Translation2d(xAxis, yAxis);
     if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
