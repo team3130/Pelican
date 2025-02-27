@@ -6,12 +6,9 @@ package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.fasterxml.jackson.databind.util.Named;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -35,8 +32,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public final SlewRateLimiter driveLimiter = new SlewRateLimiter(0.5, -1, 0);
-  public final SlewRateLimiter steerLimiter = new SlewRateLimiter(1);
+  public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
+
+  public final MySlewRateLimiter thetaLimiter;
+  private final double thetaLimiterConstant = 4;
+  private boolean isAngleReal = false;
+  private final double deadband = 0.01 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
@@ -54,11 +55,13 @@ public class RobotContainer {
 
   public final CommandSwerveDrivetrain driveTrain = frc.robot.TunerConstants.createDrivetrain();
 
+  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
 
   private final SendableChooser<Command> autoChooser;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    thetaLimiter = new MySlewRateLimiter(0);
     manip = new Manipulator();
     elevator = new Elevator();
     coralIntake = new CoralIntake();
@@ -104,8 +107,9 @@ public class RobotContainer {
   private void configureBindings() {
     driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    //driverController.L2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
 
-    //driverController.R2().whileTrue(new UnlimitedRunManip(manip));
+    //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     //driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
     driverController.R1().whileTrue(new GoToL4Basic(elevator));
@@ -113,6 +117,7 @@ public class RobotContainer {
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
 
+    //driverController.L1().whileTrue(new GoToL1(elevator));
     driverController.L1().whileTrue(new GoDown(elevator));
     driverController.R3().whileTrue(new GoUp(elevator));
 
@@ -145,7 +150,8 @@ public class RobotContainer {
     // and Y is defined as to the left according to WPILib convention.
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            driveTrain.applyRequest(this::elevatorPercentDrive));
+            driveTrain.applyRequest(this::accelLimitVectorDrive)
+    );
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
@@ -165,6 +171,7 @@ public class RobotContainer {
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
+    SmartDashboard.putData(thetaLimiter);
   }
 
   public Command pick() {
@@ -210,5 +217,58 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return Autos.exampleAuto(m_exampleSubsystem);
+  }
+
+  public SwerveRequest driveRequest() {
+    double xAxis = -driverController.getLeftY();
+    double yAxis = -driverController.getLeftX();
+    return drive.withVelocityX(xAxis * Constants.Swerve.maxSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(yAxis * Constants.Swerve.maxSpeed) // Drive left with negative X (left)
+            .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
+  }
+
+  public boolean isWithinDeadband(Translation2d vector) {
+    return (vector.getNorm() <= deadband);
+  }
+
+  public SwerveRequest accelLimitVectorDrive() {
+    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * Constants.Swerve.maxSpeed;
+    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
+    double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
+    Translation2d vector = new Translation2d(xAxis, yAxis);
+    if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
+      if(isWithinDeadband(vector)) { // Checking if within deadband
+        thetaLimiter.reset(0);
+        driveLimiter.reset(0);
+        return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+      } else { // Robot starts moving
+        isAngleReal = true;
+        thetaLimiter.reset(vector.getAngle().getRadians());
+        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+        double mag = driveLimiter.calculate(vector.getNorm());
+        vector = new Translation2d(mag, vector.getAngle());
+        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      }
+    } else { // Robot was moving last cycle
+      double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
+      if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) { // If turn is greater than 90 degrees, slow to a stop
+        thetaLimiter.reset(thetaLimiter.lastValue());
+        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+        double newMag = driveLimiter.calculate(0);
+        vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
+        if(isWithinDeadband(vector)) { // If new mag is within deadband, slow to a stop
+          isAngleReal = false;
+          vector = new Translation2d(0, 0);
+        }
+          return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      }
+      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Throttle desired vector by angle turned before calculating new magnitude
+      double limit = thetaLimiterConstant/mag;
+      thetaLimiter.updateValues(limit, -limit);
+      Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
+      vector = new Translation2d(mag, angle);
+      return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+    }
   }
 }

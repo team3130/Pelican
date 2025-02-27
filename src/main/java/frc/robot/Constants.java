@@ -59,10 +59,9 @@ public final class Constants {
   }
 
   public static class Swerve {
-    public static double maxSpeed = frc.robot.TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    public static double maxSpeedPartiallyExtended = 1.5;
-    public static double maxSpeedFullExtended = 1;
-    public static double maxAngularRate = RotationsPerSecond.of(0.25).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static double maxSpeed = 2.5; // NOT kSpeedAt12Volts
+    public static double maxAccelerationFromRest = 7.875; //in m/s^2 gotten from assumed mass of 70 kg
+    public static double maxAngularRate = RotationsPerSecond.of(0.25).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
     public static double maxSteerVoltage = 4d;
     public static double maxDriveVoltage = 10d;
 
