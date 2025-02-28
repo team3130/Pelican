@@ -41,6 +41,7 @@ public class RobotContainer {
   private boolean isAngleReal = false;
   private final double deadband = 0.01 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final Chassis chassis;
   private final Manipulator manip;
   private final Elevator elevator;
   private final CoralIntake coralIntake;
@@ -64,6 +65,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     thetaLimiter = new MySlewRateLimiter(0);
+    chassis = new Chassis();
     manip = new Manipulator();
     elevator = new Elevator();
     coralIntake = new CoralIntake();
