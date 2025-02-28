@@ -47,7 +47,6 @@ public class RobotContainer {
   private final Elevator elevator;
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
-  private final Camera camera;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
           .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
@@ -71,7 +70,6 @@ public class RobotContainer {
     elevator = new Elevator();
     coralIntake = new CoralIntake();
     algaeIntake = new AlgaeIntake();
-    camera = new Camera();
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator));
