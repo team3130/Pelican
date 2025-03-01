@@ -2,34 +2,30 @@ package frc.robot.sensors;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonUtils;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
-import java.nio.file.FileSystem;
 import java.util.List;
 import java.util.Optional;
 
 public class Camera implements Sendable {
-    private PhotonCamera camera = new PhotonCamera("3130Camera");
-    private Transform3d cameraToRobot = new Transform3d(12, 4, 8, new Rotation3d(0,Math.toDegrees(-15),Math.toDegrees(5)));
+    private final PhotonCamera camera = new PhotonCamera("3130Camera");
+    private final Transform3d cameraToRobot = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(180,0,0));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
-    private AprilTagFieldLayout aprilTagFieldLayout;
-    private PhotonPoseEstimator photonPoseEstimator;
+    private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
     public Camera() {
+        AprilTagFieldLayout aprilTagFieldLayout;
         try{
             aprilTagFieldLayout = new AprilTagFieldLayout(fieldName);
             System.out.println(fieldName);
@@ -43,13 +39,15 @@ public class Camera implements Sendable {
         photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE, cameraToRobot);
     }
 
-    public void getResult(CommandSwerveDrivetrain drivetrain) {
+    public void updateVisionOdometry(CommandSwerveDrivetrain drivetrain, Telemetry logger) {
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         for (PhotonPipelineResult result : results) {
             photonPoseEstimator.setReferencePose(drivetrain.getState().Pose);
             Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
             if (optionalOdoState.isPresent()) {
                 odoState = optionalOdoState.get();
+                var newPose = odoState.estimatedPose.toPose2d();
+                logger.updateVision(newPose);
                 drivetrain.addVisionMeasurement(odoState.estimatedPose.toPose2d(), odoState.timestampSeconds);
             }
         }
@@ -89,6 +87,12 @@ public class Camera implements Sendable {
             return "null";
         }
     }
+
+    public void getFakeResult(CommandSwerveDrivetrain driveTrain) {
+        Pose2d fakePose = new Pose2d(2, 2, new Rotation2d(0));
+        driveTrain.addVisionMeasurement(fakePose, MathSharedStore.getTimestamp());
+    }
+
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Vision");
         builder.addDoubleProperty("Odo State X", this::getXOdoState, null);

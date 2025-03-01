@@ -1,20 +1,18 @@
 package frc.robot.commands.Camera;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Telemetry;
 import frc.robot.sensors.Camera;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 
-public class UpdateOdoFromVision extends Command {
+public class UpdateOdoFromPose extends Command {
     private final CommandSwerveDrivetrain commandSwerveDrivetrain;
-    private final Telemetry logger;
     private final Camera camera;
 
-    public UpdateOdoFromVision(CommandSwerveDrivetrain commandSwerveDrivetrain, Camera camera, Telemetry logger) {
+    public UpdateOdoFromPose(CommandSwerveDrivetrain commandSwerveDrivetrain, Camera camera) {
         this.commandSwerveDrivetrain = commandSwerveDrivetrain;
         this.camera = camera;
-        this.logger = logger;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements();
@@ -34,7 +32,7 @@ public class UpdateOdoFromVision extends Command {
      */
     @Override
     public void execute() {
-        camera.updateVisionOdometry(commandSwerveDrivetrain, logger);
+        camera.getFakeResult(commandSwerveDrivetrain);
     }
 
     /**
