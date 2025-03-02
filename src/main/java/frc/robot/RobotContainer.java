@@ -18,6 +18,7 @@ import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Camera.UpdateOdoFromPose;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
+import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralOuttake;
@@ -126,6 +127,7 @@ public class RobotContainer {
 
     driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
     driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
+    camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
     driverController.L1().whileTrue(new GoDown(elevator));

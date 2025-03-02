@@ -8,17 +8,19 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.List;
 import java.util.Optional;
 
-public class Camera implements Sendable {
+public class Camera implements Sendable, Subsystem {
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
     private final Transform3d cameraToRobot = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(180,0,0));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
@@ -36,21 +38,40 @@ public class Camera implements Sendable {
             System.out.println("Fix ur Field ngl");
             System.out.println(fieldName);
         }
-        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE, cameraToRobot);
+        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, cameraToRobot);
     }
 
-    public void updateVisionOdometry(CommandSwerveDrivetrain drivetrain, Telemetry logger) {
+    public void getVisionOdometry(CommandSwerveDrivetrain drivetrain, Telemetry logger) {
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         for (PhotonPipelineResult result : results) {
-            photonPoseEstimator.setReferencePose(drivetrain.getState().Pose);
-            Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
-            if (optionalOdoState.isPresent()) {
-                odoState = optionalOdoState.get();
-                var newPose = odoState.estimatedPose.toPose2d();
-                logger.updateVision(newPose);
-                drivetrain.addVisionMeasurement(odoState.estimatedPose.toPose2d(), odoState.timestampSeconds);
+            boolean inRange = false;
+            double highestAmbiguity = 0;
+            for (PhotonTrackedTarget target: result.getTargets()) {
+                double xSquared = target.getBestCameraToTarget().getX() * target.getBestCameraToTarget().getX();
+                double ySquared = target.getBestCameraToTarget().getY() * target.getBestCameraToTarget().getY();
+                double distance = Math.sqrt(xSquared + ySquared);
+                if(target.getPoseAmbiguity() > highestAmbiguity) {
+                    highestAmbiguity = target.getPoseAmbiguity();
+                }
+                if(distance < 4){
+                    inRange = true;
+                }
+            }
+            if(inRange && highestAmbiguity < 0.1) {
+                photonPoseEstimator.setReferencePose(drivetrain.getState().Pose);
+                Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
+                if (optionalOdoState.isPresent()) {
+                    odoState = optionalOdoState.get();
+                    var newPose = odoState.estimatedPose.toPose2d();
+                    logger.updateVision(newPose);
+                }
             }
         }
+    }
+
+    public void updateVisionOdometry(CommandSwerveDrivetrain driveTrain, Telemetry logger){
+        getVisionOdometry(driveTrain, logger);
+        driveTrain.addVisionMeasurement(odoState.estimatedPose.toPose2d(), odoState.timestampSeconds);
     }
     public double getXOdoState() {
         if(odoState != null) {
