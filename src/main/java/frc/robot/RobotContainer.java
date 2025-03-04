@@ -16,6 +16,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Chassis.FollowClosestPath;
+import frc.robot.commands.Chassis.TopALeftFolllowPath;
+import frc.robot.commands.Chassis.TopARightFolllowPath;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralOuttake;
@@ -118,6 +121,10 @@ public class RobotContainer {
     driverController.cross().whileTrue(new GoToL3Basic(elevator));
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
+
+    driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
+    driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));
+    driverController.povDown().whileTrue(new FollowClosestPath(driveTrain, driverController));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
     driverController.L1().whileTrue(new GoDown(elevator));
