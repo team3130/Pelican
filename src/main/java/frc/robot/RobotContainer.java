@@ -125,9 +125,10 @@ public class RobotContainer {
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
 
-    driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
-    driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
-    camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
+    //driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
+    //driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
+    //camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
+    camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
     driverController.L1().whileTrue(new GoDown(elevator));

@@ -17,7 +17,7 @@ public class UpdateOdoFromVision extends Command {
         this.logger = logger;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
-        addRequirements();
+        addRequirements(camera);
     }
 
     /**

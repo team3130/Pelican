@@ -27,7 +27,8 @@ public class Camera implements Sendable, Subsystem {
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
     public Camera() {
-        AprilTagFieldLayout aprilTagFieldLayout;
+        AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+        /*
         try{
             aprilTagFieldLayout = new AprilTagFieldLayout(fieldName);
             System.out.println(fieldName);
@@ -38,6 +39,7 @@ public class Camera implements Sendable, Subsystem {
             System.out.println("Fix ur Field ngl");
             System.out.println(fieldName);
         }
+         */
         photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, cameraToRobot);
     }
 
