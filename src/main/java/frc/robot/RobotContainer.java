@@ -16,11 +16,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Camera.UpdateOdoFromPose;
+import frc.robot.commands.Camera.UpdateOdoFromVision;
+import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralOuttake;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
+import frc.robot.sensors.Camera;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -45,6 +49,7 @@ public class RobotContainer {
   private final Elevator elevator;
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
+  private final Camera camera;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
           .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
@@ -68,6 +73,7 @@ public class RobotContainer {
     elevator = new Elevator();
     coralIntake = new CoralIntake();
     algaeIntake = new AlgaeIntake();
+    camera = new Camera();
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator));
@@ -118,6 +124,10 @@ public class RobotContainer {
     driverController.cross().whileTrue(new GoToL3Basic(elevator));
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
+
+    driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
+    driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
+    camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
     driverController.L1().whileTrue(new GoDown(elevator));
@@ -174,6 +184,9 @@ public class RobotContainer {
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
     SmartDashboard.putData(thetaLimiter);
+    SmartDashboard.putData(camera);
+
+    SmartDashboard.putData(logger.getField());
   }
 
   public Command pick() {

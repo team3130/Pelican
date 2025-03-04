@@ -14,9 +14,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
@@ -39,6 +37,7 @@ public class Telemetry {
     /* Robot swerve drive state */
     private final NetworkTable driveStateTable = inst.getTable("DriveState");
     private final StructPublisher<Pose2d> drivePose = driveStateTable.getStructTopic("Pose", Pose2d.struct).publish();
+    private final StructPublisher<Pose2d> visionPose = driveStateTable.getStructTopic("Vision Pose", Pose2d.struct).publish();
     private final StructPublisher<ChassisSpeeds> driveSpeeds = driveStateTable.getStructTopic("Speeds", ChassisSpeeds.struct).publish();
     private final StructArrayPublisher<SwerveModuleState> driveModuleStates = driveStateTable.getStructArrayTopic("ModuleStates", SwerveModuleState.struct).publish();
     private final StructArrayPublisher<SwerveModuleState> driveModuleTargets = driveStateTable.getStructArrayTopic("ModuleTargets", SwerveModuleState.struct).publish();
@@ -46,10 +45,15 @@ public class Telemetry {
     private final DoublePublisher driveTimestamp = driveStateTable.getDoubleTopic("Timestamp").publish();
     private final DoublePublisher driveOdometryFrequency = driveStateTable.getDoubleTopic("OdometryFrequency").publish();
 
-    /* Robot pose for field positioning */
-    private final NetworkTable table = inst.getTable("Pose");
-    private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
-    private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
+
+    private final Field2d field = new Field2d();
+    public void updateVision(Pose2d pose) {
+        field.getObject("Vision").setPose(pose);
+    }
+
+    public Field2d getField() {
+        return field;
+    }
 
     /* Mechanisms to represent the swerve module states */
     private final Mechanism2d[] m_moduleMechanisms = new Mechanism2d[] {
@@ -85,6 +89,7 @@ public class Telemetry {
     public void telemeterize(SwerveDriveState state) {
         /* Telemeterize the swerve drive state */
         drivePose.set(state.Pose);
+        field.setRobotPose(state.Pose);
         driveSpeeds.set(state.Speeds);
         driveModuleStates.set(state.ModuleStates);
         driveModuleTargets.set(state.ModuleTargets);
@@ -107,10 +112,6 @@ public class Telemetry {
         SignalLogger.writeDoubleArray("DriveState/ModuleStates", m_moduleStatesArray);
         SignalLogger.writeDoubleArray("DriveState/ModuleTargets", m_moduleTargetsArray);
         SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
-
-        /* Telemeterize the pose to a Field2d */
-        fieldTypePub.set("Field2d");
-        fieldPub.set(m_poseArray);
 
         /* Telemeterize the module states to a Mechanism2d */
         for (int i = 0; i < 4; ++i) {
