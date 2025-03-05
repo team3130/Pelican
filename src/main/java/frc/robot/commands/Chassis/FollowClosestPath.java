@@ -29,13 +29,13 @@ public class FollowClosestPath extends Command {
 
     //left to right, top to bottom
     private final double[] blueCoralTagNums = {19, 20, 18, 21, 17, 22};
-    private final double[] redCoralTagNums = {9, 8, 10, 7, 11, 6};
+    private final double[] redCoralTagNums = {6, 8, 10, 7, 9, 11};
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
             field.getTagPose(18).get(), field.getTagPose(21).get(),
             field.getTagPose(17).get(), field.getTagPose(22).get()};
-    private final Pose3d[] redCoralTagPoses = {field.getTagPose(9).get(), field.getTagPose(8).get(),
+    private final Pose3d[] redCoralTagPoses = {field.getTagPose(6).get(), field.getTagPose(8).get(),
             field.getTagPose(10).get(), field.getTagPose(7).get(),
-            field.getTagPose(11).get(), field.getTagPose(6).get()};
+            field.getTagPose(9).get(), field.getTagPose(11).get()};
 
     private boolean onBlue = false;
 
@@ -52,19 +52,7 @@ public class FollowClosestPath extends Command {
      */
     @Override
     public void initialize() {
-        if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-            onBlue = true;
-        } else {
-            onBlue = false;
-        }
-    }
-
-    /**
-     * The main body of a command.  Called repeatedly while the command is scheduled.
-     * (That is, it is called repeatedly until {@link #isFinished()}) returns true.)
-     */
-    @Override
-    public void execute() {
+        onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
         int sideChosen = -1;
         if(onBlue) {
             double lowestDistance = 1000;
@@ -92,21 +80,30 @@ public class FollowClosestPath extends Command {
             }
         }
         int leftOrRight = -1;
-        double upperDeadband = 0.7;
-        double lowerDeadband = 0.3;
+        double deadband = 0.7;
         double joystickChoice = driverController.getRightY();
-        if(joystickChoice > upperDeadband || joystickChoice < lowerDeadband) {
-            if (joystickChoice > upperDeadband) {
+        if(joystickChoice > deadband || joystickChoice < -deadband) {
+            if (joystickChoice > deadband) {
                 leftOrRight = 0;
             } else {
                 leftOrRight = 1;
             }
             try {
-                driveTrain.produceTrajectory(pathNames[sideChosen][leftOrRight]);
+                driveTrain.produceTrajectory(pathNames[sideChosen][leftOrRight]).schedule();
             } catch (IOException | ParseException e) {
+                System.out.println("lowkey didnt work");
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /**
+     * The main body of a command.  Called repeatedly while the command is scheduled.
+     * (That is, it is called repeatedly until {@link #isFinished()}) returns true.)
+     */
+    @Override
+    public void execute() {
+
     }
 
     /**
