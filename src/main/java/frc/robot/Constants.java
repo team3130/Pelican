@@ -37,7 +37,7 @@ public final class Constants {
 
     public static final int Manipulator = 13;
 
-    public static final int Climber = -1;
+    public static final int Climber = 20;
   }
 
   public static class IDs {

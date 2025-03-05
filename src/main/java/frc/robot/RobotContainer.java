@@ -22,6 +22,8 @@ import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.Chassis.FollowClosestPath;
 import frc.robot.commands.Chassis.TopALeftFolllowPath;
 import frc.robot.commands.Chassis.TopARightFolllowPath;
+import frc.robot.commands.Climber.BasicClimberDown;
+import frc.robot.commands.Climber.BasicClimberUp;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralOuttake;
@@ -52,6 +54,7 @@ public class RobotContainer {
   private final Elevator elevator;
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
+  private final Climber climber;
   private final Camera camera;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
@@ -76,6 +79,7 @@ public class RobotContainer {
     elevator = new Elevator();
     coralIntake = new CoralIntake();
     algaeIntake = new AlgaeIntake();
+    climber = new Climber();
     camera = new Camera();
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
@@ -127,6 +131,9 @@ public class RobotContainer {
     driverController.cross().whileTrue(new GoToL3Basic(elevator));
     driverController.circle().whileTrue(new GoToL2Basic(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
+
+    driverController.square().whileTrue(new BasicClimberUp(climber));
+    driverController.triangle().whileTrue(new BasicClimberDown(climber));
 
     //driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
     //driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
