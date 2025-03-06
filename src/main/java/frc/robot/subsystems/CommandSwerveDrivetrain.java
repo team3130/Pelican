@@ -212,6 +212,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 constraints);
     }
 
+    public void produceOneDimensionalTrajectory() {
+
+    }
+
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
