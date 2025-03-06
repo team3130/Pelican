@@ -25,7 +25,7 @@ public class Elevator extends SubsystemBase {
   private final DigitalInput topLimitSwitch;
 
   private double home = 0;
-  private double minPosition = 0;
+  private double minPosition = 20;
   private double L1 = 47;
   private double L2 = 59;
   private double L3 = 90;
@@ -66,6 +66,7 @@ public class Elevator extends SubsystemBase {
     leftMotor.getConfigurator().apply(new CurrentLimitsConfigs().withSupplyCurrentLimitEnable(true).withSupplyCurrentLimit(6));
 
     voltRequest0 = new MotionMagicDutyCycle(0);
+    MotionMagicConfigs configs = new MotionMagicConfigs().withMotionMagicAcceleration(1).withMotionMagicCruiseVelocity(1);
     slot0Configs = new Slot0Configs().withGravityType(GravityTypeValue.Elevator_Static);
     slot0Configs.kG = slot0kG;
     slot0Configs.kP = slot0kP;
@@ -73,6 +74,7 @@ public class Elevator extends SubsystemBase {
     slot0Configs.kD = slot0kD;
 
     leftMotor.getConfigurator().apply(slot0Configs);
+    leftMotor.getConfigurator().apply(configs);
   }
 
   public void stop() {
@@ -157,7 +159,7 @@ public class Elevator extends SubsystemBase {
   public void setPosition(double value) {leftMotor.setPosition(value);}
 
   public boolean brokeBottomLimitSwitch() {return !bottomLimitSwitch.get();}
-  public boolean brokeTopLimitSwitch() {return !topLimitSwitch.get();}
+  public boolean brokeTopLimitSwitch() {return topLimitSwitch.get();}
 
   public boolean isZeroed() {return zeroed;}
   public boolean isAtHome() {return atHome;}

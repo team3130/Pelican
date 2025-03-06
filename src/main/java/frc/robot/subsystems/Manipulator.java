@@ -38,7 +38,7 @@ public class Manipulator extends SubsystemBase {
     manip.set(ControlMode.PercentOutput, 0);
   }
 
-  public boolean getFirstBeam() {return !firstBeam.get();}
+  public boolean getFirstBeam() {return firstBeam.get();}
   public boolean getSecondBeam() {return secondBeam.get();}
 
   public double getManipSpeed() {return manipSpeed;}
