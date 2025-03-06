@@ -76,7 +76,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void stop() {
-    leftMotor.setControl(voltRequest0.withPosition(0));
+    leftMotor.set(0);
   }
 
   public void goDown() {
