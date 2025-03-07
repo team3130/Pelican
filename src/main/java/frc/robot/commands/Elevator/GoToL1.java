@@ -7,6 +7,7 @@ package frc.robot.commands.Elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
 public class GoToL1 extends Command {
@@ -18,10 +19,12 @@ public class GoToL1 extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL1(Elevator elevator) {
+  public GoToL1(Elevator elevator, LEDs LEDs) {
     this.elevator = elevator;
+    this.LEDs = LEDs;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
+    addRequirements(LEDs);
   }
 
   // Called when the command is initially scheduled.
@@ -35,6 +38,7 @@ public class GoToL1 extends Command {
   public void execute() {
     if(elevator.isZeroed()) {
       elevator.goToL1();
+      LEDs.setLEDstateElevator();
     } else {
       elevator.goToHome();
       elevator.goToL1();

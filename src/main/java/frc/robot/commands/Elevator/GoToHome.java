@@ -17,10 +17,12 @@ public class GoToHome extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToHome(Elevator elevator) {
+  public GoToHome(Elevator elevator, LEDs LEDs) {
     this.elevator = elevator;
+    this.LEDs = LEDs;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
+    addRequirements(LEDs);
   }
 
   // Called when the command is initially scheduled.
@@ -31,7 +33,10 @@ public class GoToHome extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {elevator.goToHome();}
+  public void execute() {
+    elevator.goToHome(); 
+    LEDs.setLEDstateElevator();
+  }
 
   // Called once the command ends or is interrupted.
   @Override
