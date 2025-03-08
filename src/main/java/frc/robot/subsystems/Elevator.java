@@ -25,7 +25,7 @@ public class Elevator extends SubsystemBase {
   private final DigitalInput topLimitSwitch;
 
   private double home = 0;
-  private double minPosition = 0;
+  private double minPosition = 20;
   private double L1 = 47;
   private double L2 = 59;
   private double L3 = 90;
@@ -33,6 +33,7 @@ public class Elevator extends SubsystemBase {
   private double maxPosition = 137;
 
   private final MotionMagicDutyCycle voltRequest0;
+  private TalonFXConfiguration config;
   private Slot0Configs slot0Configs;
   private double slot0kG = 0;
   private double slot0kP = 0;
@@ -55,16 +56,6 @@ public class Elevator extends SubsystemBase {
 
     rightMotor.setControl(new Follower(leftMotor.getDeviceID(), true));
 
-    leftMotor.getConfigurator().apply(new TalonFXConfiguration());
-    rightMotor.getConfigurator().apply(new TalonFXConfiguration());
-
-    leftMotor.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
-
-    leftMotor.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
-    rightMotor.getConfigurator().apply(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Brake));
-
-    leftMotor.getConfigurator().apply(new CurrentLimitsConfigs().withSupplyCurrentLimitEnable(true).withSupplyCurrentLimit(6));
-
     voltRequest0 = new MotionMagicDutyCycle(0);
     slot0Configs = new Slot0Configs().withGravityType(GravityTypeValue.Elevator_Static);
     slot0Configs.kG = slot0kG;
@@ -72,7 +63,13 @@ public class Elevator extends SubsystemBase {
     slot0Configs.kI = slot0kI;
     slot0Configs.kD = slot0kD;
 
-    leftMotor.getConfigurator().apply(slot0Configs);
+    config = new TalonFXConfiguration();
+    config.MotionMagic.withMotionMagicCruiseVelocity(120).withMotionMagicAcceleration(240);
+    config.Slot0 = slot0Configs;
+    config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake);
+    config.CurrentLimits.withSupplyCurrentLimitEnable(true).withSupplyCurrentLimit(6);
+
+    leftMotor.getConfigurator().apply(config);
   }
 
   public void stop() {
@@ -157,7 +154,7 @@ public class Elevator extends SubsystemBase {
   public void setPosition(double value) {leftMotor.setPosition(value);}
 
   public boolean brokeBottomLimitSwitch() {return !bottomLimitSwitch.get();}
-  public boolean brokeTopLimitSwitch() {return !topLimitSwitch.get();}
+  public boolean brokeTopLimitSwitch() {return topLimitSwitch.get();}
 
   public boolean isZeroed() {return zeroed;}
   public boolean isAtHome() {return atHome;}
@@ -213,7 +210,8 @@ public class Elevator extends SubsystemBase {
     slot0Configs.kI = slot0kI;
     slot0Configs.kD = slot0kD;
 
-    leftMotor.getConfigurator().apply(slot0Configs);
+    config.Slot0 = slot0Configs;
+    leftMotor.getConfigurator().apply(config);
   }
 
 

@@ -53,6 +53,6 @@ public class LimitedManipIntake extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return !manip.getFirstBeam() && manip.getSecondBeam();
+    return manip.getFirstBeam() && !manip.getSecondBeam();
   }
 }
