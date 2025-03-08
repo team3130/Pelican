@@ -1,24 +1,33 @@
 package frc.robot.commands.Chassis;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import frc.robot.Constants;
+import frc.robot.MySlewRateLimiter;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 
 
-public class FollowClosestPath extends Command {
+public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
+    private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
-    private Command follower;
+    private final MySlewRateLimiter thetaLimiter;
+    private final Translation2d targetPose = new Translation2d(0, new Rotation2d(0));
+    private String chosenPathName;
+    private boolean runnable = false;
     private final String[][] pathNames = {
             {"TopALeftFollow", "TopARightFollow"},
             {"TopBLeftFollow", "TopBRightFollow"},
@@ -29,7 +38,7 @@ public class FollowClosestPath extends Command {
     };
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
-    //left to right, top to bottom
+    //left to right, top to bottom for blue/ red is weirdly mirrored
     private final double[] blueCoralTagNums = {19, 20, 18, 21, 17, 22};
     private final double[] redCoralTagNums = {6, 11, 7, 10, 8, 9};
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -41,9 +50,11 @@ public class FollowClosestPath extends Command {
 
     private boolean onBlue = false;
 
-    public FollowClosestPath(CommandSwerveDrivetrain commandSwerveDrivetrain, CommandPS5Controller driverController) {
+    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive, CommandPS5Controller driverController) {
         this.driveTrain = commandSwerveDrivetrain;
+        this.drive = drive;
         this.driverController = driverController;
+        thetaLimiter = new MySlewRateLimiter(90, -90, driveTrain.getStatePose().getRotation().getDegrees());
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
@@ -90,14 +101,9 @@ public class FollowClosestPath extends Command {
             } else {
                 leftOrRight = 1;
             }
-            try {
-                follower = driveTrain.produceTrajectory(pathNames[sideChosen][leftOrRight]);
-                follower.schedule();
-            } catch (IOException | ParseException e) {
-                System.out.println("lowkey didnt work");
-                throw new RuntimeException(e);
-            }
+            runnable = true;
         }
+        chosenPathName = pathNames[sideChosen][leftOrRight];
     }
 
     /**
@@ -106,7 +112,19 @@ public class FollowClosestPath extends Command {
      */
     @Override
     public void execute() {
-
+        if(runnable) {
+            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+            approach = approach.div(approach.getNorm());
+            Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
+            double magnitude = (joystick.getX() * approach.getX()) + (joystick.getY() * approach.getY());
+            magnitude *= Constants.Swerve.maxSpeed;
+            double rotation = thetaLimiter.calculate(thetaLimiter.getDelta(60));
+            driveTrain.setControl(
+                    drive.withVelocityX(approach.getX() * magnitude)
+                            .withVelocityY(approach.getY() * magnitude)
+                            .withRotationalRate(rotation)
+            );
+        }
     }
 
     /**
@@ -139,8 +157,6 @@ public class FollowClosestPath extends Command {
      */
     @Override
     public void end(boolean interrupted) {
-        if(follower.isScheduled()) {
-            follower.cancel();
-        }
+        //AutoBuilder.buildAuto(chosenPathName).schedule();
     }
 }

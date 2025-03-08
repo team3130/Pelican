@@ -20,6 +20,7 @@ import frc.robot.commands.Camera.UpdateOdoFromPose;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.Chassis.FollowClosestPath;
+import frc.robot.commands.Chassis.OneDimensionalTrajectoryDrive;
 import frc.robot.commands.Chassis.TopALeftFolllowPath;
 import frc.robot.commands.Chassis.TopARightFolllowPath;
 import frc.robot.commands.Climber.BasicClimberDown;
@@ -140,8 +141,9 @@ public class RobotContainer {
     //camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
     camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
 
-    driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
-    driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));
+    //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
+    //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));
+    driverController.povUp().whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController));
     driverController.povDown().whileTrue(new FollowClosestPath(driveTrain, driverController));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));

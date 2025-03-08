@@ -20,6 +20,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -212,8 +213,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 constraints);
     }
 
-    public void produceOneDimensionalTrajectory() {
-
+    public Translation2d produceOneDimensionalTrajectory(Translation2d targetPose) {
+        Translation2d aprilTagUnitVector = new Translation2d(1, targetPose.getAngle());
+        Translation2d startingPose = getStatePose().getTranslation();
+        Translation2d distance = targetPose.minus(startingPose);
+        Translation2d pivotOffset = distance.div(4);
+        Translation2d intercept = targetPose.plus(pivotOffset);
+        return intercept.minus(startingPose);
     }
 
     /**
