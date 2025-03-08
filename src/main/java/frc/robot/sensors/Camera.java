@@ -6,7 +6,6 @@ import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Telemetry;
@@ -22,7 +21,7 @@ import java.util.Optional;
 
 public class Camera implements Sendable, Subsystem {
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
-    private final Transform3d cameraToRobot = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(180,0,0));
+    private final Transform3d robotToCamera = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(Math.PI,0,0));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
@@ -40,7 +39,7 @@ public class Camera implements Sendable, Subsystem {
             System.out.println(fieldName);
         }
          */
-        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, cameraToRobot);
+        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
     }
 
     public void getVisionOdometry(CommandSwerveDrivetrain drivetrain, Telemetry logger) {
@@ -66,17 +65,12 @@ public class Camera implements Sendable, Subsystem {
                     odoState = optionalOdoState.get();
                     var newPose = odoState.estimatedPose.toPose2d();
                     logger.updateVision(newPose);
+                    drivetrain.addVisionMeasurement(odoState.estimatedPose.toPose2d(), odoState.timestampSeconds);
                 }
             }
         }
     }
 
-    public void updateVisionOdometry(CommandSwerveDrivetrain driveTrain, Telemetry logger){
-        if(odoState != null) {
-            getVisionOdometry(driveTrain, logger);
-            driveTrain.addVisionMeasurement(odoState.estimatedPose.toPose2d(), odoState.timestampSeconds);
-        }
-    }
     public double getXOdoState() {
         if(odoState != null) {
             return odoState.estimatedPose.getX();
