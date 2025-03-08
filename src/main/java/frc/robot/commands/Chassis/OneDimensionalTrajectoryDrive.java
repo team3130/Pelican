@@ -25,7 +25,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
     private final MySlewRateLimiter thetaLimiter;
-    private final Translation2d targetPose = new Translation2d(0, new Rotation2d(0));
+    private final Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private String chosenPathName;
     private boolean runnable = false;
     private final String[][] pathNames = {
@@ -66,7 +66,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void initialize() {
         onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
-        int sideChosen = -1;
+        int sideChosen = 0;
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
@@ -92,7 +92,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
             }
         }
-        int leftOrRight = -1;
+        int leftOrRight = 0;
         double deadband = 0.7;
         double joystickChoice = driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
@@ -113,16 +113,16 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose.getTranslation());
             approach = approach.div(approach.getNorm());
             Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
             double magnitude = (joystick.getX() * approach.getX()) + (joystick.getY() * approach.getY());
             magnitude *= Constants.Swerve.maxSpeed;
-            double rotation = thetaLimiter.calculate(thetaLimiter.getDelta(60));
+            //double rotation = thetaLimiter.calculate(thetaLimiter.getDelta(60));
             driveTrain.setControl(
                     drive.withVelocityX(approach.getX() * magnitude)
                             .withVelocityY(approach.getY() * magnitude)
-                            .withRotationalRate(rotation)
+                            .withRotationalRate(0)
             );
         }
     }

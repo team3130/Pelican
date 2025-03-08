@@ -19,10 +19,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.Camera.UpdateOdoFromPose;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
-import frc.robot.commands.Chassis.FollowClosestPath;
-import frc.robot.commands.Chassis.OneDimensionalTrajectoryDrive;
-import frc.robot.commands.Chassis.TopALeftFolllowPath;
-import frc.robot.commands.Chassis.TopARightFolllowPath;
+import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.BasicClimberDown;
 import frc.robot.commands.Climber.BasicClimberUp;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
@@ -143,8 +140,9 @@ public class RobotContainer {
 
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));
-    driverController.povUp().whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController));
-    driverController.povDown().whileTrue(new FollowClosestPath(driveTrain, driverController));
+    driverController.povDown().whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController));
+    //driverController.povDown().whileTrue(new FollowClosestPath(driveTrain, driverController));
+    driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
     driverController.L1().whileTrue(new GoDown(elevator));
