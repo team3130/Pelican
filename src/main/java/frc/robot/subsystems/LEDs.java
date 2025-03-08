@@ -17,8 +17,9 @@ public class LEDs extends SubsystemBase {
   private final int LEDLength = 37; //TODO UPDATE TO NEW LENGTH
   private final int pwmPort = 0;
   public LEDs() {
+      
       //set pwmPort
-      LED = new AddressableLED(0);
+      LED = new AddressableLED(2);
 
       //set strip length
       LEDBuffer = new AddressableLEDBuffer(37);
