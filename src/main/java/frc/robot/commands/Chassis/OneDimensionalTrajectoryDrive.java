@@ -25,8 +25,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
     private final MySlewRateLimiter thetaLimiter;
-    private final Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
-    private String chosenPathName;
+    private Pose3d targetPose = new Pose3d();
     private boolean runnable = false;
     private final String[][] pathNames = {
             {"TopALeftFollow", "TopARightFollow"},
@@ -70,9 +69,9 @@ public class OneDimensionalTrajectoryDrive extends Command {
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
-                Pose3d tagPose = blueCoralTagPoses[i];
-                double x = tagPose.getX() - driveTrain.getStatePose().getX();
-                double y = tagPose.getY() - driveTrain.getStatePose().getY();
+                targetPose = blueCoralTagPoses[i];
+                double x = targetPose.getX() - driveTrain.getStatePose().getX();
+                double y = targetPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
                 if(distance < lowestDistance) {
                     lowestDistance = distance;
@@ -82,9 +81,9 @@ public class OneDimensionalTrajectoryDrive extends Command {
         } else {
             double lowestDistance = 1000;
             for(int i = 0; i < redCoralTagPoses.length; i++) {
-                Pose3d tagPose = redCoralTagPoses[i];
-                double x = tagPose.getX() - driveTrain.getStatePose().getX();
-                double y = tagPose.getY() - driveTrain.getStatePose().getY();
+                targetPose = redCoralTagPoses[i];
+                double x = targetPose.getX() - driveTrain.getStatePose().getX();
+                double y = targetPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
                 if(distance < lowestDistance) {
                     lowestDistance = distance;
@@ -94,7 +93,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
         }
         int leftOrRight = 0;
         double deadband = 0.7;
-        double joystickChoice = driverController.getRightY();
+        double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
             if (joystickChoice > deadband) {
                 leftOrRight = 0;
@@ -103,7 +102,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
             runnable = true;
         }
-        chosenPathName = pathNames[sideChosen][leftOrRight];
+        String chosenPathName = pathNames[sideChosen][leftOrRight];
     }
 
     /**
@@ -113,10 +112,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose.getTranslation());
+            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose.toPose2d().getTranslation());
             approach = approach.div(approach.getNorm());
             Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
-            double magnitude = (joystick.getX() * approach.getX()) + (joystick.getY() * approach.getY());
+            double magnitude = (-joystick.getY() * approach.getX()) + (-joystick.getX() * approach.getY()); //x and y should be flipped for field oriented
             magnitude *= Constants.Swerve.maxSpeed;
             //double rotation = thetaLimiter.calculate(thetaLimiter.getDelta(60));
             driveTrain.setControl(

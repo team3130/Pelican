@@ -217,7 +217,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         Translation2d aprilTagUnitVector = new Translation2d(1, targetPose.getAngle());
         Translation2d startingPose = getStatePose().getTranslation();
         Translation2d distance = targetPose.minus(startingPose);
-        Translation2d pivotOffset = distance.div(4);
+        double r = 1;
+        double smallDistance = Math.min(r, distance.getNorm());
+        Translation2d pivotOffset = aprilTagUnitVector.times(smallDistance);
         Translation2d intercept = targetPose.plus(pivotOffset);
         return intercept.minus(startingPose);
     }
