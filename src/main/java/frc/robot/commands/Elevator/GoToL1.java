@@ -13,18 +13,18 @@ import frc.robot.subsystems.LEDs;
 public class GoToL1 extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL1(Elevator elevator, LEDs LEDs) {
+  public GoToL1(Elevator elevator, LEDs LED) {
     this.elevator = elevator;
-    this.LEDs = LEDs;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
-    addRequirements(LEDs);
   }
 
   // Called when the command is initially scheduled.
@@ -38,7 +38,7 @@ public class GoToL1 extends Command {
   public void execute() {
     if(elevator.isZeroed()) {
       elevator.goToL1();
-      LEDs.setLEDstateElevator();
+      LED.setLEDstateElevator();
     } else {
       elevator.goToHome();
       elevator.goToL1();

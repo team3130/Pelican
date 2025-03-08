@@ -13,15 +13,17 @@ public class UnlimitedRunManip extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
   private final Elevator elevator;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param manip The subsystem used by this command.
    */
-  public UnlimitedRunManip(Manipulator manip, Elevator elevator) {
+  public UnlimitedRunManip(Manipulator manip, Elevator elevator, LEDs LED) {
     this.manip = manip;
     this.elevator = elevator;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip);
   }
@@ -37,6 +39,7 @@ public class UnlimitedRunManip extends Command {
   public void execute() {
     //if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
       manip.runManip();
+      LED.setLEDstateManipulator();
     //}
   }
 

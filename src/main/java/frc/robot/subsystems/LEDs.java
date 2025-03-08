@@ -44,7 +44,13 @@ public class LEDs extends SubsystemBase {
       LEDPattern redAndBlue = LEDPattern.steps(Map.of(0, Color.kRed, 0.5, Color.kBlue));
 
       LEDPattern timer = LEDPattern.progressMaskLayer(() -> DriverStation.getCurrentTimeSeconds / 135);
-
+      LEDPattern elevatorDeltaL1 = LEDPattern.progressMaskLayer(() -> Elevator.getPosition / getL1);
+      LEDPattern elevatorDeltaL2 = LEDPattern.progressMaskLayer(() -> Elevator.getPosition / getL2);
+      LEDPattern elevatorDeltaL3 = LEDPattern.progressMaskLayer(() -> Elevator.getPosition / getL3);
+      LEDPattern elevatorDeltaL4 = LEDPattern.progressMaskLayer(() -> Elevator.getPosition / getL4);
+      LEDPattern elevatorDeltaHome = LEDPattern.progressMaskLayer(() -> Elevator.getPosition / getHome);
+      LEDPattern elevatorDeltaMaxPos = LEDPattern.progressMaskLayer(() -> Elevator.getPosition / getMaxPosition);
+      LEDPattern elevatorDeltaMinPos = LEDPattern.progressMaskLayer(() -> Elevator.getPosition / getMinPosition);
 
       setDefaultCommand(runPattern(timer)).withName("Off");
   }
@@ -58,28 +64,35 @@ public class LEDs extends SubsystemBase {
   public setLEDsRainbow(){rainbow.applyTo(LEDBuffer);}
   public setLEDsScrollingRainbow(){scrollingRainbow.applyTo(LEDBuffer);}
   public setLEDsRedAndBlue(){redAndBlue.applyTo(LEDBuffer);}
+  public setLEDsL1Delta(){elevatorDeltaL1.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
+  public setLEDsL2Delta(){elevatorDeltaL2.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
+  public setLEDsL3Delta(){elevatorDeltaL3.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
+  public setLEDsL4Delta(){elevatorDeltaL4.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
+  public setLEDsHomeDelta(){elevatorDeltaHome.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
+  public setLEDsMinDelta(){elevatorDeltaMinPos.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
+  public setLEDsMaxDelta(){elevatorDeltaMaxPos.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
 
   public void setLEDstateElevator(){
-    if(Elevator.setAtL4() && Elevator.getPosition == Elevator.getL4){
-      LEDs.setLEDsPurple();
+    if(Elevator.setAtL4() && ((Elevator.getL4Elevator) Elevator.getPosition == Elevator.getL4)){
+      LEDs.setLEDsL4Delta();
     }
     else if (Elevator.setAtL3() && Elevator.getPosition == Elevator.getL3){
-      LEDs.setLEDsPurple();
+      LEDs.setLEDsL3Delta();
     }
     else if (Elevator.setAtL2() && Elevator.getPosition == Elevator.getL2){
-      LEDs.setLEDsPurple();
+      LEDs.setLEDsL2Delta();
     }
     else if (Elevator.setAtL1() && Elevator.getPosition == Elevator.getL1){
-      LEDs.setLEDsPurple();
+      LEDs.setLEDsL1Delta();
     }
     else if (Elevator.setAtHome() && Elevator.getPosition == Elevator.getHome){
-      LEDs.setLEDsPurple();
+      LEDs.setLEDsHomeDelta();
     }
     else if (Elevator.setAtMaxPosition() && Elevator.getPosition == Elevator.getMaxPosition){
-      LEDs.setLEDsPurple();
+      LEDs.setLEDsMaxDelta();
     }
     else if (Elevator.setAtMinPosition() && Elevator.getPosition == Elevator.getMinPosition){
-      LEDs.setLEDsPurple();
+      LEDs.setLEDsMinDelta();
     }
   }
 

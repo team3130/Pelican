@@ -11,14 +11,16 @@ import frc.robot.subsystems.Elevator;
 public class GoToMinPosition extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToMinPosition(Elevator elevator) {
+  public GoToMinPosition(Elevator elevator, LEDs LED) {
     this.elevator = elevator;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -38,6 +40,7 @@ public class GoToMinPosition extends Command {
       elevator.goToHome();
       elevator.goToMinPosition();
     }
+    LED.setLEDstateElevator();
   }
 
   // Called once the command ends or is interrupted.

@@ -22,7 +22,6 @@ public class GoToHome extends Command {
     this.LEDs = LEDs;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
-    addRequirements(LEDs);
   }
 
   // Called when the command is initially scheduled.

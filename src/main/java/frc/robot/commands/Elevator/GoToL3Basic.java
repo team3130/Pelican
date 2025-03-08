@@ -11,14 +11,16 @@ import frc.robot.subsystems.Elevator;
 public class GoToL3Basic extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL3Basic(Elevator elevator) {
+  public GoToL3Basic(Elevator elevator, LEDs LED) {
     this.elevator = elevator;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -37,6 +39,7 @@ public class GoToL3Basic extends Command {
     }else if(elevator.getPosition() < elevator.getL3()) {
       elevator.goUp();
     }
+    LED.setLEDstateElevator();
   }
 
   // Called once the command ends or is interrupted.

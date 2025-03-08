@@ -11,14 +11,16 @@ import frc.robot.subsystems.Elevator;
 public class GoDown extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoDown(Elevator elevator) {
+  public GoDown(Elevator elevator, LEDs LED) {
     this.elevator = elevator;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -31,7 +33,10 @@ public class GoDown extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {elevator.goDown();}
+  public void execute() {
+    elevator.goDown();
+    LED.setLEDstateElevator();
+  }
 
   // Called once the command ends or is interrupted.
   @Override
