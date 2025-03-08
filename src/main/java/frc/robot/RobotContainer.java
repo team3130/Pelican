@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
+import frc.robot.commands.CommandSwerveDrivetrain.TeleopDrive;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralIntake;
 import frc.robot.commands.CoralIntake.UnlimitedCoralOuttake;
@@ -36,16 +37,13 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(0.5, -2, 0);
-  public final MySlewRateLimiter thetaLimiter;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
-  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-          .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
-          .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+  private final TeleopDrive teleopDrive;
+
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -55,12 +53,15 @@ public class RobotContainer {
 
   public final CommandSwerveDrivetrain driveTrain = frc.robot.TunerConstants.createDrivetrain();
 
-// Replace with CommandPS4Controller or CommandJoystick if needed
+  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
   //private final SendableChooser<Command> autoChooser;
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
-    thetaLimiter = new MySlewRateLimiter(0);
+    teleopDrive = new TeleopDrive(driveTrain, driverController);
     manip = new Manipulator();
     elevator = new Elevator();
     coralIntake = new CoralIntake();
@@ -153,15 +154,19 @@ public class RobotContainer {
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
-    SmartDashboard.putData(thetaLimiter);
   }
 
   //public Command pick() {
-    //return autoChooser.getSelected();
+  //return autoChooser.getSelected();
   //}
 
-  public Command elevatorHome() {return new GoToHome(elevator);}
-  public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
+  public Command elevatorHome() {
+    return new GoToHome(elevator);
+  }
+
+  public Command algaeActuationHome() {
+    return new AlgaeActuationGoHome(algaeIntake);
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -171,52 +176,5 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return Autos.exampleAuto(m_exampleSubsystem);
-  }
-
-  public SwerveRequest driveRequest() {
-    double xAxis = -driverController.getLeftY();
-    double yAxis = -driverController.getLeftX();
-    return drive.withVelocityX(xAxis * Constants.Swerve.maxSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(yAxis * Constants.Swerve.maxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-driverController.getRightX() * Constants.Swerve.maxAngularRate); // Drive counterclockwise with negative X (left)
-  }
-
-  public SwerveRequest accelLimitVectorDrive() {
-    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * Constants.Swerve.maxSpeed;
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * Constants.Swerve.maxSpeed;
-    double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
-    double deadband = 0.09 * Constants.Swerve.maxSpeed;
-    if(-deadband <= xAxis && xAxis <= deadband && -deadband <= yAxis && yAxis <= deadband) {
-      thetaLimiter.reset(0);
-      driveLimiter.reset(0);
-      return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
-    } else {
-      Translation2d vector = new Translation2d(xAxis, yAxis);
-
-      double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());;
-      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta));
-      mag = Math.max(mag, 0);
-      if(driveLimiter.lastValue() == 0) {
-        vector = new Translation2d(mag, vector.getAngle());
-        thetaLimiter.reset(vector.getAngle().getRadians());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-      }
-      if(Math.cos(theta) <= 0) {
-        vector = new Translation2d(mag, new Rotation2d(thetaLimiter.lastValue()));
-        thetaLimiter.reset(thetaLimiter.lastValue());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-      }
-      if(mag < 4/Math.PI * thetaLimiter.getElapsedTime()) {
-        vector = new Translation2d(mag, vector.getAngle());
-        thetaLimiter.reset(vector.getAngle().getRadians());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-      }
-
-      double limit = 4 / mag;
-      thetaLimiter.updateValues(limit, -limit);
-      Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
-      vector = new Translation2d(mag, angle);
-      return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-    }
   }
 }
