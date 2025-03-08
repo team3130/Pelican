@@ -72,8 +72,8 @@ public class Camera implements Sendable, Subsystem {
     }
 
     public void updateVisionOdometry(CommandSwerveDrivetrain driveTrain, Telemetry logger){
-        getVisionOdometry(driveTrain, logger);
         if(odoState != null) {
+            getVisionOdometry(driveTrain, logger);
             driveTrain.addVisionMeasurement(odoState.estimatedPose.toPose2d(), odoState.timestampSeconds);
         }
     }

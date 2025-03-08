@@ -19,6 +19,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.Camera.UpdateOdoFromPose;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
+import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.BasicClimberDown;
 import frc.robot.commands.Climber.BasicClimberUp;
 import frc.robot.commands.CoralIntake.LimitedCoralIntake;
@@ -45,7 +46,7 @@ public class RobotContainer {
   public final MySlewRateLimiter thetaLimiter;
   private final double thetaLimiterConstant = 4;
   private boolean isAngleReal = false;
-  private final double deadband = 0.01 * Constants.Swerve.maxSpeed;
+  private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
   private final Elevator elevator;
@@ -54,8 +55,8 @@ public class RobotContainer {
   private final Climber climber;
   private final Camera camera;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-          .withDeadband(Constants.Swerve.maxSpeed * 0.09).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
-          .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+          .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
+          .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -135,7 +136,13 @@ public class RobotContainer {
     //driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
     //driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
     //camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
-    camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
+    //camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
+
+    //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
+    //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));
+    driverController.povDown().whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController));
+    //driverController.povDown().whileTrue(new FollowClosestPath(driveTrain, driverController));
+    driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
     driverController.L1().whileTrue(new GoDown(elevator));
