@@ -64,6 +64,8 @@ public class LEDs extends SubsystemBase {
   public setLEDsRainbow(){rainbow.applyTo(LEDBuffer);}
   public setLEDsScrollingRainbow(){scrollingRainbow.applyTo(LEDBuffer);}
   public setLEDsRedAndBlue(){redAndBlue.applyTo(LEDBuffer);}
+
+  // elevator LED colors
   public setLEDsL1Delta(){elevatorDeltaL1.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
   public setLEDsL2Delta(){elevatorDeltaL2.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
   public setLEDsL3Delta(){elevatorDeltaL3.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
