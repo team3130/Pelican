@@ -25,16 +25,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
     private final MySlewRateLimiter thetaLimiter;
-    private Pose3d targetPose = new Pose3d();
+    private final Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
-    private final String[][] pathNames = {
-            {"TopALeftFollow", "TopARightFollow"},
-            {"TopBLeftFollow", "TopBRightFollow"},
-            {"MiddleALeftFollow", "MiddleARightFollow"},
-            {"MiddleBLeftFollow", "MiddleBRightFollow"},
-            {"BottomALeftFollow", "BottomARightFollow"},
-            {"BottomBLeftFollow", "BottomBRightFollow"}
-    };
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
     //left to right, top to bottom for blue/ red is weirdly mirrored
@@ -91,18 +83,17 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
             }
         }
-        int leftOrRight = 0;
+        boolean leftOrRight;
         double deadband = 0.7;
         double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
             if (joystickChoice > deadband) {
-                leftOrRight = 0;
+                leftOrRight = true;
             } else {
-                leftOrRight = 1;
+                leftOrRight = false;
             }
             runnable = true;
         }
-        String chosenPathName = pathNames[sideChosen][leftOrRight];
     }
 
     /**
@@ -112,7 +103,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose.toPose2d().getTranslation());
+            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
             approach = approach.div(approach.getNorm());
             Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
             double magnitude = (-joystick.getY() * approach.getX()) + (-joystick.getX() * approach.getY()); //x and y should be flipped for field oriented

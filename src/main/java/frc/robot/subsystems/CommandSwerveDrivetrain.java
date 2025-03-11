@@ -213,15 +213,40 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 constraints);
     }
 
-    public Translation2d produceOneDimensionalTrajectory(Translation2d targetPose) {
-        Translation2d aprilTagUnitVector = new Translation2d(1, targetPose.getAngle());
+    public Translation2d produceOneDimensionalTrajectory(Pose2d targetPose) {
+        double radius = 1;
+        Translation2d OLeft = targetPose.getTranslation().plus(new Translation2d(radius, Rotation2d.kCW_90deg));
+        Translation2d ORight = targetPose.getTranslation().plus(new Translation2d(radius, Rotation2d.kCCW_90deg));
         Translation2d startingPose = getStatePose().getTranslation();
-        Translation2d distance = targetPose.minus(startingPose);
-        double r = 1;
-        double smallDistance = Math.min(r, distance.getNorm());
-        Translation2d pivotOffset = aprilTagUnitVector.times(smallDistance);
-        Translation2d intercept = targetPose.plus(pivotOffset);
-        return intercept.minus(startingPose);
+        Translation2d chosenO;
+        boolean rotateClockwise;
+        if(startingPose.getDistance(OLeft) < startingPose.getDistance(ORight)) {
+            chosenO = OLeft;
+            rotateClockwise = true;
+        } else {
+            chosenO = ORight;
+            rotateClockwise = false;
+        }
+        Translation2d distance = chosenO.minus(startingPose);
+        if(distance.getNorm() >= radius) {
+            double theta = Math.asin(radius/distance.getNorm());
+            if(rotateClockwise) {
+                return new Translation2d(1, distance.getAngle().minus(new Rotation2d(theta)));
+            } else {
+                return new Translation2d(1, distance.getAngle().plus(new Rotation2d(theta)));
+            }
+        } else {
+            Translation2d radiusVector = targetPose.getTranslation().minus(chosenO);
+            double RdotD = (radiusVector.getX() * distance.getX()) + (radiusVector.getY() * distance.getY());
+            double denominator = 2 * ((radius * radius) - RdotD);
+            double numerator = (radius * radius) - (distance.getNorm() * distance.getNorm());
+            Translation2d littleR = distance.plus(radiusVector.times(numerator/denominator));
+            if(rotateClockwise) {
+                return new Translation2d(1, littleR.getAngle().plus(Rotation2d.kCW_90deg));
+            } else {
+                return new Translation2d(1, littleR.getAngle().plus(Rotation2d.kCCW_90deg));
+            }
+        }
     }
 
     /**
