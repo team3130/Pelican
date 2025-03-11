@@ -1,10 +1,9 @@
 package frc.robot.commands.Chassis;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,23 +14,21 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
 import frc.robot.MySlewRateLimiter;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
 
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
-    private final MySlewRateLimiter thetaLimiter;
-    private final Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
+    private final PIDController turningController = new PIDController(0, 0, 0);
+    private final MySlewRateLimiter turningLimiter;
+    private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
-    //left to right, top to bottom for blue/ red is weirdly mirrored
+    //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final double[] blueCoralTagNums = {19, 20, 18, 21, 17, 22};
-    private final double[] redCoralTagNums = {6, 11, 7, 10, 8, 9};
+    private final double[] redCoralTagNums = {6, 8, 10, 7, 9, 11};
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
             field.getTagPose(18).get(), field.getTagPose(21).get(),
             field.getTagPose(17).get(), field.getTagPose(22).get()};
@@ -45,7 +42,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
         this.driveTrain = commandSwerveDrivetrain;
         this.drive = drive;
         this.driverController = driverController;
-        thetaLimiter = new MySlewRateLimiter(90, -90, driveTrain.getStatePose().getRotation().getDegrees());
+        turningLimiter = new MySlewRateLimiter(0.25, -0.25, driveTrain.getStatePose().getRotation().getRotations());
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
@@ -57,29 +54,28 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void initialize() {
         onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
-        int sideChosen = 0;
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
-                targetPose = blueCoralTagPoses[i];
-                double x = targetPose.getX() - driveTrain.getStatePose().getX();
-                double y = targetPose.getY() - driveTrain.getStatePose().getY();
+                Pose2d currentPose = blueCoralTagPoses[i].toPose2d();
+                double x = currentPose.getX() - driveTrain.getStatePose().getX();
+                double y = currentPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
                 if(distance < lowestDistance) {
                     lowestDistance = distance;
-                    sideChosen = i;
+                    targetPose = currentPose;
                 }
             }
         } else {
             double lowestDistance = 1000;
             for(int i = 0; i < redCoralTagPoses.length; i++) {
-                targetPose = redCoralTagPoses[i];
-                double x = targetPose.getX() - driveTrain.getStatePose().getX();
-                double y = targetPose.getY() - driveTrain.getStatePose().getY();
+                Pose2d currentPose = redCoralTagPoses[i].toPose2d();
+                double x = currentPose.getX() - driveTrain.getStatePose().getX();
+                double y = currentPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
                 if(distance < lowestDistance) {
                     lowestDistance = distance;
-                    sideChosen = i;
+                    targetPose = currentPose;
                 }
             }
         }
@@ -108,11 +104,11 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
             double magnitude = (-joystick.getY() * approach.getX()) + (-joystick.getX() * approach.getY()); //x and y should be flipped for field oriented
             magnitude *= Constants.Swerve.maxSpeed;
-            //double rotation = thetaLimiter.calculate(thetaLimiter.getDelta(60));
+            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRotations(), targetPose.getRotation().getRotations());
             driveTrain.setControl(
                     drive.withVelocityX(approach.getX() * magnitude)
                             .withVelocityY(approach.getY() * magnitude)
-                            .withRotationalRate(0)
+                            .withRotationalRate(rotation)
             );
         }
     }
