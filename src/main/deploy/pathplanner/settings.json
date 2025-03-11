@@ -3,7 +3,8 @@
   "robotLength": 0.9144,
   "holonomicMode": true,
   "pathFolders": [
-    "Follow Paths"
+    "Feeder Follower Paths",
+    "Reef Followers"
   ],
   "autoFolders": [],
   "defaultMaxVel": 2.5,

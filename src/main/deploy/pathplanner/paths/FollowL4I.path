@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.8240778688524584,
-        "y": 2.5325307377049184
+        "x": 5.514344262295082,
+        "y": 5.457530737704917
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.003203514935304,
-        "y": 2.891391469478303
+        "x": 5.284028997454681,
+        "y": 5.042470497804752
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.9679303278688525,
-        "y": 2.7842725409836064
+        "x": 5.3105532786885234,
+        "y": 5.097899590163934
       },
       "prevControl": {
-        "x": 3.7684921617062552,
-        "y": 2.3209172660225015
+        "x": 5.577353765713044,
+        "y": 5.56026519228106
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": -119.99999999999999
   },
   "reversed": false,
-  "folder": "Follow Paths",
+  "folder": "Reef Followers",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 59.99999999999999
+    "rotation": -119.99999999999999
   },
   "useDefaultConstraints": false
 }

@@ -222,7 +222,7 @@ public class RobotContainer {
   }
 
   public double getElevatorPercentSpeed() {
-    double maxSpeed = 2.75;
+    double maxSpeed = Constants.Swerve.maxSpeed;
     double minSpeed = 1;
     double range = maxSpeed - minSpeed;
     double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
