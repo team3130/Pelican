@@ -7,6 +7,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -57,7 +60,12 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     CommandScheduler.getInstance().cancelAll();
     //CommandScheduler.getInstance().schedule(m_robotContainer.elevatorHome());
-    autonomousCommand = robotContainer.pick();
+    //autonomousCommand = robotContainer.pick();
+    try {
+      autonomousCommand = robotContainer.configureAuton();
+    } catch (IOException | ParseException e) {
+      throw new RuntimeException(e);
+    }
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       autonomousCommand.schedule();

@@ -12,16 +12,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
-import frc.robot.commands.Camera.UpdateOdoFromPose;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
-import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.Chassis.*;
-import frc.robot.commands.Climber.BasicClimberDown;
-import frc.robot.commands.Climber.BasicClimberUp;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
@@ -30,6 +27,9 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -104,6 +104,8 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
+
+
   }
 
   /**
@@ -214,6 +216,14 @@ public class RobotContainer {
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command visionResetOdo() {return new UpdateOdoFromVision(driveTrain, camera, logger);}
+
+  public SequentialCommandGroup configureAuton() throws IOException, ParseException {
+    PathChooser.buildAndSendCoralChooser("Coral 1");
+    PathChooser.buildAndSendCoralChooser("Coral 2");
+    PathChooser.buildAndSendCoralChooser("Coral 3");
+    PathChooser.buildAndSendStationChooser();
+    return PathChooser.buildAutoCommand();
+  }
 
   public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {

@@ -1,7 +1,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.util.Units;
@@ -28,24 +27,21 @@ public class PathChooser {
     private static SendableChooser<Command> pathChooser2 = null;
     private static SendableChooser<Command> pathChooser3 = null;
     private static SendableChooser<Command> stationChooser = null;
-    private static Command coral1;
-    private static Command coral2;
-    private static Command coral3;
     private static PathConstraints defaultConstraints = new PathConstraints(
             2.5, 1,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // For convenience a programmer could change this when going to competition.
-    private final boolean isCompetition = true;
+    private static final boolean isCompetition = true;
 
-    public PathChooser(String chooserType) throws IOException, ParseException {
+    public static void buildAndSendCoralChooser(String chooserType) throws IOException, ParseException {
         // Build an auto chooser. This will use Commands.none() as the default option.
         // As an example, this will only show autos that start with "comp" while at
         // competition as defined by the programmer
         if(chooserType.equals("Coral 1")) {
-            pathChooser1 = AutoBuilder.buildAutoChooserWithOptionsModifier(
+            pathChooser1 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
-                            ? stream.filter(path -> path.getName().startsWith("follow"))
+                            ? stream.filter(path -> path.name.startsWith("follow"))
                             : stream
             );
             SmartDashboard.putData("Coral 1 Path", pathChooser1);
@@ -53,7 +49,7 @@ public class PathChooser {
         } else if(chooserType.equals("Coral 2")) {
             pathChooser2 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
-                            ? stream.filter(path -> path.getName().startsWith("follow"))
+                            ? stream.filter(path -> path.name.startsWith("follow"))
                             : stream
             );
             SmartDashboard.putData("Coral 2 Path", pathChooser2);
@@ -61,23 +57,36 @@ public class PathChooser {
         } else if(chooserType.equals("Coral 3")) {
             pathChooser3 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
-                            ? stream.filter(path -> path.getName().startsWith("follow"))
+                            ? stream.filter(path -> path.name.startsWith("follow"))
                             : stream
             );
             SmartDashboard.putData("Coral 3 Path", pathChooser3);
         }
+    }
+
+    public static void buildAndSendStationChooser() throws IOException, ParseException {
         stationChooser = new SendableChooser<>();
         stationChooser.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
         stationChooser.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
         SmartDashboard.putData("Station Chooser", stationChooser);
     }
+
     public static Command getPathFollowCommand(SendableChooser<Command> pathChooser) {
         return pathChooser.getSelected();
     }
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
+            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) throws IOException, ParseException {
+        return buildPathChooserWithOptionsModifier("", optionsModifier);
+    }
+
+    public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
             String defaultPathName,
             Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) throws IOException, ParseException {
+        if (!AutoBuilder.isConfigured()) {
+            throw new RuntimeException(
+                    "AutoBuilder was not configured before attempting to build an auto chooser");
+        }
 
         SendableChooser<Command> chooser = new SendableChooser<>();
         List<String> pathNames = getAllPathNames();
@@ -85,10 +94,10 @@ public class PathChooser {
         PathPlannerPath defaultOption = null;
         List<PathPlannerPath> options = new ArrayList<>();
 
-        for (String pathName : pathNames) {
-            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+        for (String pathname : pathNames) {
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathname);
 
-            if (!defaultPathName.isEmpty() && defaultPathName.equals(pathName)) {
+            if (!defaultPathName.isEmpty() && defaultPathName.equals(pathname)) {
                 defaultOption = path;
             } else {
                 options.add(path);
