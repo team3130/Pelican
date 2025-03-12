@@ -6,6 +6,7 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
 public class GoToMinPosition extends Command {
@@ -28,12 +29,7 @@ public class GoToMinPosition extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(elevator.isZeroed()) {
-      elevator.goToMinPosition();
-    } else {
-      elevator.goToHome();
-      elevator.goToMinPosition();
-    }
+    elevator.goToMinPosition();
     LED.setLEDstateElevator();
   }
 

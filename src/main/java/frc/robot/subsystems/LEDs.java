@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot;
+package frc.robot.subsystems;
 
 import java.util.Map;
 
@@ -19,16 +19,16 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static java.awt.Color.*;
 
-public class LEDs{
+public class LEDs extends SubsystemBase{
   private AddressableLED LED;
   private AddressableLEDBuffer LEDBuffer;
   private Elevator elevator;
   private Manipulator manip;
   private final int LEDLength = 37; //TODO UPDATE TO NEW LENGTH
-  private final int pwmPort = 0;
+  private final int pwmPort = 2;
 
   //LEDs per Meter
-  Distance kLedSpacing = Meters.of((double) 1 / 37);
+  Distance kLedSpacing = Meters.of((double) 1 / LEDLength);
 
   //create color palate
   //Solid colors
@@ -41,26 +41,26 @@ public class LEDs{
 
   //animated colors
   LEDPattern rainbow = LEDPattern.rainbow(255, 255);
-  LEDPattern scrollingRainbow = rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(1), kLedSpacing);
+  LEDPattern scrollingRainbow = rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.25), kLedSpacing);
   LEDPattern redAndBlue = LEDPattern.steps(Map.of(0, Color.kRed, 0.5, Color.kBlue));
 
   LEDPattern timer = LEDPattern.progressMaskLayer(() -> DriverStation.getMatchTime() / 135);
-  LEDPattern elevatorDeltaL1 = LEDPattern.progressMaskLayer(() -> elevator.getPosition() / elevator.getL1());
-  LEDPattern elevatorDeltaL2 = LEDPattern.progressMaskLayer(() -> elevator.getPosition() / elevator.getL2());
-  LEDPattern elevatorDeltaL3 = LEDPattern.progressMaskLayer(() -> elevator.getPosition() / elevator.getL3());
-  LEDPattern elevatorDeltaL4 = LEDPattern.progressMaskLayer(() -> elevator.getPosition() / elevator.getL4());
-  LEDPattern elevatorDeltaHome = LEDPattern.progressMaskLayer(() -> elevator.getPosition() / elevator.getHome());
-  LEDPattern elevatorDeltaMaxPos = LEDPattern.progressMaskLayer(() -> elevator.getPosition() / elevator.getMaxPosition());
-  LEDPattern elevatorDeltaMinPos = LEDPattern.progressMaskLayer(() -> elevator.getPosition() / elevator.getMinPosition());
+  LEDPattern elevatorDeltaL1 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL1()));
+  LEDPattern elevatorDeltaL2 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL2()));
+  LEDPattern elevatorDeltaL3 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL3()));
+  LEDPattern elevatorDeltaL4 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL4()));
+  LEDPattern elevatorDeltaHome = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getHome()));
+  LEDPattern elevatorDeltaMaxPos = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getMaxPosition()));
+  LEDPattern elevatorDeltaMinPos = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getMinPosition()));
   public LEDs(Elevator elevator, Manipulator manip) {
       this.elevator = elevator;
       this.manip = manip;
       
       //set pwmPort
-      LED = new AddressableLED(2);
+      LED = new AddressableLED(pwmPort);
 
       //set strip length
-      LEDBuffer = new AddressableLEDBuffer(37);
+      LEDBuffer = new AddressableLEDBuffer(LEDLength);
       LED.setLength(LEDBuffer.getLength());
       LED.setData(LEDBuffer);
       LED.start();
@@ -77,13 +77,34 @@ public class LEDs{
   public void setLEDsRedAndBlue(){redAndBlue.applyTo(LEDBuffer);}
 
   // elevator LED colors
-  public void setLEDsL1Delta(){elevatorDeltaL1.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
-  public void setLEDsL2Delta(){elevatorDeltaL2.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
-  public void setLEDsL3Delta(){elevatorDeltaL3.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
-  public void setLEDsL4Delta(){elevatorDeltaL4.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
-  public void setLEDsHomeDelta(){elevatorDeltaHome.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
-  public void setLEDsMinDelta(){elevatorDeltaMinPos.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
-  public void setLEDsMaxDelta(){elevatorDeltaMaxPos.applyTo(LEDBuffer); purple.applyTo(LEDBuffer);}
+  public void setLEDsL1Delta(){
+    elevatorDeltaL1.applyTo(LEDBuffer);
+    purple.applyTo(LEDBuffer);
+  }
+  public void setLEDsL2Delta(){
+    elevatorDeltaL2.applyTo(LEDBuffer);
+    purple.applyTo(LEDBuffer);
+  }
+  public void setLEDsL3Delta(){
+    elevatorDeltaL3.applyTo(LEDBuffer);
+    purple.applyTo(LEDBuffer);
+  }
+  public void setLEDsL4Delta(){
+    elevatorDeltaL4.applyTo(LEDBuffer);
+    purple.applyTo(LEDBuffer);
+  }
+  public void setLEDsHomeDelta(){
+    elevatorDeltaHome.applyTo(LEDBuffer);
+    purple.applyTo(LEDBuffer);
+  }
+  public void setLEDsMinDelta(){
+    elevatorDeltaMinPos.applyTo(LEDBuffer);
+    purple.applyTo(LEDBuffer);
+  }
+  public void setLEDsMaxDelta(){
+    elevatorDeltaMaxPos.applyTo(LEDBuffer);
+    purple.applyTo(LEDBuffer);
+  }
 
   public void setLEDstateElevator(){
     if(elevator.isAtL4()){

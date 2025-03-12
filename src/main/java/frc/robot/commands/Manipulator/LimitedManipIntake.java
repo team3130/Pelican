@@ -5,9 +5,8 @@
 package frc.robot.commands.Manipulator;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.LEDs;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
@@ -33,16 +32,15 @@ public class LimitedManipIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    LED.setLEDstateManipulator();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //if (elevator.isAtMinPosition()) {
+    if (elevator.isAtMinPosition()) {
       manip.runManip();
-      LED.setLEDstateManipulator();
-    //}
+    }
   }
 
   // Called once the command ends or is interrupted.

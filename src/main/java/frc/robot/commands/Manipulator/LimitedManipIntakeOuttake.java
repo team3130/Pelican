@@ -10,18 +10,20 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
-public class LimitedManipOuttake extends Command {
+public class LimitedManipIntakeOuttake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
   private final Elevator elevator;
   private final LEDs LED;
+  private boolean isIntaking = false;
+  private boolean isOuttaking = false;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param manip The subsystem used by this command.
    */
-  public LimitedManipOuttake(Manipulator manip, Elevator elevator, LEDs LED) {
+  public LimitedManipIntakeOuttake(Manipulator manip, Elevator elevator, LEDs LED) {
     this.manip = manip;
     this.elevator = elevator;
     this.LED = LED;
@@ -38,8 +40,14 @@ public class LimitedManipOuttake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
+    if (elevator.isAtMinPosition()) {
       manip.runManip();
+      isIntaking = true;
+      isOuttaking = false;
+    } else if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
+      manip.runManip();
+      isIntaking = false;
+      isOuttaking = true;
     }
   }
 
@@ -52,6 +60,11 @@ public class LimitedManipOuttake extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return manip.getSecondBeam();
+    if(isIntaking) {
+      return manip.getFirstBeam() && !manip.getSecondBeam();
+    } else if(isOuttaking) {
+      return manip.getSecondBeam();
+    }
+    return false;
   }
 }
