@@ -136,7 +136,7 @@ public class RobotContainer {
     //driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
     //driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
     //camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
-    camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
+    //camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
 
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));
@@ -213,6 +213,7 @@ public class RobotContainer {
 
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
+  public Command visionResetOdo() {return new UpdateOdoFromVision(driveTrain, camera, logger);}
 
   public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {
