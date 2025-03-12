@@ -17,6 +17,8 @@ public class CoralIntake extends SubsystemBase {
   private final Servo actuation1;
   private final Servo actuation2;
   private double intakeSpeed = 0.5;
+  private double lowSetpoint = 0.4;
+  private double highSetpoint = 1;
 
   public CoralIntake() {
     intake = new TalonSRX(Constants.CAN.CoralIntake);
@@ -39,19 +41,31 @@ public class CoralIntake extends SubsystemBase {
     intake.set(ControlMode.PercentOutput, -intakeSpeed);
   }
 
-  public void deactuate1() {actuation1.setPosition(0.4);}
-  public void deactuate2() {actuation2.setPosition(0.4);}
+  public void deactuate1() {
+    actuation1.setPosition(lowSetpoint);
+  }
+  public void deactuate2() {
+    actuation2.setPosition(lowSetpoint);
+  }
 
   public void actuate1() {
-    actuation1.setPosition(1.0);
+    actuation1.setPosition(highSetpoint);
   }
-  public void actuate2() {actuation2.setPosition(1.0);}
+  public void actuate2() {
+    actuation2.setPosition(highSetpoint);
+  }
 
   public void gotoSetpoint1(double setpoint) {actuation1.setPosition(setpoint);}
   public void gotoSetpoint2(double setpoint) {actuation2.setPosition(setpoint);}
 
   public double getIntakeSpeed() {return intakeSpeed;}
   public void setIntakeSpeed(double value) {intakeSpeed = value;}
+
+  public double getLowSetpoint() {return lowSetpoint;}
+  public void setLowSetpoint(double value) {lowSetpoint = value;}
+
+  public double getHighSetpoint() {return highSetpoint;}
+  public void setHighSetpoint(double value) {highSetpoint = value;}
 
   /**
    * Initializes the data we send on shuffleboard
@@ -63,6 +77,9 @@ public class CoralIntake extends SubsystemBase {
       builder.setSmartDashboardType("Coral Intake");
 
       builder.addDoubleProperty("Intake Speed", this::getIntakeSpeed, this::setIntakeSpeed);
+
+      builder.addDoubleProperty("Low Setpoint", this::getLowSetpoint, this::setLowSetpoint);
+      builder.addDoubleProperty("High Setpoint", this::getHighSetpoint, this::setHighSetpoint);
     }
   }
 
