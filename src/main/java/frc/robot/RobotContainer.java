@@ -52,6 +52,7 @@ public class RobotContainer {
   private final AlgaeIntake algaeIntake;
   private final Climber climber;
   private final Camera camera;
+  private final LEDs LED;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
           .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
@@ -77,19 +78,20 @@ public class RobotContainer {
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
     camera = new Camera();
+    LED = new LEDs(elevator, manip);
 
-    NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
-    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator));
-    NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
+    NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
+    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
+    NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator, LED));
 
-    NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
-    NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator));
-    NamedCommands.registerCommand("Go L4", new GoToL4(elevator));
-    NamedCommands.registerCommand("Go L3", new GoToL3(elevator));
-    NamedCommands.registerCommand("Go L2", new GoToL2(elevator));
-    NamedCommands.registerCommand("Go L1", new GoToL1(elevator));
-    NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator));
-    NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator));
+    NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
+    NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator, LED));
+    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, LED));
+    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, LED));
+    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, LED));
+    NamedCommands.registerCommand("Go L1", new GoToL1(elevator, LED));
+    NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator, LED));
+    NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator, LED));
 
     NamedCommands.registerCommand("Toggle Algae Intake", new ActuateAlgaeIntake(algaeIntake));
     NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
@@ -117,18 +119,18 @@ public class RobotContainer {
    */
   private void configureBindings() {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
-    driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator, LED));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.R2().whileTrue(new LimitedManipIntake(manip, elevator));
-    driverController.R3().whileTrue(new LimitedManipOuttake(manip, elevator));
+    driverController.R2().whileTrue(new LimitedManipIntake(manip, elevator, LED));
+    driverController.R3().whileTrue(new LimitedManipOuttake(manip, elevator, LED));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
-    driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
-    driverController.R1().whileTrue(new GoToL4(elevator));
-    driverController.cross().whileTrue(new GoToL3(elevator));
-    driverController.circle().whileTrue(new GoToL2(elevator));
-    driverController.triangle().onTrue(new GoToL1(elevator));
+    driverController.L3().onTrue(new GoToMinPosition(elevator, LED)); //loading position
+    driverController.R1().whileTrue(new GoToL4(elevator, LED));
+    driverController.cross().whileTrue(new GoToL3(elevator, LED));
+    driverController.circle().whileTrue(new GoToL2(elevator, LED));
+    driverController.triangle().onTrue(new GoToL1(elevator, LED));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -145,7 +147,7 @@ public class RobotContainer {
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
-    driverController.L1().whileTrue(new GoDown(elevator));
+    driverController.L1().whileTrue(new GoDown(elevator, LED));
     //driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
@@ -171,7 +173,7 @@ public class RobotContainer {
     //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
-    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
+    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator, LED));
     //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
     operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
@@ -211,7 +213,7 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 
-  public Command elevatorHome() {return new GoToHome(elevator);}
+  public Command elevatorHome() {return new GoToHome(elevator, LED);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
 
   public double getModularSpeed() {
