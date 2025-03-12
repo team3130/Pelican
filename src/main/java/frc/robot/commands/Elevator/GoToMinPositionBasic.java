@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
 /** An example command that uses an example subsystem. */
-public class GoToL4 extends Command {
+public class GoToMinPositionBasic extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
 
@@ -17,7 +17,7 @@ public class GoToL4 extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL4(Elevator elevator) {
+  public GoToMinPositionBasic(Elevator elevator) {
     this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
@@ -26,18 +26,17 @@ public class GoToL4 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(elevator.isZeroed()) {
-      elevator.goToL4();
-    } else {
-      elevator.goToHome();
-      elevator.goToL4();
-    }
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
+    if(elevator.getPosition() > elevator.getMinPosition()) {
+      elevator.goDown();
+    }else if(elevator.getPosition() < elevator.getMinPosition()) {
+      elevator.goUp();
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -49,6 +48,6 @@ public class GoToL4 extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.brokeTopLimitSwitch();
+      return elevator.getPosition() < elevator.getMinPosition() + 1 && elevator.getPosition() > elevator.getMinPosition() - 1;
   }
 }

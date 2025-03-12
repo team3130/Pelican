@@ -5,28 +5,23 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 //written in phoenix 5 since TalonSRX doesn't exist in phoenix 6
 public class CoralIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final TalonSRX intake;
-  private final TalonSRX actuation;
+  private final Servo actuation1;
+  private final Servo actuation2;
   private double intakeSpeed = 0.5;
-  private double actuationSpeed = 0.2;
 
   public CoralIntake() {
     intake = new TalonSRX(Constants.CAN.CoralIntake);
-    actuation = new TalonSRX(Constants.CAN.CoralIntakePivot);
-
-    actuation.configFactoryDefault();
-    actuation.setInverted(true);
+    actuation1 = new Servo(Constants.IDs.CoralIntakeActuation1);
+    actuation2 = new Servo(Constants.IDs.CoralIntakeActuation2);
 
     intake.configFactoryDefault();
     intake.setInverted(false);
@@ -44,11 +39,16 @@ public class CoralIntake extends SubsystemBase {
     intake.set(ControlMode.PercentOutput, -intakeSpeed);
   }
 
-  public void deactuate() {actuation.set(TalonSRXControlMode.PercentOutput, actuationSpeed);}
+  public void deactuate1() {actuation1.setPosition(0.4);}
+  public void deactuate2() {actuation2.setPosition(0.4);}
 
-  public void actuate() {
-    actuation.set(TalonSRXControlMode.PercentOutput, -actuationSpeed);
+  public void actuate1() {
+    actuation1.setPosition(1.0);
   }
+  public void actuate2() {actuation2.setPosition(1.0);}
+
+  public void gotoSetpoint1(double setpoint) {actuation1.setPosition(setpoint);}
+  public void gotoSetpoint2(double setpoint) {actuation2.setPosition(setpoint);}
 
   public double getIntakeSpeed() {return intakeSpeed;}
   public void setIntakeSpeed(double value) {intakeSpeed = value;}

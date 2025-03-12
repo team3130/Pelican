@@ -37,8 +37,6 @@ public class GoDown extends Command {
   @Override
   public void end(boolean interrupted) {
     elevator.stop();
-    elevator.setPosition(0);
-    elevator.setZeroed(true);
   }
 
   // Returns true when the command should end.

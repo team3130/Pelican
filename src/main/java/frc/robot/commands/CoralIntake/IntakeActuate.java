@@ -31,7 +31,10 @@ public class IntakeActuate extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {coralIntake.actuate();}
+  public void execute() {
+    coralIntake.actuate1();
+    coralIntake.actuate2();
+  }
 
   // Called once the command ends or is interrupted.
   @Override
