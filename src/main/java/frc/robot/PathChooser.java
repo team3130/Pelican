@@ -17,7 +17,7 @@ import static com.pathplanner.lib.auto.AutoBuilder.getAllAutoNames;
 
 public class PathChooser {
     private List<String> autonames;
-    private final SendableChooser<String> pathChooser;
+    //private final SendableChooser<String> pathChooser;
     private final SendableChooser<Command> autoChooser;
 
     // For convenience a programmer could change this when going to competition.

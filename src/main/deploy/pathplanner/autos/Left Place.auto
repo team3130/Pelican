@@ -11,15 +11,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Go L4"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LeftMoveReef"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LeftMoveReef"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Go L4"
+                }
+              }
+            ]
           }
         },
         {
