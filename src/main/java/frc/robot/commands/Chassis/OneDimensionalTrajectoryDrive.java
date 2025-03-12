@@ -4,10 +4,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -79,14 +76,15 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
             }
         }
-        boolean leftOrRight;
+        targetPose = targetPose.plus(new Transform2d(new Translation2d(.8,targetPose.getRotation()), targetPose.getRotation()));
         double deadband = 0.7;
         double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
-            if (joystickChoice > deadband) {
-                leftOrRight = true;
-            } else {
-                leftOrRight = false;
+            if (joystickChoice > 0) {
+                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651,targetPose.getRotation().plus(Rotation2d.kCCW_90deg)), targetPose.getRotation()));
+            }
+            else {
+                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651,targetPose.getRotation().plus(Rotation2d.kCW_90deg)), targetPose.getRotation()));
             }
             runnable = true;
         }
