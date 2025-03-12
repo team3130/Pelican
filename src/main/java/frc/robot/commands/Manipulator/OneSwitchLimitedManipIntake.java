@@ -6,7 +6,7 @@ package frc.robot.commands.Manipulator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.LEDs;
+import frc.robot.LEDs;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
