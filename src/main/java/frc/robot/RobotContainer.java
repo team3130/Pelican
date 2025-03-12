@@ -158,6 +158,7 @@ public class RobotContainer {
     driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
     driverController.povUp().onTrue(new IntakeActuate(coralIntake));
     driverController.povDown().onTrue(new IntakeDeactuate(coralIntake));
+    coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));

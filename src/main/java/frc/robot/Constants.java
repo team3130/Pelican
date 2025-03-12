@@ -53,7 +53,8 @@ public final class Constants {
     public static final int ClimberLimitSwitchHome = 5;
     public static final int ClimberLimitSwitchExtended = 6;
 
-    public static final int CoralIntakeActuationPNMChannel = 0;
+    public static final int CoralIntakeActuation1 = 0;
+    public static final int CoralIntakeActuation2 = 1;
 
     public static final int AlgaeIntakeLimitSwitch = 1;
   }

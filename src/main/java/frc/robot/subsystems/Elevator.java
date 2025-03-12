@@ -24,7 +24,7 @@ public class Elevator extends SubsystemBase {
   private final DigitalInput bottomLimitSwitch;
   private final DigitalInput topLimitSwitch;
   private double targetVelocity = 100;
-  private double targetAcceleration = 180;
+  private double targetAcceleration = 120;
 
   private double home = 0;
   private double minPosition = 20;
@@ -38,7 +38,7 @@ public class Elevator extends SubsystemBase {
   private TalonFXConfiguration config;
   private Slot0Configs slot0Configs;
   private double slot0kG = 0.0175;
-  private double slot0kP = 0;
+  private double slot0kP = 0.15;
   private double slot0kI = 0;
   private double slot0kD = 0;
 
@@ -212,6 +212,12 @@ public class Elevator extends SubsystemBase {
     slot0Configs.kD = slot0kD;
 
     config.Slot0 = slot0Configs;
+    leftMotor.getConfigurator().apply(config);
+  }
+
+  public void updateMotionConfigs() {
+    config.MotionMagic.MotionMagicCruiseVelocity = targetVelocity;
+    config.MotionMagic.MotionMagicAcceleration = targetAcceleration;
     leftMotor.getConfigurator().apply(config);
   }
 

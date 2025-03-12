@@ -5,20 +5,23 @@
 package frc.robot.commands.CoralIntake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.CoralIntake;
 
 /** An example command that uses an example subsystem. */
-public class IntakeDeactuate extends Command {
+public class IntakeActuateToSetpoint extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final CoralIntake coralIntake;
+  private final CommandXboxController operatorController;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param coralIntake The subsystem used by this command.
    */
-  public IntakeDeactuate(CoralIntake coralIntake) {
+  public IntakeActuateToSetpoint(CoralIntake coralIntake, CommandXboxController operatorController) {
     this.coralIntake = coralIntake;
+    this.operatorController = operatorController;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(coralIntake);
   }
@@ -32,8 +35,11 @@ public class IntakeDeactuate extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    coralIntake.deactuate1();
-    coralIntake.deactuate2();
+    double setpoint = -operatorController.getRightY();
+    if(setpoint > 0) {
+      coralIntake.gotoSetpoint1(setpoint);
+      coralIntake.gotoSetpoint2(setpoint);
+    }
   }
 
   // Called once the command ends or is interrupted.
