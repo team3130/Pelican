@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.io.IOException;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -14,23 +15,26 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.TunerConstants.TunerSwerveDrivetrain;
+import org.json.simple.parser.ParseException;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -192,6 +196,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     this // Reference to this subsystem to set requirements
             );
         }
+    }
+
+    public Command produceTrajectory(String pathName) throws IOException, ParseException {
+        // Load the path we want to pathfind to and follow
+        PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+
+        // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path.
+        PathConstraints constraints = new PathConstraints(
+                1, 1,
+                Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+        // Since AutoBuilder is configured, we can use it to build pathfinding commands
+        return AutoBuilder.pathfindThenFollowPath(
+                path,
+                constraints);
+    }
+
+    public Translation2d produceOneDimensionalTrajectory(Translation2d targetPose) {
+        Translation2d aprilTagUnitVector = new Translation2d(1, targetPose.getAngle());
+        Translation2d startingPose = getStatePose().getTranslation();
+        Translation2d distance = targetPose.minus(startingPose);
+        Translation2d pivotOffset = distance.div(4);
+        Translation2d intercept = targetPose.plus(pivotOffset);
+        return intercept.minus(startingPose);
     }
 
     /**

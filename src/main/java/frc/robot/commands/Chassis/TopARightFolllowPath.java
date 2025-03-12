@@ -1,23 +1,20 @@
-package frc.robot.commands.Camera;
+package frc.robot.commands.Chassis;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Telemetry;
-import frc.robot.sensors.Camera;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 
 
-public class UpdateOdoFromVision extends Command {
-    private final CommandSwerveDrivetrain commandSwerveDrivetrain;
-    private final Telemetry logger;
-    private final Camera camera;
+public class TopARightFolllowPath extends Command {
+    private final CommandSwerveDrivetrain driveTrain;
 
-    public UpdateOdoFromVision(CommandSwerveDrivetrain commandSwerveDrivetrain, Camera camera, Telemetry logger) {
-        this.commandSwerveDrivetrain = commandSwerveDrivetrain;
-        this.camera = camera;
-        this.logger = logger;
+    public TopARightFolllowPath(CommandSwerveDrivetrain commandSwerveDrivetrain) {
+        this.driveTrain = commandSwerveDrivetrain;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
-        addRequirements(camera);
+        addRequirements(this.driveTrain);
     }
 
     /**
@@ -25,7 +22,11 @@ public class UpdateOdoFromVision extends Command {
      */
     @Override
     public void initialize() {
-
+        try {
+            driveTrain.produceTrajectory("TopARightFollow");
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -34,7 +35,7 @@ public class UpdateOdoFromVision extends Command {
      */
     @Override
     public void execute() {
-        camera.getVisionOdometry(commandSwerveDrivetrain, logger);
+
     }
 
     /**

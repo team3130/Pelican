@@ -23,6 +23,8 @@ public class Elevator extends SubsystemBase {
   private final TalonFX rightMotor;
   private final DigitalInput bottomLimitSwitch;
   private final DigitalInput topLimitSwitch;
+  private double targetVelocity = 100;
+  private double targetAcceleration = 120;
 
   private double home = 0;
   private double minPosition = 20;
@@ -35,8 +37,8 @@ public class Elevator extends SubsystemBase {
   private final MotionMagicDutyCycle voltRequest0;
   private TalonFXConfiguration config;
   private Slot0Configs slot0Configs;
-  private double slot0kG = 0;
-  private double slot0kP = 0;
+  private double slot0kG = 0.0175;
+  private double slot0kP = 0.15;
   private double slot0kI = 0;
   private double slot0kD = 0;
 
@@ -64,10 +66,9 @@ public class Elevator extends SubsystemBase {
     slot0Configs.kD = slot0kD;
 
     config = new TalonFXConfiguration();
-    config.MotionMagic.withMotionMagicCruiseVelocity(120).withMotionMagicAcceleration(240);
+    config.MotionMagic.withMotionMagicCruiseVelocity(targetVelocity).withMotionMagicAcceleration(targetAcceleration);
     config.Slot0 = slot0Configs;
     config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake);
-    config.CurrentLimits.withSupplyCurrentLimitEnable(true).withSupplyCurrentLimit(6);
 
     leftMotor.getConfigurator().apply(config);
   }
@@ -214,6 +215,19 @@ public class Elevator extends SubsystemBase {
     leftMotor.getConfigurator().apply(config);
   }
 
+  public void updateMotionConfigs() {
+    config.MotionMagic.MotionMagicCruiseVelocity = targetVelocity;
+    config.MotionMagic.MotionMagicAcceleration = targetAcceleration;
+    leftMotor.getConfigurator().apply(config);
+  }
+
+  public double getTargetVelocity() {return targetVelocity;}
+  public double getTargetAcceleration() {return targetAcceleration;}
+  public double getRealVelocity() {return leftMotor.getVelocity().getValueAsDouble();}
+
+  public void setTargetVelocity(double value) {targetVelocity = value;}
+  public void setTargetAcceleration(double value) {targetAcceleration = value;}
+
 
   /**
    * Initializes the data we send on shuffleboard
@@ -225,6 +239,10 @@ public class Elevator extends SubsystemBase {
       builder.setSmartDashboardType("Elevator");
 
       builder.addDoubleProperty("Position", this::getPosition, null);
+      builder.addDoubleProperty("Real Velocity", this::getRealVelocity, null);
+      builder.addDoubleProperty("Target Velocity", this::getTargetVelocity, this::setTargetVelocity);
+      builder.addDoubleProperty("Target Acceleration", this::getTargetAcceleration, this::setTargetAcceleration);
+
       builder.addDoubleProperty("Min Position", this::getMinPosition, this::setMinPosition);
       builder.addDoubleProperty("Home", this::getHome, this::setHome);
       builder.addDoubleProperty("L1", this::getL1, this::setL1);

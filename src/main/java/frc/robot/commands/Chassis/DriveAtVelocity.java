@@ -1,23 +1,21 @@
-package frc.robot.commands.Camera;
+package frc.robot.commands.Chassis;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Telemetry;
-import frc.robot.sensors.Camera;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 
-public class UpdateOdoFromVision extends Command {
+public class DriveAtVelocity extends Command {
     private final CommandSwerveDrivetrain commandSwerveDrivetrain;
-    private final Telemetry logger;
-    private final Camera camera;
+    private final SwerveRequest.FieldCentric drive;
+    private final double velocity = 1.5;
 
-    public UpdateOdoFromVision(CommandSwerveDrivetrain commandSwerveDrivetrain, Camera camera, Telemetry logger) {
+    public DriveAtVelocity(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive) {
         this.commandSwerveDrivetrain = commandSwerveDrivetrain;
-        this.camera = camera;
-        this.logger = logger;
+        this.drive = drive;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
-        addRequirements(camera);
+        addRequirements(this.commandSwerveDrivetrain);
     }
 
     /**
@@ -34,7 +32,7 @@ public class UpdateOdoFromVision extends Command {
      */
     @Override
     public void execute() {
-        camera.getVisionOdometry(commandSwerveDrivetrain, logger);
+      commandSwerveDrivetrain.setControl(drive.withVelocityX(velocity).withVelocityY(0).withRotationalRate(0));
     }
 
     /**

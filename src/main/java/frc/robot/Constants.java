@@ -53,17 +53,18 @@ public final class Constants {
     public static final int ClimberLimitSwitchHome = 5;
     public static final int ClimberLimitSwitchExtended = 6;
 
-    public static final int CoralIntakeActuationPNMChannel = 0;
+    public static final int CoralIntakeActuation1 = 0;
+    public static final int CoralIntakeActuation2 = 1;
 
     public static final int AlgaeIntakeLimitSwitch = 1;
   }
 
   public static class Swerve {
-    public static double maxSpeed = 2.5; // NOT kSpeedAt12Volts
+    public static double maxSpeed = 3; // NOT kSpeedAt12Volts
     public static double maxSpeedPartiallyExtended = 1.5;
     public static double maxSpeedFullExtended = 1;
     public static double maxAccelerationFromRest = 7.875; //in m/s^2 gotten from assumed mass of 70 kg
-    public static double maxAngularRate = RotationsPerSecond.of(0.25).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
+    public static double maxAngularRate = RotationsPerSecond.of(0.6).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
     public static double maxSteerVoltage = 4d;
     public static double maxDriveVoltage = 10d;
 
