@@ -31,11 +31,14 @@ public class PathChooser {
     private static Command coral1;
     private static Command coral2;
     private static Command coral3;
+    private static PathConstraints defaultConstraints = new PathConstraints(
+            2.5, 1,
+            Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // For convenience a programmer could change this when going to competition.
     private final boolean isCompetition = true;
 
-    public PathChooser(String chooserType) {
+    public PathChooser(String chooserType) throws IOException, ParseException {
         // Build an auto chooser. This will use Commands.none() as the default option.
         // As an example, this will only show autos that start with "comp" while at
         // competition as defined by the programmer
@@ -63,7 +66,10 @@ public class PathChooser {
             );
             SmartDashboard.putData("Coral 3 Path", pathChooser3);
         }
-
+        stationChooser = new SendableChooser<>();
+        stationChooser.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
+        stationChooser.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+        SmartDashboard.putData("Station Chooser", stationChooser);
     }
     public static Command getPathFollowCommand(SendableChooser<Command> pathChooser) {
         return pathChooser.getSelected();
@@ -88,20 +94,17 @@ public class PathChooser {
                 options.add(path);
             }
         }
-        PathConstraints defaultConstraints = new PathConstraints(
-                2.5, 1,
-                Units.degreesToRadians(540), Units.degreesToRadians(720));
 
         if (defaultOption == null) {
             chooser.setDefaultOption("None", Commands.none());
         } else {
-            chooser.setDefaultOption(defaultOption.name, new PathPlannerAuto(pathfindThenFollowPath(defaultOption, defaultConstraints)));
+            chooser.setDefaultOption(defaultOption.name, pathfindThenFollowPath(defaultOption, defaultConstraints));
             chooser.addOption("None", Commands.none());
         }
 
         optionsModifier
                 .apply(options.stream())
-                .forEach(path -> chooser.addOption(path.name, new PathPlannerAuto(pathfindThenFollowPath(path, defaultConstraints))));
+                .forEach(path -> chooser.addOption(path.name, pathfindThenFollowPath(path, defaultConstraints)));
 
         return chooser;
     }
@@ -122,9 +125,11 @@ public class PathChooser {
     }
 
     public static SequentialCommandGroup buildAutoCommand() {
+        //for now only 3 coral and two trips to coral station
         Command coral1Choice = getPathFollowCommand(pathChooser1);
         Command coral2Choice = getPathFollowCommand(pathChooser2);
         Command coral3Choice = getPathFollowCommand(pathChooser3);
-
+        Command stationChoice = getPathFollowCommand(stationChooser);
+        return new SequentialCommandGroup(coral1Choice, stationChoice, coral2Choice, stationChoice, coral3Choice);
     }
 }
