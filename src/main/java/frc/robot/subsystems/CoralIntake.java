@@ -10,20 +10,22 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.LinearServo;
+
 //written in phoenix 5 since TalonSRX doesn't exist in phoenix 6
 public class CoralIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final TalonSRX intake;
-  private final Servo actuation1;
-  private final Servo actuation2;
+  private final LinearServo actuation1;
+  private final LinearServo actuation2;
   private double intakeSpeed = 0.5;
-  private double lowSetpoint = 0.4;
-  private double highSetpoint = 1;
+  private double lowSetpoint = 10;
+  private double highSetpoint = 50;
 
   public CoralIntake() {
     intake = new TalonSRX(Constants.CAN.CoralIntake);
-    actuation1 = new Servo(Constants.IDs.CoralIntakeActuation1);
-    actuation2 = new Servo(Constants.IDs.CoralIntakeActuation2);
+    actuation1 = new LinearServo(Constants.IDs.CoralIntakeActuation1, 50, 1);
+    actuation2 = new LinearServo(Constants.IDs.CoralIntakeActuation2, 50, 1);
 
     intake.configFactoryDefault();
     intake.setInverted(false);
