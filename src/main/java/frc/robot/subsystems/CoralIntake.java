@@ -69,6 +69,13 @@ public class CoralIntake extends SubsystemBase {
   public double getHighSetpoint() {return highSetpoint;}
   public void setHighSetpoint(double value) {highSetpoint = value;}
 
+  public double getPosition1() {
+    return actuation1.getPosition();
+  }
+  public double getPosition2() {
+    return actuation2.getPosition();
+  }
+
   /**
    * Initializes the data we send on shuffleboard
    * Calls the default init sendable for Subsystem Bases
@@ -82,11 +89,16 @@ public class CoralIntake extends SubsystemBase {
 
       builder.addDoubleProperty("Low Setpoint", this::getLowSetpoint, this::setLowSetpoint);
       builder.addDoubleProperty("High Setpoint", this::getHighSetpoint, this::setHighSetpoint);
+
+      builder.addDoubleProperty("Position 1", this::getPosition1, null);
+      builder.addDoubleProperty("Position 2", this::getPosition2, null);
     }
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    actuation1.updateCurPos();
+    actuation2.updateCurPos();
   }
 }
