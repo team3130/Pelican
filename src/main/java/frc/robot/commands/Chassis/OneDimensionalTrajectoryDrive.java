@@ -4,12 +4,15 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
 import frc.robot.MySlewRateLimiter;
+import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 
@@ -17,8 +20,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
-    private final PIDController turningController = new PIDController(0, 0, 0);
+    private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
+            Constants.Swerve.maxAngularRate / (2 * Math.PI),
+            Constants.Swerve.maxAngularRate/Math.PI);
+    private final ProfiledPIDController turningController = new ProfiledPIDController(4, 0, 0, rotationConstraints);
     private final MySlewRateLimiter turningLimiter;
+    private final Telemetry logger;
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
@@ -31,14 +38,17 @@ public class OneDimensionalTrajectoryDrive extends Command {
             field.getTagPose(10).get(), field.getTagPose(7).get(),
             field.getTagPose(9).get(), field.getTagPose(11).get()};
 
-    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive, CommandPS5Controller driverController) {
+    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive,
+                                         CommandPS5Controller driverController, Telemetry logger) {
         this.driveTrain = commandSwerveDrivetrain;
         this.drive = drive;
         this.driverController = driverController;
+        this.logger = logger;
         turningLimiter = new MySlewRateLimiter(0.25, -0.25, driveTrain.getStatePose().getRotation().getRotations());
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
+        turningController.enableContinuousInput(-.5, .5);
     }
 
     /**
@@ -85,6 +95,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
             runnable = true;
         }
+        logger.updateTarget(targetPose);
     }
 
     /**

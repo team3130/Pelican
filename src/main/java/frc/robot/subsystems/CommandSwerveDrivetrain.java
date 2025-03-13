@@ -216,6 +216,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     //targetPose must be the final desired pose of the robot in Pose2d
     public Translation2d produceOneDimensionalTrajectory(Pose2d targetPose) {
+
         double radius = 1;
         Transform2d goLeft = new Transform2d(new Translation2d(radius, Rotation2d.kCCW_90deg), Rotation2d.kZero);
         Translation2d OLeft = targetPose.plus(goLeft).getTranslation();

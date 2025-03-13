@@ -141,7 +141,7 @@ public class RobotContainer {
 
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
-    driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController));
+    driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController, logger));
     driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
