@@ -41,33 +41,31 @@ public class PathChooser {
         if(chooserType.equals("Coral 1")) {
             pathChooser1 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
-                            ? stream.filter(path -> path.name.startsWith("follow"))
-                            : stream
+                            ? stream.filter(path -> path.name.startsWith("Follow"))
+                            :stream
             );
             return pathChooser1;
-
         } else if(chooserType.equals("Coral 2")) {
             pathChooser2 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
-                            ? stream.filter(path -> path.name.startsWith("follow"))
-                            : stream
+                            ? stream.filter(path -> path.name.startsWith("Follow"))
+                            :stream
             );
             return pathChooser2;
-
         } else if(chooserType.equals("Coral 3")) {
             pathChooser3 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
-                            ? stream.filter(path -> path.name.startsWith("follow"))
-                            : stream
+                            ? stream.filter(path -> path.name.startsWith("Follow"))
+                            :stream
             );
             return pathChooser3;
-        } else {
-            return null;
         }
+        return null;
     }
 
     public static SendableChooser<Command> buildAndSendStationChooser() {
         stationChooser = new SendableChooser<>();
+        stationChooser.addOption("None", Commands.none());
         try {
             stationChooser.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
         } catch (IOException | ParseException e) {
@@ -82,7 +80,12 @@ public class PathChooser {
     }
 
     public static Command getPathFollowCommand(SendableChooser<Command> pathChooser) {
-        return pathChooser.getSelected();
+        if(pathChooser == null) {
+            System.out.println("Path Chooser is null");
+            return Commands.none();
+        } else {
+            return pathChooser.getSelected();
+        }
     }
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
@@ -153,7 +156,10 @@ public class PathChooser {
         Command coral1Choice = getPathFollowCommand(pathChooser1);
         Command coral2Choice = getPathFollowCommand(pathChooser2);
         Command coral3Choice = getPathFollowCommand(pathChooser3);
-        Command stationChoice = getPathFollowCommand(stationChooser);
-        return new SequentialCommandGroup(coral1Choice, stationChoice, coral2Choice, stationChoice, coral3Choice);
+        //Command stationChoice1 = getPathFollowCommand(stationChooser);
+        //Command stationChoice2 = getPathFollowCommand(stationChooser);
+        //Command stationChoice3 = getPathFollowCommand(stationChooser);
+        //return new SequentialCommandGroup(coral1Choice, stationChoice1, coral2Choice, stationChoice2, coral3Choice);
+        return new SequentialCommandGroup(coral1Choice, coral2Choice, coral3Choice);
     }
 }
