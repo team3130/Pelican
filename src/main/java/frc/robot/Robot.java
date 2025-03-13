@@ -61,12 +61,8 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().cancelAll();
     //CommandScheduler.getInstance().schedule(m_robotContainer.elevatorHome());
     //autonomousCommand = robotContainer.pick();
-    try {
       autonomousCommand = robotContainer.configureAuton();
-    } catch (IOException | ParseException e) {
-      throw new RuntimeException(e);
-    }
-    // schedule the autonomous command (example)
+      // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }

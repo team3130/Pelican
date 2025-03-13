@@ -34,7 +34,7 @@ public class PathChooser {
     // For convenience a programmer could change this when going to competition.
     private static final boolean isCompetition = true;
 
-    public static void buildAndSendCoralChooser(String chooserType) throws IOException, ParseException {
+    public static SendableChooser<Command> buildAndSendCoralChooser(String chooserType) {
         // Build an auto chooser. This will use Commands.none() as the default option.
         // As an example, this will only show autos that start with "comp" while at
         // competition as defined by the programmer
@@ -44,7 +44,7 @@ public class PathChooser {
                             ? stream.filter(path -> path.name.startsWith("follow"))
                             : stream
             );
-            SmartDashboard.putData("Coral 1 Path", pathChooser1);
+            return pathChooser1;
 
         } else if(chooserType.equals("Coral 2")) {
             pathChooser2 = buildPathChooserWithOptionsModifier(
@@ -52,7 +52,7 @@ public class PathChooser {
                             ? stream.filter(path -> path.name.startsWith("follow"))
                             : stream
             );
-            SmartDashboard.putData("Coral 2 Path", pathChooser2);
+            return pathChooser2;
 
         } else if(chooserType.equals("Coral 3")) {
             pathChooser3 = buildPathChooserWithOptionsModifier(
@@ -60,15 +60,25 @@ public class PathChooser {
                             ? stream.filter(path -> path.name.startsWith("follow"))
                             : stream
             );
-            SmartDashboard.putData("Coral 3 Path", pathChooser3);
+            return pathChooser3;
+        } else {
+            return null;
         }
     }
 
-    public static void buildAndSendStationChooser() throws IOException, ParseException {
+    public static SendableChooser<Command> buildAndSendStationChooser() {
         stationChooser = new SendableChooser<>();
-        stationChooser.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
-        stationChooser.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
-        SmartDashboard.putData("Station Chooser", stationChooser);
+        try {
+            stationChooser.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            stationChooser.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return stationChooser;
     }
 
     public static Command getPathFollowCommand(SendableChooser<Command> pathChooser) {
@@ -76,13 +86,13 @@ public class PathChooser {
     }
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
-            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) throws IOException, ParseException {
+            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) {
         return buildPathChooserWithOptionsModifier("", optionsModifier);
     }
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
             String defaultPathName,
-            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) throws IOException, ParseException {
+            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) {
         if (!AutoBuilder.isConfigured()) {
             throw new RuntimeException(
                     "AutoBuilder was not configured before attempting to build an auto chooser");
@@ -95,7 +105,12 @@ public class PathChooser {
         List<PathPlannerPath> options = new ArrayList<>();
 
         for (String pathname : pathNames) {
-            PathPlannerPath path = PathPlannerPath.fromPathFile(pathname);
+            PathPlannerPath path = null;
+            try {
+                path = PathPlannerPath.fromPathFile(pathname);
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
 
             if (!defaultPathName.isEmpty() && defaultPathName.equals(pathname)) {
                 defaultOption = path;

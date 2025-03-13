@@ -105,7 +105,7 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
-
+    sendAutonChoosers();
   }
 
   /**
@@ -217,11 +217,19 @@ public class RobotContainer {
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command visionResetOdo() {return new UpdateOdoFromVision(driveTrain, camera, logger);}
 
-  public SequentialCommandGroup configureAuton() throws IOException, ParseException {
-    PathChooser.buildAndSendCoralChooser("Coral 1");
-    PathChooser.buildAndSendCoralChooser("Coral 2");
-    PathChooser.buildAndSendCoralChooser("Coral 3");
-    PathChooser.buildAndSendStationChooser();
+  public void sendAutonChoosers() {
+    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1");
+    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2");
+    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3");
+    SendableChooser<Command> stationChooser = PathChooser.buildAndSendStationChooser();
+
+    SmartDashboard.putData("Coral 1 Path", pathChooser1);
+    SmartDashboard.putData("Coral 2 Path", pathChooser2);
+    SmartDashboard.putData("Coral 3 Path", pathChooser3);
+    SmartDashboard.putData("Station Path", stationChooser);
+  }
+
+  public SequentialCommandGroup configureAuton() {
     return PathChooser.buildAutoCommand();
   }
 
