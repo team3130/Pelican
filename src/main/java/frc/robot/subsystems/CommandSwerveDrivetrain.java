@@ -20,6 +20,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
@@ -213,10 +214,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 constraints);
     }
 
+    //targetPose must be the final desired pose of the robot in Pose2d
     public Translation2d produceOneDimensionalTrajectory(Pose2d targetPose) {
         double radius = 1;
-        Translation2d OLeft = targetPose.getTranslation().plus(new Translation2d(radius, Rotation2d.kCW_90deg));
-        Translation2d ORight = targetPose.getTranslation().plus(new Translation2d(radius, Rotation2d.kCCW_90deg));
+        Transform2d goLeft = new Transform2d(new Translation2d(radius, Rotation2d.kCCW_90deg), Rotation2d.kZero);
+        Translation2d OLeft = targetPose.plus(goLeft).getTranslation();
+        Transform2d goRight = new Transform2d(new Translation2d(radius, Rotation2d.kCW_90deg), Rotation2d.kZero);
+        Translation2d ORight = targetPose.plus(goRight).getTranslation();
         Translation2d startingPose = getStatePose().getTranslation();
         Translation2d chosenO;
         boolean rotateClockwise;

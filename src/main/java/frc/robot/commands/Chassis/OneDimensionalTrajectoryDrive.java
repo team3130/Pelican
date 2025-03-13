@@ -24,16 +24,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
-    private final double[] blueCoralTagNums = {19, 20, 18, 21, 17, 22};
-    private final double[] redCoralTagNums = {6, 8, 10, 7, 9, 11};
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
             field.getTagPose(18).get(), field.getTagPose(21).get(),
             field.getTagPose(17).get(), field.getTagPose(22).get()};
     private final Pose3d[] redCoralTagPoses = {field.getTagPose(6).get(), field.getTagPose(8).get(),
             field.getTagPose(10).get(), field.getTagPose(7).get(),
             field.getTagPose(9).get(), field.getTagPose(11).get()};
-
-    private boolean onBlue = false;
 
     public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive, CommandPS5Controller driverController) {
         this.driveTrain = commandSwerveDrivetrain;
@@ -50,7 +46,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
-        onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+        boolean onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
@@ -76,15 +72,16 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
             }
         }
-        targetPose = targetPose.plus(new Transform2d(new Translation2d(.8,targetPose.getRotation()), targetPose.getRotation()));
+        targetPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.kZero), Rotation2d.k180deg)); //.8 is in meters
         double deadband = 0.7;
         double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
             if (joystickChoice > 0) {
-                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651,targetPose.getRotation().plus(Rotation2d.kCCW_90deg)), targetPose.getRotation()));
+                //0.1651 is in meters and is equivalent to 6.5 inches
+                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCW_90deg), Rotation2d.kZero));
             }
             else {
-                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651,targetPose.getRotation().plus(Rotation2d.kCW_90deg)), targetPose.getRotation()));
+                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
             runnable = true;
         }
