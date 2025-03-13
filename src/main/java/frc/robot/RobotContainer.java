@@ -221,12 +221,17 @@ public class RobotContainer {
     SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1");
     SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2");
     SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3");
-    SendableChooser<Command> stationChooser = PathChooser.buildAndSendStationChooser();
+    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1");
+    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2");
+    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3");
+
 
     SmartDashboard.putData("Coral 1 Path", pathChooser1);
     SmartDashboard.putData("Coral 2 Path", pathChooser2);
     SmartDashboard.putData("Coral 3 Path", pathChooser3);
-    SmartDashboard.putData("Station Path", stationChooser);
+    SmartDashboard.putData("Station 1 Path", stationChooser1);
+    SmartDashboard.putData("Station 2 Path", stationChooser2);
+    SmartDashboard.putData("Station 3 Path", stationChooser3);
   }
 
   public SequentialCommandGroup configureAuton() {

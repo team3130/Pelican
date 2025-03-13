@@ -6,7 +6,6 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -26,7 +25,9 @@ public class PathChooser {
     private static SendableChooser<Command> pathChooser1 = null;
     private static SendableChooser<Command> pathChooser2 = null;
     private static SendableChooser<Command> pathChooser3 = null;
-    private static SendableChooser<Command> stationChooser = null;
+    private static SendableChooser<Command> stationChooser1 = null;
+    private static SendableChooser<Command> stationChooser2 = null;
+    private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
             2.5, 1,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
@@ -63,20 +64,39 @@ public class PathChooser {
         return null;
     }
 
-    public static SendableChooser<Command> buildAndSendStationChooser() {
-        stationChooser = new SendableChooser<>();
-        stationChooser.addOption("None", Commands.none());
-        try {
-            stationChooser.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+    public static SendableChooser<Command> buildAndSendStationChooser(String chooserType) {
+        if (chooserType.equals("Station 1")) {
+            stationChooser1 = new SendableChooser<>();
+            stationChooser1.setDefaultOption("None", Commands.none());
+            try {
+                stationChooser1.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
+                stationChooser1.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+            return stationChooser1;
+        } else if(chooserType.equals("Station 2")) {
+            stationChooser2 = new SendableChooser<>();
+            stationChooser2.setDefaultOption("None", Commands.none());
+            try {
+                stationChooser2.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
+                stationChooser2.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+            return stationChooser2;
+        } else if(chooserType.equals("Station 3")) {
+            stationChooser3 = new SendableChooser<>();
+            stationChooser3.setDefaultOption("None", Commands.none());
+            try {
+                stationChooser3.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
+                stationChooser3.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+            return stationChooser3;
         }
-        try {
-            stationChooser.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
-        }
-        return stationChooser;
+        return null;
     }
 
     public static Command getPathFollowCommand(SendableChooser<Command> pathChooser) {
@@ -156,10 +176,10 @@ public class PathChooser {
         Command coral1Choice = getPathFollowCommand(pathChooser1);
         Command coral2Choice = getPathFollowCommand(pathChooser2);
         Command coral3Choice = getPathFollowCommand(pathChooser3);
-        //Command stationChoice1 = getPathFollowCommand(stationChooser);
-        //Command stationChoice2 = getPathFollowCommand(stationChooser);
-        //Command stationChoice3 = getPathFollowCommand(stationChooser);
-        //return new SequentialCommandGroup(coral1Choice, stationChoice1, coral2Choice, stationChoice2, coral3Choice);
-        return new SequentialCommandGroup(coral1Choice, coral2Choice, coral3Choice);
+        Command stationChoice1 = getPathFollowCommand(stationChooser1);
+        Command stationChoice2 = getPathFollowCommand(stationChooser2);
+        Command stationChoice3 = getPathFollowCommand(stationChooser3);
+        return new SequentialCommandGroup(coral1Choice, stationChoice1, coral2Choice, stationChoice2, coral3Choice);
+        //return new SequentialCommandGroup(coral1Choice, coral2Choice, coral3Choice);
     }
 }
