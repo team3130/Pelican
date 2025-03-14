@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
@@ -118,18 +119,18 @@ public class RobotContainer {
    */
   private void configureBindings() {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
-    driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
     driverController.R2().whileTrue(new LimitedManipIntake(manip, elevator));
     driverController.R3().whileTrue(new LimitedManipOuttake(manip, elevator));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
-    driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
+    driverController.L1().onTrue(new GoToMinPosition(elevator)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator));
-    driverController.cross().onTrue(new GoToL3(elevator));
-    driverController.circle().onTrue(new GoToL2(elevator));
-    driverController.triangle().onTrue(new GoToL1(elevator));
+    driverController.L2().onTrue(new GoToL3(elevator));
+    driverController.cross().onTrue(new GoToL2(elevator));
+    //driverController.triangle().onTrue(new GoToL1(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -142,24 +143,18 @@ public class RobotContainer {
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
     driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController, logger));
-    driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
+    //driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
-    //driverController.L1().whileTrue(new GoToL1(elevator));
-    driverController.L1().whileTrue(new GoDown(elevator));
-    //driverController.R3().whileTrue(new GoUp(elevator));
-
-    //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
-    //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
-    //operatorController.y().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    //operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
-    //driverController.L1().whileTrue(new RunAlgaeOuttake(algaeIntake));
-
-    driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
-    driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    driverController.povUp().onTrue(new IntakeActuate(coralIntake));
-    driverController.povDown().onTrue(new IntakeDeactuate(coralIntake));
+    //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
+    driverController.circle().onTrue(new IntakeActuate(coralIntake));
+    //driverController.square().onTrue(new IntakeDeactuate(coralIntake));
+    //driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new Climber))
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
+
+    driverController.triangle().whileTrue(new BasicClimberDown(climber));
+    driverController.square().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -177,8 +172,6 @@ public class RobotContainer {
     operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
     operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
 
-    operatorController.a().whileTrue(new BasicClimberUp(climber));
-    operatorController.b().whileTrue(new BasicClimberDown(climber));
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
