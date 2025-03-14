@@ -146,11 +146,13 @@ public class RobotContainer {
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
     driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController, logger));
-    driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
+    //driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
+    driverController.L1().whileTrue(new DriveWithTransPID(driveTrain, drive));
+    driverController.povRight().whileTrue(new DriveWithRotPID(driveTrain, drive));
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
     //driverController.L1().whileTrue(new GoToL1(elevator));
-    driverController.L1().whileTrue(new GoDown(elevator));
+    //driverController.L1().whileTrue(new GoDown(elevator));
     //driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
@@ -161,8 +163,8 @@ public class RobotContainer {
 
     driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    driverController.povUp().onTrue(new IntakeActuate(coralIntake));
-    driverController.povDown().onTrue(new IntakeDeactuate(coralIntake));
+    //driverController.povUp().onTrue(new IntakeActuate(coralIntake));
+    //driverController.povDown().onTrue(new IntakeDeactuate(coralIntake));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
