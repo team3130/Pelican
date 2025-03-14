@@ -1,46 +1,36 @@
 package frc.robot.commands.Chassis;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
 import frc.robot.MySlewRateLimiter;
+import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
 
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
-    private final MySlewRateLimiter thetaLimiter;
-    private final Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
-    private String chosenPathName;
+    private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
+            Constants.Swerve.maxAngularRate / (2 * Math.PI),
+            Constants.Swerve.maxAngularRate/Math.PI);
+    private final ProfiledPIDController turningController = new ProfiledPIDController(4, 0, 0, rotationConstraints);
+    private final MySlewRateLimiter turningLimiter;
+    private final Telemetry logger;
+    private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
-    private final String[][] pathNames = {
-            {"TopALeftFollow", "TopARightFollow"},
-            {"TopBLeftFollow", "TopBRightFollow"},
-            {"MiddleALeftFollow", "MiddleARightFollow"},
-            {"MiddleBLeftFollow", "MiddleBRightFollow"},
-            {"BottomALeftFollow", "BottomARightFollow"},
-            {"BottomBLeftFollow", "BottomBRightFollow"}
-    };
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 
-    //left to right, top to bottom for blue/ red is weirdly mirrored
-    private final double[] blueCoralTagNums = {19, 20, 18, 21, 17, 22};
-    private final double[] redCoralTagNums = {6, 11, 7, 10, 8, 9};
+    //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
             field.getTagPose(18).get(), field.getTagPose(21).get(),
             field.getTagPose(17).get(), field.getTagPose(22).get()};
@@ -48,16 +38,17 @@ public class OneDimensionalTrajectoryDrive extends Command {
             field.getTagPose(10).get(), field.getTagPose(7).get(),
             field.getTagPose(9).get(), field.getTagPose(11).get()};
 
-    private boolean onBlue = false;
-
-    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive, CommandPS5Controller driverController) {
+    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive,
+                                         CommandPS5Controller driverController, Telemetry logger) {
         this.driveTrain = commandSwerveDrivetrain;
         this.drive = drive;
         this.driverController = driverController;
-        thetaLimiter = new MySlewRateLimiter(90, -90, driveTrain.getStatePose().getRotation().getDegrees());
+        this.logger = logger;
+        turningLimiter = new MySlewRateLimiter(0.25, -0.25, driveTrain.getStatePose().getRotation().getRotations());
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
+        turningController.enableContinuousInput(-.5, .5);
     }
 
     /**
@@ -65,45 +56,46 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
-        onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
-        int sideChosen = 0;
+        boolean onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
-                Pose3d tagPose = blueCoralTagPoses[i];
-                double x = tagPose.getX() - driveTrain.getStatePose().getX();
-                double y = tagPose.getY() - driveTrain.getStatePose().getY();
+                Pose2d currentPose = blueCoralTagPoses[i].toPose2d();
+                double x = currentPose.getX() - driveTrain.getStatePose().getX();
+                double y = currentPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
                 if(distance < lowestDistance) {
                     lowestDistance = distance;
-                    sideChosen = i;
+                    targetPose = currentPose;
                 }
             }
         } else {
             double lowestDistance = 1000;
             for(int i = 0; i < redCoralTagPoses.length; i++) {
-                Pose3d tagPose = redCoralTagPoses[i];
-                double x = tagPose.getX() - driveTrain.getStatePose().getX();
-                double y = tagPose.getY() - driveTrain.getStatePose().getY();
+                Pose2d currentPose = redCoralTagPoses[i].toPose2d();
+                double x = currentPose.getX() - driveTrain.getStatePose().getX();
+                double y = currentPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
                 if(distance < lowestDistance) {
                     lowestDistance = distance;
-                    sideChosen = i;
+                    targetPose = currentPose;
                 }
             }
         }
-        int leftOrRight = 0;
+        targetPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.kZero), Rotation2d.k180deg)); //.8 is in meters
         double deadband = 0.7;
-        double joystickChoice = driverController.getRightY();
+        double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
-            if (joystickChoice > deadband) {
-                leftOrRight = 0;
-            } else {
-                leftOrRight = 1;
+            if (joystickChoice > 0) {
+                //0.1651 is in meters and is equivalent to 6.5 inches
+                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCW_90deg), Rotation2d.kZero));
+            }
+            else {
+                targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
             runnable = true;
         }
-        chosenPathName = pathNames[sideChosen][leftOrRight];
+        logger.updateTarget(targetPose);
     }
 
     /**
@@ -113,16 +105,16 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose.getTranslation());
+            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
             approach = approach.div(approach.getNorm());
             Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
-            double magnitude = (joystick.getX() * approach.getX()) + (joystick.getY() * approach.getY());
+            double magnitude = (-joystick.getY() * approach.getX()) + (-joystick.getX() * approach.getY()); //x and y should be flipped for field oriented
             magnitude *= Constants.Swerve.maxSpeed;
-            //double rotation = thetaLimiter.calculate(thetaLimiter.getDelta(60));
+            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRotations(), targetPose.getRotation().getRotations());
             driveTrain.setControl(
                     drive.withVelocityX(approach.getX() * magnitude)
                             .withVelocityY(approach.getY() * magnitude)
-                            .withRotationalRate(0)
+                            .withRotationalRate(rotation)
             );
         }
     }
