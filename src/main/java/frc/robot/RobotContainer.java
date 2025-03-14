@@ -86,18 +86,13 @@ public class RobotContainer {
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
 
-    NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
-    NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator));
-    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip));
-    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip));
-    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip));
-    NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip));
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
     NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator, LED));
-    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, LED));
-    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, LED));
-    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, LED));
-    NamedCommands.registerCommand("Go L1", new GoToL1(elevator, LED));
+    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip, LED));
+    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip, LED));
+    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip, LED));
+    NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip, LED));
+    NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator));
     NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator));
 
@@ -129,16 +124,17 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.R2().whileTrue(new LimitedManipIntake(manip, elevator, LED));
-    driverController.R3().whileTrue(new LimitedManipOuttake(manip, elevator, LED));
+    driverController.R2().whileTrue(new LimitedManipIntakeOuttake(manip, elevator, LED));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
-    driverController.L3().onTrue(new GoToMinPosition(elevator, LED)); //loading position
-    driverController.R1().whileTrue(new GoToL4(elevator, LED));
-    driverController.cross().whileTrue(new GoToL3(elevator, LED));
-    driverController.circle().whileTrue(new GoToL2(elevator, LED));
-    driverController.triangle().onTrue(new GoToL1(elevator, LED));
+    driverController.R3().whileTrue(new GoUp(elevator));
+    driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
+    driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
+    driverController.L2().onTrue(new GoToL3(elevator, manip, LED));
+    driverController.cross().onTrue(new GoToL2(elevator, manip, LED));
+    //driverController.triangle().onTrue(new GoToL1(elevator, manip, LED));
+    driverController.circle().onTrue(new GoToHome(elevator, LED));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -156,7 +152,7 @@ public class RobotContainer {
 
     //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    driverController.circle().onTrue(new IntakeActuate(coralIntake));
+    driverController.povRight().onTrue(new IntakeActuate(coralIntake));
     driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
     driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));

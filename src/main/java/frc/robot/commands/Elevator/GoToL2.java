@@ -22,8 +22,7 @@ public class GoToL2 extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL2(Elevator elevator, Manipulator manip) {
-  public GoToL2(Elevator elevator, LEDs LED) {
+  public GoToL2(Elevator elevator, Manipulator manip, LEDs LED) {
     this.elevator = elevator;
     this.LED = LED;
     this.manip = manip;
@@ -34,6 +33,7 @@ public class GoToL2 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    LED.setLEDstateElevator();
     if(elevator.isAtMinPosition()) {
       elevator.setRunnable(!manip.getFirstBeam() && !manip.getSecondBeam());
     } else {

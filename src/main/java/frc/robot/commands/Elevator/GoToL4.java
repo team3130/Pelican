@@ -15,7 +15,6 @@ public class GoToL4 extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
   private final Manipulator manip;
-  private boolean runnable;
   private final LEDs LED;
 
   /**
@@ -23,8 +22,7 @@ public class GoToL4 extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL4(Elevator elevator, Manipulator manip) {
-  public GoToL4(Elevator elevator, LEDs LED) {
+  public GoToL4(Elevator elevator, Manipulator manip, LEDs LED) {
     this.elevator = elevator;
     this.manip = manip;
     this.LED = LED;
@@ -35,6 +33,7 @@ public class GoToL4 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    LED.setLEDstateElevator();
     if(elevator.isAtMinPosition()) {
       elevator.setRunnable(!manip.getFirstBeam() && !manip.getSecondBeam());
     } else {

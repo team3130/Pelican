@@ -29,8 +29,8 @@ public class GoToHome extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.goToHome();
     LEDs.setLEDstateElevator();
+    elevator.goToHome();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

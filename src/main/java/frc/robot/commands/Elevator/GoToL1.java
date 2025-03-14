@@ -15,18 +15,17 @@ public class GoToL1 extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
   private final Manipulator manip;
-  private final LEDs LEDs;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL1(Elevator elevator, Manipulator manip) {
-  public GoToL1(Elevator elevator, LEDs LEDs) {
+  public GoToL1(Elevator elevator, Manipulator manip, LEDs LED) {
     this.elevator = elevator;
     this.manip = manip;
-    this.LEDs = LEDs;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -34,6 +33,7 @@ public class GoToL1 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    LED.setLEDstateElevator();
     if(elevator.isAtMinPosition()) {
         elevator.setRunnable(!manip.getFirstBeam() && !manip.getSecondBeam());
     } else {
