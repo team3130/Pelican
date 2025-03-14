@@ -1,9 +1,9 @@
 package frc.robot.commands.Chassis;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -14,17 +14,25 @@ import frc.robot.Constants;
 import frc.robot.MySlewRateLimiter;
 import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Elevator;
 
 
-public class OneDimensionalTrajectoryDrive extends Command {
+public class TeleopDrive extends Command {
+    public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
+
+    public final MySlewRateLimiter thetaLimiter = new MySlewRateLimiter(0);
+    private final double thetaLimiterConstant = 4;
+    private boolean isAngleReal = false;
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.05) // Add a 5% deadband
+            .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
+    private final Elevator elevator;
     private final CommandSwerveDrivetrain driveTrain;
-    private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
             Constants.Swerve.maxAngularRate / (2 * Math.PI),
             Constants.Swerve.maxAngularRate/Math.PI);
     private final ProfiledPIDController turningController = new ProfiledPIDController(4, 0, 0, rotationConstraints);
-    private final MySlewRateLimiter turningLimiter;
     private final Telemetry logger;
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
@@ -38,13 +46,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
             field.getTagPose(10).get(), field.getTagPose(7).get(),
             field.getTagPose(9).get(), field.getTagPose(11).get()};
 
-    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive,
-                                         CommandPS5Controller driverController, Telemetry logger) {
+    public TeleopDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive,
+                       CommandPS5Controller driverController, Telemetry logger, Elevator elevator) {
         this.driveTrain = commandSwerveDrivetrain;
-        this.drive = drive;
         this.driverController = driverController;
         this.logger = logger;
-        turningLimiter = new MySlewRateLimiter(0.25, -0.25, driveTrain.getStatePose().getRotation().getRotations());
+        this.elevator = elevator;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
@@ -83,6 +90,15 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
         }
         targetPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.kZero), Rotation2d.k180deg)); //.8 is in meters
+        logger.updateTarget(targetPose);
+    }
+
+    /**
+     * The main body of a command.  Called repeatedly while the command is scheduled.
+     * (That is, it is called repeatedly until {@link #isFinished()}) returns true.)
+     */
+    @Override
+    public void execute() {
         double deadband = 0.7;
         double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
@@ -95,15 +111,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
             runnable = true;
         }
-        logger.updateTarget(targetPose);
-    }
-
-    /**
-     * The main body of a command.  Called repeatedly while the command is scheduled.
-     * (That is, it is called repeatedly until {@link #isFinished()}) returns true.)
-     */
-    @Override
-    public void execute() {
         if(runnable) {
             Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
             approach = approach.div(approach.getNorm());
@@ -116,8 +123,53 @@ public class OneDimensionalTrajectoryDrive extends Command {
                             .withVelocityY(approach.getY() * magnitude)
                             .withRotationalRate(rotation)
             );
+        } else {
+            double maxSpeed = 2.75;
+            double minSpeed = 1;
+            double range = maxSpeed - minSpeed;
+            double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
+            double realSpeed = maxSpeed - untranslatedSpeed;
+
+            double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * realSpeed;
+            double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * realSpeed;
+            double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
+                Translation2d vector = new Translation2d(xAxis, yAxis);
+                if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
+                    if(vector.getNorm() <= deadband) { // Checking if within deadband
+                        thetaLimiter.reset(0);
+                        driveLimiter.reset(0);
+                        driveTrain.setControl(drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation));
+                    } else { // Robot starts moving
+                        isAngleReal = true;
+                        thetaLimiter.reset(vector.getAngle().getRadians());
+                        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+                        double mag = driveLimiter.calculate(vector.getNorm());
+                        vector = new Translation2d(mag, vector.getAngle());
+                        driveTrain.setControl(drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation));
+                    }
+                } else { // Robot was moving last cycle
+                    double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
+                    if(Math.cos(theta) <= 0 || vector.getNorm() <= deadband) { // If turn is greater than 90 degrees, slow to a stop
+                        thetaLimiter.reset(thetaLimiter.lastValue());
+                        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+                        double newMag = driveLimiter.calculate(0);
+                        vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
+                        if(vector.getNorm() <= deadband) { // If new mag is within deadband, slow to a stop
+                            isAngleReal = false;
+                            vector = new Translation2d(0, 0);
+                        }
+                        driveTrain.setControl(drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation));
+                    }
+                    driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+                    double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Throttle desired vector by angle turned before calculating new magnitude
+                    double limit = thetaLimiterConstant/mag;
+                    thetaLimiter.updateValues(limit, -limit);
+                    Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
+                    vector = new Translation2d(mag, angle);
+                    driveTrain.setControl(drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation));
+                }
+            }
         }
-    }
 
     /**
      * <p>

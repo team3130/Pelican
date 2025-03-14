@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -32,8 +33,11 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
+import frc.robot.Constants;
+import frc.robot.MySlewRateLimiter;
 import frc.robot.TunerConstants.TunerSwerveDrivetrain;
 import org.json.simple.parser.ParseException;
 
@@ -42,6 +46,15 @@ import org.json.simple.parser.ParseException;
  * Subsystem so it can easily be used in command-based projects.
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+    public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
+
+    public final MySlewRateLimiter thetaLimiter = new MySlewRateLimiter(0);
+    private final double thetaLimiterConstant = 4;
+    private boolean isAngleReal = false;
+    private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
+            .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
     private RobotConfig config;
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -212,6 +225,60 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return AutoBuilder.pathfindThenFollowPath(
                 path,
                 constraints);
+    }
+
+    public boolean isWithinDeadband(Translation2d vector) {
+        return (vector.getNorm() <= deadband);
+    }
+
+    public double getElevatorPercentSpeed(Elevator elevator) {
+        double maxSpeed = 2.75;
+        double minSpeed = 1;
+        double range = maxSpeed - minSpeed;
+        double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
+        double realSpeed = maxSpeed - untranslatedSpeed;
+        return realSpeed;
+    }
+
+    public SwerveRequest accelLimitVectorDrive(CommandPS5Controller driverController, Elevator elevator) {
+        double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getElevatorPercentSpeed(elevator);
+        double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getElevatorPercentSpeed(elevator);
+        double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
+        Translation2d vector = new Translation2d(xAxis, yAxis);
+        if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
+            if(isWithinDeadband(vector)) { // Checking if within deadband
+                thetaLimiter.reset(0);
+                driveLimiter.reset(0);
+                return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+            } else { // Robot starts moving
+                isAngleReal = true;
+                thetaLimiter.reset(vector.getAngle().getRadians());
+                driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+                double mag = driveLimiter.calculate(vector.getNorm());
+                vector = new Translation2d(mag, vector.getAngle());
+                return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+            }
+        } else { // Robot was moving last cycle
+            double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
+            if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) { // If turn is greater than 90 degrees, slow to a stop
+                thetaLimiter.reset(thetaLimiter.lastValue());
+                driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+                double newMag = driveLimiter.calculate(0);
+                vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
+                if(isWithinDeadband(vector)) { // If new mag is within deadband, slow to a stop
+                    isAngleReal = false;
+                    vector = new Translation2d(0, 0);
+                }
+                return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+            }
+            driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
+            double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Throttle desired vector by angle turned before calculating new magnitude
+            double limit = thetaLimiterConstant/mag;
+            thetaLimiter.updateValues(limit, -limit);
+            Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
+            vector = new Translation2d(mag, angle);
+            return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+        }
     }
 
     //targetPose must be the final desired pose of the robot in Pose2d
