@@ -26,12 +26,13 @@ public class ZeroClimber extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    climber.setPosition(0);
+    climber.setZeroed(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {climber.setPosition(0);}
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

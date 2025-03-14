@@ -43,12 +43,12 @@ public class LimitedManipIntakeOuttake extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (elevator.isAtMinPosition()) {
-            isIntaking = true;
-            isOuttaking = false;
+        if (isIntaking) {
             if(manip.getFirstBeam() && !manip.getSecondBeam()) {
                 timer.start();
                 manip.reverseManip();
+            } else {
+                manip.runManip();
             }
         } else if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
             manip.runManip();

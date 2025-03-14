@@ -24,6 +24,7 @@ import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.BasicClimberDown;
 import frc.robot.commands.Climber.BasicClimberUp;
+import frc.robot.commands.Climber.GoToExtended;
 import frc.robot.commands.Climber.ZeroClimber;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
@@ -87,10 +88,10 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
     NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator));
-    NamedCommands.registerCommand("Go L4", new GoToL4(elevator));
-    NamedCommands.registerCommand("Go L3", new GoToL3(elevator));
-    NamedCommands.registerCommand("Go L2", new GoToL2(elevator));
-    NamedCommands.registerCommand("Go L1", new GoToL1(elevator));
+    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip));
+    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip));
+    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip));
+    NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip));
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator));
     NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator));
 
@@ -128,9 +129,9 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.L1().onTrue(new GoToMinPosition(elevator)); //loading position
-    driverController.R1().onTrue(new GoToL4(elevator));
-    driverController.L2().onTrue(new GoToL3(elevator));
-    driverController.cross().onTrue(new GoToL2(elevator));
+    driverController.R1().onTrue(new GoToL4(elevator, manip));
+    driverController.L2().onTrue(new GoToL3(elevator, manip));
+    driverController.cross().onTrue(new GoToL2(elevator, manip));
     //driverController.triangle().onTrue(new GoToL1(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
@@ -151,11 +152,11 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
     driverController.circle().onTrue(new IntakeActuate(coralIntake));
     driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
-    //driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new Climber))
+    driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     driverController.triangle().whileTrue(new BasicClimberDown(climber));
-    driverController.square().whileTrue(new BasicClimberUp(climber));
+    //driverController.square().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));

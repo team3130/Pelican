@@ -6,19 +6,23 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
 public class GoToL2 extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final Manipulator manip;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL2(Elevator elevator) {
+  public GoToL2(Elevator elevator, Manipulator manip) {
     this.elevator = elevator;
+    this.manip = manip;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -26,29 +30,35 @@ public class GoToL2 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.updateElevatorPID();
-    if(elevator.isZeroed()) {
-      elevator.goToL2();
+    if(elevator.isAtMinPosition()) {
+      elevator.setRunnable(!manip.getFirstBeam() && !manip.getSecondBeam());
     } else {
-      elevator.goToHome();
-      elevator.goToL2();
+      elevator.setRunnable(true);
     }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if(elevator.isRunnable()) {
+      if (elevator.isZeroed()) {
+        elevator.goToL2();
+      } else {
+        elevator.goToHome();
+        elevator.goToL2();
+      }
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-
+    elevator.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.brokeTopLimitSwitch();
+    return elevator.brokeTopLimitSwitch();
   }
 }
