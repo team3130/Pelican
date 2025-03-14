@@ -125,9 +125,9 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
-    driverController.R1().whileTrue(new GoToL4(elevator));
-    driverController.cross().whileTrue(new GoToL3(elevator));
-    driverController.circle().whileTrue(new GoToL2(elevator));
+    driverController.R1().onTrue(new GoToL4(elevator));
+    driverController.cross().onTrue(new GoToL3(elevator));
+    driverController.circle().onTrue(new GoToL2(elevator));
     driverController.triangle().onTrue(new GoToL1(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
@@ -158,7 +158,7 @@ public class RobotContainer {
     driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
     driverController.povUp().onTrue(new IntakeActuate(coralIntake));
     driverController.povDown().onTrue(new IntakeDeactuate(coralIntake));
-    coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
+    //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -175,6 +175,9 @@ public class RobotContainer {
     //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
     operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+
+    operatorController.a().whileTrue(new BasicClimberUp(climber));
+    operatorController.b().whileTrue(new BasicClimberDown(climber));
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.

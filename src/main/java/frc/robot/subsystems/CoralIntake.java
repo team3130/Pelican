@@ -19,13 +19,13 @@ public class CoralIntake extends SubsystemBase {
   private final LinearServo actuation1;
   private final LinearServo actuation2;
   private double intakeSpeed = 0.5;
-  private double lowSetpoint = 10;
-  private double highSetpoint = 50;
+  private double lowSetpoint = 35;
+  private double highSetpoint = 125;
 
   public CoralIntake() {
     intake = new TalonSRX(Constants.CAN.CoralIntake);
-    actuation1 = new LinearServo(Constants.IDs.CoralIntakeActuation1, 50, 1);
-    actuation2 = new LinearServo(Constants.IDs.CoralIntakeActuation2, 50, 1);
+    actuation1 = new LinearServo(Constants.IDs.CoralIntakeActuation1, 140, 1);
+    actuation2 = new LinearServo(Constants.IDs.CoralIntakeActuation2, 140, 1);
 
     intake.configFactoryDefault();
     intake.setInverted(false);
