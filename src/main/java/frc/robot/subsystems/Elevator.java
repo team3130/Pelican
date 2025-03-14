@@ -27,7 +27,7 @@ public class Elevator extends SubsystemBase {
   private double targetAcceleration = 120;
 
   private double home = 0;
-  private double minPosition = 20;
+  private double minPosition = 23;
   private double L1 = 47;
   private double L2 = 59;
   private double L3 = 90;
@@ -78,11 +78,11 @@ public class Elevator extends SubsystemBase {
   }
 
   public void goDown() {
-    leftMotor.set(-0.4);
+    leftMotor.set(-0.2);
   }
 
   public void goUp() {
-    leftMotor.set(0.4);
+    leftMotor.set(0.2);
   }
 
   public void goToSetpoint(double setpoint) {
