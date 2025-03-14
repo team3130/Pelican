@@ -24,6 +24,7 @@ import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.BasicClimberDown;
 import frc.robot.commands.Climber.BasicClimberUp;
+import frc.robot.commands.Climber.ZeroClimber;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
@@ -210,6 +211,7 @@ public class RobotContainer {
 
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
+  public Command climberHome() {return new ZeroClimber(climber);}
 
   public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {
