@@ -40,7 +40,7 @@ public class Climber extends SubsystemBase {
     extendedLimit = new DigitalInput(Constants.IDs.ClimberLimitSwitchExtended);
 
     climber.getConfigurator().apply(new TalonFXConfiguration());
-    climber.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
+    climber.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
 
     voltRequest = new MotionMagicVoltage(0);
     //slot0Configs = new Slot0Configs().withGravityType(GravityTypeValue.Arm_Cosine);
@@ -73,6 +73,7 @@ public class Climber extends SubsystemBase {
   }
 
   public double getPosition() {return climber.getPosition().getValueAsDouble();}
+  public void setPosition(double position) {climber.setPosition(position);}
 
   public boolean brokeHomeLimit() {return homeLimit.get();}
   public boolean brokeExtendedLimit() {return extendedLimit.get();}

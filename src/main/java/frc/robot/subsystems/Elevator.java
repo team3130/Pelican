@@ -27,7 +27,7 @@ public class Elevator extends SubsystemBase {
   private double targetAcceleration = 120;
 
   private double home = 0;
-  private double minPosition = 20;
+  private double minPosition = 23;
   private double L1 = 47;
   private double L2 = 59;
   private double L3 = 90;
@@ -50,6 +50,7 @@ public class Elevator extends SubsystemBase {
   private boolean atL3 = false;
   private boolean atL4 = false;
   private boolean atMaxPosition = false;
+  private boolean runnable = false;
   public Elevator() {
     leftMotor = new TalonFX(Constants.CAN.ElevatorLeft);
     rightMotor = new TalonFX(Constants.CAN.ElevatorRight);
@@ -78,11 +79,11 @@ public class Elevator extends SubsystemBase {
   }
 
   public void goDown() {
-    leftMotor.set(-0.4);
+    leftMotor.set(-0.2);
   }
 
   public void goUp() {
-    leftMotor.set(0.4);
+    leftMotor.set(0.2);
   }
 
   public void goToSetpoint(double setpoint) {
@@ -165,6 +166,7 @@ public class Elevator extends SubsystemBase {
   public boolean isAtL3() {return atL3;}
   public boolean isAtL4() {return atL4;}
   public boolean isAtMaxPosition() {return atMaxPosition;}
+  public boolean isRunnable() {return runnable;}
   public void setZeroed(boolean value) {zeroed = value;}
   public void setAtHome(boolean value) {
     atHome = value;}
@@ -180,6 +182,8 @@ public class Elevator extends SubsystemBase {
     atL4 = value;}
   public void setAtMaxPosition(boolean value) {
     atMaxPosition = value;}
+  public void setRunnable(boolean value) {
+    runnable = value;}
 
   public double getHome() {return home;}
   public double getMinPosition() {return minPosition;}
@@ -266,6 +270,7 @@ public class Elevator extends SubsystemBase {
       builder.addBooleanProperty("At L3", this::isAtL3, this::setAtL3);
       builder.addBooleanProperty("At L4", this::isAtL4, this::setAtL4);
       builder.addBooleanProperty("At Max Position", this::isAtMaxPosition, this::setAtMaxPosition);
+      builder.addBooleanProperty("Is Runnable", this::isRunnable, this::setRunnable);
     }
   }
   @Override

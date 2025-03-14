@@ -10,14 +10,20 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
+import frc.robot.commands.Climber.BasicClimberDown;
+import frc.robot.commands.Climber.BasicClimberUp;
+import frc.robot.commands.Climber.GoToExtended;
+import frc.robot.commands.Climber.ZeroClimber;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
@@ -80,6 +86,12 @@ public class RobotContainer {
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
 
+    NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
+    NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator));
+    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip));
+    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip));
+    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip));
+    NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip));
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
     NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator, LED));
     NamedCommands.registerCommand("Go L4", new GoToL4(elevator, LED));
@@ -115,7 +127,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
-    driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
     driverController.R2().whileTrue(new LimitedManipIntake(manip, elevator, LED));
     driverController.R3().whileTrue(new LimitedManipOuttake(manip, elevator, LED));
@@ -137,26 +149,20 @@ public class RobotContainer {
     camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
 
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
-    //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));
-    driverController.povDown().whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController));
-    driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
+    //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
+    driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController, logger));
+    //driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
-    //driverController.L1().whileTrue(new GoToL1(elevator));
-    driverController.L1().whileTrue(new GoDown(elevator));
-    //driverController.R3().whileTrue(new GoUp(elevator));
+    //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
+    driverController.circle().onTrue(new IntakeActuate(coralIntake));
+    driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
+    driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
+    //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
-    //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
-    //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
-    //operatorController.y().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    //operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
-    //driverController.L1().whileTrue(new RunAlgaeOuttake(algaeIntake));
-
-    driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
-    driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    driverController.povUp().onTrue(new IntakeActuate(coralIntake));
-    driverController.povDown().onTrue(new IntakeDeactuate(coralIntake));
-    coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
+    driverController.triangle().whileTrue(new BasicClimberDown(climber));
+    //driverController.square().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -173,6 +179,7 @@ public class RobotContainer {
     //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
     operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
@@ -211,6 +218,7 @@ public class RobotContainer {
 
   public Command elevatorHome() {return new GoToHome(elevator, LED);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
+  public Command climberHome() {return new ZeroClimber(climber);}
 
   public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {

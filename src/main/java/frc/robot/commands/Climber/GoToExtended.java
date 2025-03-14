@@ -26,15 +26,15 @@ public class GoToExtended extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    if(climber.isZeroed()) {
+      climber.climbDown();
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(climber.isZeroed()) {
-      climber.goToExtended();
-    }
+
   }
 
   // Called once the command ends or is interrupted.
@@ -46,6 +46,6 @@ public class GoToExtended extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return climber.getPosition() >= climber.getExtendedPos();
   }
 }

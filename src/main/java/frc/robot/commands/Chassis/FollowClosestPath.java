@@ -35,9 +35,9 @@ public class FollowClosestPath extends Command {
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
             field.getTagPose(18).get(), field.getTagPose(21).get(),
             field.getTagPose(17).get(), field.getTagPose(22).get()};
-    private final Pose3d[] redCoralTagPoses = {field.getTagPose(6).get(), field.getTagPose(8).get(),
-            field.getTagPose(10).get(), field.getTagPose(7).get(),
-            field.getTagPose(9).get(), field.getTagPose(11).get()};
+    private final Pose3d[] redCoralTagPoses = {field.getTagPose(6).get(), field.getTagPose(11).get(),
+            field.getTagPose(7).get(), field.getTagPose(10).get(),
+            field.getTagPose(8).get(), field.getTagPose(9).get()};
 
     private boolean onBlue = false;
 
@@ -83,7 +83,7 @@ public class FollowClosestPath extends Command {
         }
         int leftOrRight = -1;
         double deadband = 0.7;
-        double joystickChoice = driverController.getRightY();
+        double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
             if (joystickChoice > deadband) {
                 leftOrRight = 0;
