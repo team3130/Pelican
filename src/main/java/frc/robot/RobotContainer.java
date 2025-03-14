@@ -149,7 +149,7 @@ public class RobotContainer {
     //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
     driverController.circle().onTrue(new IntakeActuate(coralIntake));
-    //driverController.square().onTrue(new IntakeDeactuate(coralIntake));
+    driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
     //driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new Climber))
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
