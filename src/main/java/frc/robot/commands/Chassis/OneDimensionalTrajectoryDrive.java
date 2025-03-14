@@ -140,6 +140,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
         double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
         double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
         return (tolerance >= distance);
+        //TODO: create another command which starts when robot hits PP. This command should keep the bot on railroads
+        // perpendicular to the reef, so driver can make placing adjustments without worrying about getting unaligned.
     }
 
     /**
