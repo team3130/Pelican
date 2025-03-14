@@ -20,6 +20,8 @@ import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
+import frc.robot.commands.Climber.BasicClimberDown;
+import frc.robot.commands.Climber.BasicClimberUp;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
