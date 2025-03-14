@@ -131,13 +131,10 @@ public class LEDs extends SubsystemBase{
   }
 
   public void setLEDstateManipulator(){
-    if (manip.getFirstBeam() && !manip.getSecondBeam()){
-      setLEDsOrange();
+    if (manip.getFirstBeam() && manip.getSecondBeam()){
+      setLEDsYellow();
     }
-    else if (manip.getFirstBeam() && manip.getSecondBeam()){
-      setLEDsBlue();
-    }
-    else if (!manip.getFirstBeam() && manip.getSecondBeam()){
+    else if (!manip.getFirstBeam() && !manip.getSecondBeam()){
       setLEDsGreen();
     }
   }
