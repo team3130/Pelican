@@ -29,7 +29,7 @@ public class PathChooser {
     private static SendableChooser<Command> stationChooser2 = null;
     private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
-            2.5, 1,
+            3, 2,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // For convenience a programmer could change this when going to competition.
@@ -179,7 +179,18 @@ public class PathChooser {
         Command stationChoice1 = getPathFollowCommand(stationChooser1);
         Command stationChoice2 = getPathFollowCommand(stationChooser2);
         Command stationChoice3 = getPathFollowCommand(stationChooser3);
-        return new SequentialCommandGroup(coral1Choice, stationChoice1, coral2Choice, stationChoice2, coral3Choice);
+        Command waitStation1 = Commands.waitSeconds(0.5);
+        Command waitStation2 = Commands.waitSeconds(0.5);
+        Command waitStation3 = Commands.waitSeconds(0.5);
+        Command waitCoral1 = Commands.waitSeconds(0.5);
+        Command waitCoral2 = Commands.waitSeconds(0.5);
+        Command waitCoral3 = Commands.waitSeconds(0.5);
+        return new SequentialCommandGroup(
+                coral1Choice, waitCoral1,
+                stationChoice1, waitStation1,
+                coral2Choice, waitCoral2,
+                stationChoice2, waitStation2,
+                coral3Choice, waitCoral3);
         //return new SequentialCommandGroup(coral1Choice, coral2Choice, coral3Choice);
     }
 }

@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.685,
-        "y": 5.1
+        "x": 3.688259633584761,
+        "y": 5.081640385060891
       },
       "prevControl": {
-        "x": 3.4908534204032686,
-        "y": 5.2656506547922355
+        "x": 3.4941130539880296,
+        "y": 5.247291039853127
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "Reef Followers",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 1.0,
     "rotation": -59.99999999999999
   },
   "useDefaultConstraints": false

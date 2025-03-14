@@ -46,21 +46,21 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.5,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
+    "velocity": 0.0,
     "rotation": -53.75
   },
   "reversed": false,
   "folder": "Feeder Follower Paths",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 1.5,
     "rotation": -53.75
   },
   "useDefaultConstraints": true
