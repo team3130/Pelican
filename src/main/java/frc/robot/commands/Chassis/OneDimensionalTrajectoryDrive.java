@@ -21,8 +21,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final SwerveRequest.FieldCentric drive;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
-            Constants.Swerve.maxAngularRate / (2 * Math.PI),
-            Constants.Swerve.maxAngularRate/Math.PI);
+            Constants.Swerve.maxAngularRate,
+            Constants.Swerve.maxAngularRate);
     private final ProfiledPIDController turningController = new ProfiledPIDController(4, 0, 0, rotationConstraints);
     private final MySlewRateLimiter turningLimiter;
     private final Telemetry logger;
@@ -48,7 +48,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
-        turningController.enableContinuousInput(-.5, .5);
+        turningController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -56,6 +56,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
+        turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
         boolean onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
         if(onBlue) {
             double lowestDistance = 1000;
@@ -110,7 +111,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
             double magnitude = (-joystick.getY() * approach.getX()) + (-joystick.getX() * approach.getY()); //x and y should be flipped for field oriented
             magnitude *= Constants.Swerve.maxSpeed;
-            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRotations(), targetPose.getRotation().getRotations());
+            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(), targetPose.getRotation().getRadians());
             driveTrain.setControl(
                     drive.withVelocityX(approach.getX() * magnitude)
                             .withVelocityY(approach.getY() * magnitude)
