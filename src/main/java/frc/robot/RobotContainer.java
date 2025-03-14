@@ -142,7 +142,7 @@ public class RobotContainer {
 
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
-    driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController, logger));
+    driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, this, driverController, logger));
     //driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
@@ -252,7 +252,7 @@ public class RobotContainer {
     return (vector.getNorm() <= deadband);
   }
 
-  public SwerveRequest accelLimitVectorDrive() {
+  public SwerveRequest.FieldCentric accelLimitVectorDrive() {
     double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getElevatorPercentSpeed();
     double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getElevatorPercentSpeed();
     double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
