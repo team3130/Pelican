@@ -134,6 +134,7 @@ public class RobotContainer {
     driverController.cross().onTrue(new GoToL3(elevator));
     driverController.circle().onTrue(new GoToL2(elevator));
     driverController.triangle().onTrue(new GoToL1(elevator));
+    driverController.povDown().onTrue(new GoToHome(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
