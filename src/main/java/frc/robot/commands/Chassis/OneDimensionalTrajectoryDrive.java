@@ -30,7 +30,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
-    boolean onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+    boolean onBlue = true;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -57,6 +57,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
+        var alliance = DriverStation.getAlliance();
+        alliance.ifPresent(value -> onBlue = value == DriverStation.Alliance.Blue);
         turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
         if(onBlue) {
             double lowestDistance = 1000;
