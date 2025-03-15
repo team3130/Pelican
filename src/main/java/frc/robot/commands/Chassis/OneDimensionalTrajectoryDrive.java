@@ -5,9 +5,11 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -28,6 +30,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+    boolean onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -55,7 +58,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void initialize() {
         turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
-        boolean onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
@@ -104,19 +106,22 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-            approach = approach.div(approach.getNorm());
-            SwerveRequest.FieldCentric drive = robotContainer.accelLimitVectorDrive();
-            double vX = drive.VelocityX;
-            double vY = drive.VelocityY;
-            Translation2d vector = new Translation2d(vX, vY);
+            double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * robotContainer.getElevatorPercentSpeed();
+            double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * robotContainer.getElevatorPercentSpeed();
+            Translation2d vector = new Translation2d(xAxis, yAxis);
             double magnitude = vector.getNorm();
-            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(), targetPose.getRotation().getRadians());
-            driveTrain.setControl(
-                    drive.withVelocityX(approach.getX() * magnitude)
-                            .withVelocityY(approach.getY() * magnitude)
-                            .withRotationalRate(rotation)
-            );
+            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+            approach = approach.times(magnitude);
+            if (!onBlue) {
+                approach.rotateBy(Rotation2d.k180deg);
+            }
+            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
+                    targetPose.getRotation().getRadians());
+            ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
+            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
+            driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
+                    withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
+                    withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
         }
     }
 
@@ -128,7 +133,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      * Returning false will result in the command never ending automatically. It may still be
      * cancelled manually or interrupted by another command. Hard coding this command to always
      * return true will result in the command executing once and finishing immediately. It is
-     * recommended to use * {@link edu.wpi.first.wpilibj2.command.InstantCommand InstantCommand}
+     * recommended to use * {@link InstantCommand InstantCommand}
      * for such an operation.
      * </p>
      *

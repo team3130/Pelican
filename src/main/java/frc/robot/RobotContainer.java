@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -54,7 +55,7 @@ public class RobotContainer {
   private final AlgaeIntake algaeIntake;
   private final Climber climber;
   private final Camera camera;
-  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+  public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
           .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -177,8 +178,20 @@ public class RobotContainer {
     // and Y is defined as to the left according to WPILib convention.
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            driveTrain.applyRequest(this::accelLimitVectorDrive)
-    );
+            driveTrain.applyRequest(() -> {
+              double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getElevatorPercentSpeed();
+              double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getElevatorPercentSpeed();
+              double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
+              ChassisSpeeds joyStickSpeed = new ChassisSpeeds(xAxis, yAxis, rotation);
+              ChassisSpeeds chassisSpeed = accelLimitVectorDrive(joyStickSpeed);
+              drive.withVelocityX(chassisSpeed.vxMetersPerSecond)
+                    .withVelocityY(chassisSpeed.vyMetersPerSecond)
+                    .withRotationalRate(chassisSpeed.omegaRadiansPerSecond);
+              return drive;
+            }));
+
+
+            //driveTrain.applyRequest(this::accelLimitVectorDrive)
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
@@ -222,7 +235,7 @@ public class RobotContainer {
   }
 
   public double getElevatorPercentSpeed() {
-    double maxSpeed = 2.75;
+    double maxSpeed = Constants.Swerve.maxSpeed;
     double minSpeed = 1;
     double range = maxSpeed - minSpeed;
     double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
@@ -252,23 +265,25 @@ public class RobotContainer {
     return (vector.getNorm() <= deadband);
   }
 
-  public SwerveRequest.FieldCentric accelLimitVectorDrive() {
-    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getElevatorPercentSpeed();
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getElevatorPercentSpeed();
-    double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
+  public ChassisSpeeds accelLimitVectorDrive(ChassisSpeeds desiredSpeed) {
+    double xAxis = desiredSpeed.vxMetersPerSecond;
+    double yAxis = desiredSpeed.vyMetersPerSecond;
+    double rotation = desiredSpeed.omegaRadiansPerSecond;
     Translation2d vector = new Translation2d(xAxis, yAxis);
     if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
       if(isWithinDeadband(vector)) { // Checking if within deadband
         thetaLimiter.reset(0);
         driveLimiter.reset(0);
-        return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
+        return new ChassisSpeeds(0, 0, 0);
+       // TODO: Make sure the chassis speed omegaRadianPerSecond is correct on this one
       } else { // Robot starts moving
         isAngleReal = true;
         thetaLimiter.reset(vector.getAngle().getRadians());
         driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
         double mag = driveLimiter.calculate(vector.getNorm());
         vector = new Translation2d(mag, vector.getAngle());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+        return new ChassisSpeeds(vector.getX(), vector.getY(), rotation);
+        //return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
     } else { // Robot was moving last cycle
       double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
@@ -281,7 +296,8 @@ public class RobotContainer {
           isAngleReal = false;
           vector = new Translation2d(0, 0);
         }
-          return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+        return new ChassisSpeeds(vector.getX(), vector.getY(), rotation);
+         // return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
       }
       driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
       double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Throttle desired vector by angle turned before calculating new magnitude
@@ -289,7 +305,8 @@ public class RobotContainer {
       thetaLimiter.updateValues(limit, -limit);
       Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
       vector = new Translation2d(mag, angle);
-      return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+      return new ChassisSpeeds(vector.getX(), vector.getY(), rotation);
+      //return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
     }
   }
 }
