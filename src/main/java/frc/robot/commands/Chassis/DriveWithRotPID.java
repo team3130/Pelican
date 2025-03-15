@@ -3,6 +3,7 @@ package frc.robot.commands.Chassis;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -27,6 +28,7 @@ public class DriveWithRotPID extends Command {
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
+        SmartDashboard.putData(pidController);
     }
 
     /**
@@ -35,7 +37,7 @@ public class DriveWithRotPID extends Command {
     @Override
     public void initialize() {
         pidController.enableContinuousInput(-Math.PI, Math.PI);
-        pidController.reset(0);
+        pidController.reset(driveTrain.getStatePose().getRotation().getRadians());
     }
 
     /**

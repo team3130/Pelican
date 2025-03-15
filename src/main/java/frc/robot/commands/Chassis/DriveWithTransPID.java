@@ -15,7 +15,7 @@ public class DriveWithTransPID extends Command {
     private final TrapezoidProfile.Constraints constraints;
     private final SwerveRequest.FieldCentric drive;
     private double maxVel = 2.5;
-    private double maxAccel = 1;
+    private double maxAccel = 2;
     private double kP = 1;
     private double kI = 0;
     private double kD = 0;
@@ -38,7 +38,7 @@ public class DriveWithTransPID extends Command {
     @Override
     public void initialize() {
       pidController.reset(driveTrain.getStatePose().getX());
-      setpoint  = driveTrain.getStatePose().getX() - 3;
+      setpoint  = driveTrain.getStatePose().getX() - 8;
     }
 
     /**

@@ -183,8 +183,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                     new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                            new PIDConstants(15, 0, 0), // Translation PID constants
-                            new PIDConstants(5, 0, 0) // Rotation PID constants
+                            new PIDConstants(11, 0, 0), // Translation PID constants
+                            new PIDConstants(12, 0, 0) // Rotation PID constants
                     ),
                     config, //the robot configuration
                     () -> {
