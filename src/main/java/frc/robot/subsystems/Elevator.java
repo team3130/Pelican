@@ -31,8 +31,8 @@ public class Elevator extends SubsystemBase {
   private double L1 = 47;
   private double L2 = 59;
   private double L3 = 90;
-  private double L4 = 135;
-  private double maxPosition = 137;
+  private double L4 = 137;
+  private double maxPosition = 139;
 
   private final MotionMagicDutyCycle voltRequest0;
   private TalonFXConfiguration config;
