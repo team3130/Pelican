@@ -1,14 +1,13 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.CommandUtil;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.*;
 import org.json.simple.parser.ParseException;
 
 import java.io.File;
@@ -36,7 +35,7 @@ public class PathChooser {
     private static final boolean isCompetition = true;
 
     public static SendableChooser<Command> buildAndSendCoralChooser(String chooserType) {
-        // Build an auto chooser. This will use Commands.none() as the default option.
+        // Build an auto chooser. This will use empty instant command as the default option.
         // As an example, this will only show autos that start with "comp" while at
         // competition as defined by the programmer
         if(chooserType.equals("Coral 1")) {
@@ -67,7 +66,7 @@ public class PathChooser {
     public static SendableChooser<Command> buildAndSendStationChooser(String chooserType) {
         if (chooserType.equals("Station 1")) {
             stationChooser1 = new SendableChooser<>();
-            stationChooser1.setDefaultOption("None", Commands.none());
+            stationChooser1.setDefaultOption("None", new InstantCommand());
             try {
                 stationChooser1.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
                 stationChooser1.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
@@ -77,7 +76,7 @@ public class PathChooser {
             return stationChooser1;
         } else if(chooserType.equals("Station 2")) {
             stationChooser2 = new SendableChooser<>();
-            stationChooser2.setDefaultOption("None", Commands.none());
+            stationChooser2.setDefaultOption("None", new InstantCommand());
             try {
                 stationChooser2.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
                 stationChooser2.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
@@ -87,7 +86,7 @@ public class PathChooser {
             return stationChooser2;
         } else if(chooserType.equals("Station 3")) {
             stationChooser3 = new SendableChooser<>();
-            stationChooser3.setDefaultOption("None", Commands.none());
+            stationChooser3.setDefaultOption("None", new InstantCommand());
             try {
                 stationChooser3.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
                 stationChooser3.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
@@ -102,7 +101,7 @@ public class PathChooser {
     public static Command getPathFollowCommand(SendableChooser<Command> pathChooser) {
         if(pathChooser == null) {
             System.out.println("Path Chooser is null");
-            return Commands.none();
+            return new InstantCommand();
         } else {
             return pathChooser.getSelected();
         }
@@ -143,15 +142,25 @@ public class PathChooser {
         }
 
         if (defaultOption == null) {
-            chooser.setDefaultOption("None", Commands.none());
+            chooser.setDefaultOption("None", new InstantCommand());
         } else {
             chooser.setDefaultOption(defaultOption.name, pathfindThenFollowPath(defaultOption, defaultConstraints));
-            chooser.addOption("None", Commands.none());
+            chooser.addOption("None", new InstantCommand());
         }
 
         optionsModifier
                 .apply(options.stream())
-                .forEach(path -> chooser.addOption(path.name, pathfindThenFollowPath(path, defaultConstraints)));
+                .forEach(path -> {
+                    try {
+                        chooser.addOption(path.name,
+                                new SequentialCommandGroup(
+                                        pathfindThenFollowPath(path, defaultConstraints),
+                                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path))
+                        ));
+                    } catch (IOException | ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
         return chooser;
     }
@@ -173,12 +182,12 @@ public class PathChooser {
 
     public static SequentialCommandGroup buildAutoCommand() {
         //for now only 3 coral and two trips to coral station
-        Command coral1Choice = getPathFollowCommand(pathChooser1);
-        Command coral2Choice = getPathFollowCommand(pathChooser2);
-        Command coral3Choice = getPathFollowCommand(pathChooser3);
-        Command stationChoice1 = getPathFollowCommand(stationChooser1);
-        Command stationChoice2 = getPathFollowCommand(stationChooser2);
-        Command stationChoice3 = getPathFollowCommand(stationChooser3);
+        Command coral1Choice = getPathFollowCommand(pathChooser1).asProxy();
+        Command coral2Choice = getPathFollowCommand(pathChooser2).asProxy();
+        Command coral3Choice = getPathFollowCommand(pathChooser3).asProxy();
+        Command stationChoice1 = getPathFollowCommand(stationChooser1).asProxy();
+        Command stationChoice2 = getPathFollowCommand(stationChooser2).asProxy();
+        Command stationChoice3 = getPathFollowCommand(stationChooser3).asProxy();
         Command waitStation1 = Commands.waitSeconds(0.5);
         Command waitStation2 = Commands.waitSeconds(0.5);
         Command waitStation3 = Commands.waitSeconds(0.5);

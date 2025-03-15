@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.8,
-        "y": 5.55
+        "x": 5.311,
+        "y": 5.098
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.033477975314138,
-        "y": 5.4606241920696075
+        "x": 5.436,
+        "y": 5.314506350946109
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 5.25
+        "x": 5.514,
+        "y": 5.458
       },
       "prevControl": {
-        "x": 3.7528001741144177,
-        "y": 5.287312813913423
+        "x": 5.247089692079131,
+        "y": 4.9956977856172
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,35 +33,29 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Go L4",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "Limited Manip Outtake",
+      "name": "Go Min Position",
       "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 0.5,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 1.5,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -59.99999999999999
+    "velocity": 1.0,
+    "rotation": -119.99999999999999
   },
   "reversed": false,
   "folder": "Reef Followers",
   "idealStartingState": {
-    "velocity": 0.5,
-    "rotation": -59.99999999999999
+    "velocity": 0.0,
+    "rotation": -119.99999999999999
   },
   "useDefaultConstraints": false
 }

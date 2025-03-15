@@ -3,6 +3,7 @@ package frc.robot.commands.Chassis;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -14,10 +15,11 @@ public class DriveWithTransPID extends Command {
     private final TrapezoidProfile.Constraints constraints;
     private final SwerveRequest.FieldCentric drive;
     private double maxVel = 2.5;
-    private double maxAccel = 1.5;
-    private double kP = 0.5;
+    private double maxAccel = 1;
+    private double kP = 1;
     private double kI = 0;
     private double kD = 0;
+    private double setpoint;
 
     public DriveWithTransPID(CommandSwerveDrivetrain driveTrain, SwerveRequest.FieldCentric drive) {
         this.driveTrain = driveTrain;
@@ -27,6 +29,7 @@ public class DriveWithTransPID extends Command {
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
+        SmartDashboard.putData(pidController);
     }
 
     /**
@@ -34,7 +37,8 @@ public class DriveWithTransPID extends Command {
      */
     @Override
     public void initialize() {
-      pidController.reset(0);
+      pidController.reset(driveTrain.getStatePose().getX());
+      setpoint  = driveTrain.getStatePose().getX() - 3;
     }
 
     /**
@@ -43,7 +47,7 @@ public class DriveWithTransPID extends Command {
      */
     @Override
     public void execute() {
-      double value = pidController.calculate(driveTrain.getStatePose().getX(), 3);
+      double value = -pidController.calculate(driveTrain.getStatePose().getX(), setpoint);
       driveTrain.setControl(drive
               .withVelocityX(value)
               .withVelocityY(0)

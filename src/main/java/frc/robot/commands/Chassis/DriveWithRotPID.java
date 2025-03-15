@@ -14,7 +14,7 @@ public class DriveWithRotPID extends Command {
     private final TrapezoidProfile.Constraints constraints;
     private final SwerveRequest.FieldCentric drive;
     private double maxVel = Constants.Swerve.maxAngularRate;
-    private double maxAccel = Math.PI/4;
+    private double maxAccel = Constants.Swerve.maxAngularRate;
     private double kP = 0.01;
     private double kI = 0;
     private double kD = 0;
