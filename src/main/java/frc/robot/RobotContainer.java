@@ -123,16 +123,18 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.R2().whileTrue(new LimitedManipIntakeOuttake(manip, elevator));
-    driverController.R3().whileTrue(new GoUp(elevator));
+    driverController.R2().onTrue(new LimitedManipOuttake(manip, elevator));
+    driverController.L2().onTrue(new LimitedManipIntake(manip, elevator));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.L1().onTrue(new GoToMinPosition(elevator)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip));
-    driverController.L2().onTrue(new GoToL3(elevator, manip));
+    driverController.square().onTrue(new GoToL3(elevator, manip));
     driverController.cross().onTrue(new GoToL2(elevator, manip));
     //driverController.triangle().onTrue(new GoToL1(elevator));
+    driverController.povDown().whileTrue(new GoToHome(elevator));
+    driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -150,9 +152,9 @@ public class RobotContainer {
 
     //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    driverController.circle().onTrue(new IntakeActuate(coralIntake));
+    //driverController.circle().onTrue(new IntakeActuate(coralIntake));
     driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
-    driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
+    driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -214,6 +216,7 @@ public class RobotContainer {
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber);}
+  public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
 
   public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {

@@ -19,7 +19,7 @@ public class CoralIntake extends SubsystemBase {
   private final LinearServo actuation1;
   private final LinearServo actuation2;
   private double intakeSpeed = 0.5;
-  private double lowSetpoint = 30;
+  private double lowSetpoint = 20;
   private double highSetpoint = 125;
 
   public CoralIntake() {

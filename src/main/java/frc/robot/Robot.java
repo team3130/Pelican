@@ -57,6 +57,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     CommandScheduler.getInstance().cancelAll();
     //CommandScheduler.getInstance().schedule(m_robotContainer.elevatorHome());
+    CommandScheduler.getInstance().schedule(m_robotContainer.intakeDeactuate());
     m_autonomousCommand = m_robotContainer.pick();
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -77,8 +78,10 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    CommandScheduler.getInstance().schedule(m_robotContainer.intakeDeactuate());
     CommandScheduler.getInstance().schedule(m_robotContainer.elevatorHome());
     CommandScheduler.getInstance().schedule(m_robotContainer.climberHome());
+
     //CommandScheduler.getInstance().schedule(m_robotContainer.algaeActuationHome());
   }
 
