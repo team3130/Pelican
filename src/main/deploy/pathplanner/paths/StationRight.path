@@ -33,16 +33,26 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Go Min Position",
+      "name": "Go Min Position Event",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Go Min Position"
+        }
+      }
     },
     {
-      "name": "Limited Manip Intake",
+      "name": "Limited Manip Intake Event",
       "waypointRelativePos": 1.0,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Limited Manip Intake"
+        }
+      }
     }
   ],
   "globalConstraints": {
