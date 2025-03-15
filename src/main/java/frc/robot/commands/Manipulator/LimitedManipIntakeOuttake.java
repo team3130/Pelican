@@ -15,8 +15,6 @@ public class LimitedManipIntakeOuttake extends Command {
     private final Manipulator manip;
     private final Elevator elevator;
     private final Timer timer = new Timer();
-    private boolean isIntaking = false;
-    private boolean isOuttaking = false;
 
     /**
      * Creates a new ExampleCommand.
@@ -34,8 +32,8 @@ public class LimitedManipIntakeOuttake extends Command {
     @Override
     public void initialize() {
         if(elevator.isAtMinPosition()) {
-            isIntaking = true;
-            isOuttaking = false;
+            manip.setIsIntaking(true);
+            manip.setIsOuttaking(false);
             manip.runManip();
         }
     }
@@ -43,7 +41,7 @@ public class LimitedManipIntakeOuttake extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (isIntaking) {
+        if (manip.getIsIntaking()) {
             if(manip.getFirstBeam() && !manip.getSecondBeam()) {
                 timer.start();
                 manip.reverseManip();
@@ -52,8 +50,8 @@ public class LimitedManipIntakeOuttake extends Command {
             }
         } else if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
             manip.runManip();
-            isIntaking = false;
-            isOuttaking = true;
+            manip.setIsIntaking(false);
+            manip.setIsOuttaking(true);
         }
     }
 
@@ -68,9 +66,9 @@ public class LimitedManipIntakeOuttake extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        if(isIntaking) {
+        if(manip.getIsIntaking()) {
             return timer.get() < 0.5;
-        } else if(isOuttaking) {
+        } else if(manip.getIsOuttaking()) {
             return manip.getSecondBeam();
         }
         return false;

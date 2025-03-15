@@ -31,7 +31,7 @@ public class Climber extends SubsystemBase {
   private double climberSpeed = 0.5;
 
   private double homePos = 0;
-  private double extendedPos = 0;
+  private double extendedPos = 172;
 
   private boolean isZeroed = false;
   public Climber() {

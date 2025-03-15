@@ -156,7 +156,7 @@ public class RobotContainer {
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     driverController.triangle().whileTrue(new BasicClimberDown(climber));
-    //driverController.square().whileTrue(new BasicClimberUp(climber));
+    driverController.povRight().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -200,6 +200,7 @@ public class RobotContainer {
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
+    SmartDashboard.putData(climber);
     SmartDashboard.putData(thetaLimiter);
     SmartDashboard.putData(camera);
 

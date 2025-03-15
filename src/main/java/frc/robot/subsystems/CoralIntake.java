@@ -19,13 +19,13 @@ public class CoralIntake extends SubsystemBase {
   private final LinearServo actuation1;
   private final LinearServo actuation2;
   private double intakeSpeed = 0.5;
-  private double lowSetpoint = 35;
+  private double lowSetpoint = 30;
   private double highSetpoint = 125;
 
   public CoralIntake() {
     intake = new TalonSRX(Constants.CAN.CoralIntake);
-    actuation1 = new LinearServo(Constants.IDs.CoralIntakeActuation1, 140, 1);
-    actuation2 = new LinearServo(Constants.IDs.CoralIntakeActuation2, 140, 1);
+    actuation1 = new LinearServo(Constants.IDs.CoralIntakeActuation1, 140, 20);
+    actuation2 = new LinearServo(Constants.IDs.CoralIntakeActuation2, 140, 20);
 
     intake.configFactoryDefault();
     intake.setInverted(false);
@@ -76,6 +76,8 @@ public class CoralIntake extends SubsystemBase {
     return actuation2.getPosition();
   }
 
+  public boolean getIsFinished() {return actuation1.isFinished() && actuation2.isFinished();}
+
   /**
    * Initializes the data we send on shuffleboard
    * Calls the default init sendable for Subsystem Bases
@@ -89,6 +91,8 @@ public class CoralIntake extends SubsystemBase {
 
       builder.addDoubleProperty("Low Setpoint", this::getLowSetpoint, this::setLowSetpoint);
       builder.addDoubleProperty("High Setpoint", this::getHighSetpoint, this::setHighSetpoint);
+
+      builder.addBooleanProperty("Is Finished", this::getIsFinished, null);
 
       builder.addDoubleProperty("Position 1", this::getPosition1, null);
       builder.addDoubleProperty("Position 2", this::getPosition2, null);
