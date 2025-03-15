@@ -223,7 +223,7 @@ public class RobotContainer {
 
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
-  public Command visionResetOdo() {return new UpdateOdoFromVision(driveTrain, camera, logger);}
+  public void visionResetOdo() {camera.getVisionOdometry(driveTrain, logger);}
 
   public void sendAutonChoosers() {
     SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1");

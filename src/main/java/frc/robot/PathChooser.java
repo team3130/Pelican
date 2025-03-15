@@ -155,7 +155,7 @@ public class PathChooser {
                         chooser.addOption(path.name,
                                 new SequentialCommandGroup(
                                         pathfindThenFollowPath(path, defaultConstraints),
-                                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path))
+                                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path.name))
                         ));
                     } catch (IOException | ParseException e) {
                         throw new RuntimeException(e);

@@ -33,10 +33,15 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Go L4",
+      "name": "Go L4 Event",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Go L4"
+        }
+      }
     },
     {
       "name": "Limited Manip Outtake",
