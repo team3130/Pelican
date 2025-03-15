@@ -154,7 +154,7 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
     //driverController.circle().onTrue(new IntakeActuate(coralIntake));
     driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
-    driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
+    //driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -171,10 +171,8 @@ public class RobotContainer {
     //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
-    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
-    //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
-    operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    operatorController.a().whileTrue(new IntakeActuate(coralIntake));
+    operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
 
 
     // Note that X is defined as forward according to WPILib convention,

@@ -33,7 +33,7 @@ public class LimitedManipIntakeReverse extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    manip.reverseManip();
+    manip.manipAtSpeed(-0.3);
   }
 
   // Called once the command ends or is interrupted.

@@ -28,7 +28,8 @@ public class Climber extends SubsystemBase {
   private double kI = 0;
   private double kD = 0;
 
-  private double climberSpeed = 0.5;
+  private double climberSpeedOut = 1.0;
+  private double climberSpeedIn = -0.5;
 
   private double homePos = 0;
   private double extendedPos = 172;
@@ -63,10 +64,10 @@ public class Climber extends SubsystemBase {
   }
 
   public void climbUp() {
-    climber.set(climberSpeed);
+    climber.set(climberSpeedOut);
   }
   public void climbDown() {
-    climber.set(-climberSpeed);
+    climber.set(climberSpeedIn);
   }
   public void stopClimb() {
     climber.set(0);
@@ -78,8 +79,11 @@ public class Climber extends SubsystemBase {
   public boolean brokeHomeLimit() {return homeLimit.get();}
   public boolean brokeExtendedLimit() {return extendedLimit.get();}
 
-  public double getClimberSpeed() {return climberSpeed;}
-  public void setClimberSpeed(double value) {climberSpeed = value;}
+  public double getClimberSpeedOut() {return climberSpeedOut;}
+  public void setClimberSpeedOut(double value) {climberSpeedOut = value;}
+
+  public double getClimberSpeedIn() {return climberSpeedIn;}
+  public void setClimberSpeedIn(double speed) {climberSpeedIn = speed;}
 
   public double getHomePos() {return homePos;}
   public void setHomePos(double value) {homePos = value;}
@@ -108,7 +112,8 @@ public class Climber extends SubsystemBase {
       builder.addBooleanProperty("Is Zeroed", this::isZeroed, this::setZeroed);
 
       builder.addDoubleProperty("Position", this::getPosition, null);
-      builder.addDoubleProperty("Climber Speed", this::getClimberSpeed, this::setClimberSpeed);
+      builder.addDoubleProperty("Climber Speed Out", this::getClimberSpeedOut, this::setClimberSpeedOut);
+      builder.addDoubleProperty("Climber Speed In", this::getClimberSpeedIn, this::setClimberSpeedIn);
       builder.addDoubleProperty("Home Position", this::getHomePos, this::setHomePos);
       builder.addDoubleProperty("Extended Position", this::getExtendedPos, this::setExtendedPos);
 

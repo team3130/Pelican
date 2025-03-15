@@ -38,7 +38,11 @@ public class LimitedManipIntake extends Command {
   @Override
   public void execute() {
     if(elevator.isAtMinPosition()) {
-      manip.runManip();
+      if(!manip.getFirstBeam() && !manip.getSecondBeam()) {
+        manip.manipAtSpeed(0.4);
+      } else {
+        manip.runManip();
+      }
     }
   }
 

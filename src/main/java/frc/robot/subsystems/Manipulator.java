@@ -34,8 +34,9 @@ public class Manipulator extends SubsystemBase {
     manip.set(ControlMode.PercentOutput, manipSpeed);
   }
   public void reverseManip() {
-    manip.set(ControlMode.PercentOutput, -0.3);
+    manip.set(ControlMode.PercentOutput, -manipSpeed);
   }
+  public void manipAtSpeed(double speed) {manip.set(ControlMode.PercentOutput, speed);}
   public void stopManip() {
     manip.set(ControlMode.PercentOutput, 0);
   }

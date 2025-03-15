@@ -83,7 +83,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void goUp() {
-    leftMotor.set(0.2);
+    leftMotor.set(0.4);
   }
 
   public void goToSetpoint(double setpoint) {
