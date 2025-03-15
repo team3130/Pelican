@@ -4,26 +4,22 @@
 
 package frc.robot.commands.Manipulator;
 
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
-public class LimitedManipIntake extends Command {
+public class LimitedManipIntakeReverse extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
-  private final Elevator elevator;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param manip The subsystem used by this command.
    */
-  public LimitedManipIntake(Manipulator manip, Elevator elevator) {
+  public LimitedManipIntakeReverse(Manipulator manip) {
     this.manip = manip;
-    this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip);
   }
@@ -37,9 +33,7 @@ public class LimitedManipIntake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(elevator.isAtMinPosition()) {
-      manip.runManip();
-    }
+    manip.reverseManip();
   }
 
   // Called once the command ends or is interrupted.
@@ -51,6 +45,6 @@ public class LimitedManipIntake extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return manip.getFirstBeam() && !manip.getSecondBeam();
+    return !manip.getFirstBeam();
   }
 }

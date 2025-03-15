@@ -124,7 +124,7 @@ public class RobotContainer {
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
     driverController.R2().onTrue(new LimitedManipOuttake(manip, elevator));
-    driverController.L2().onTrue(new LimitedManipIntake(manip, elevator));
+    driverController.L2().onTrue(new SequentialCommandGroup(new LimitedManipIntake(manip, elevator), new LimitedManipIntakeReverse(manip)));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
