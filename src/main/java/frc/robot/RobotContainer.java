@@ -185,9 +185,10 @@ public class RobotContainer {
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             driveTrain.applyRequest(() -> {
-              double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getElevatorPercentSpeed();
-              double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getElevatorPercentSpeed();
-              double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
+              ChassisSpeeds chassisSpeeds = getHIDspeedsMPS();
+              double xAxis = chassisSpeeds.vxMetersPerSecond;
+              double yAxis = chassisSpeeds.vyMetersPerSecond;
+              double rotation = chassisSpeeds.omegaRadiansPerSecond;
               ChassisSpeeds joyStickSpeed = new ChassisSpeeds(xAxis, yAxis, rotation);
               ChassisSpeeds chassisSpeed = accelLimitVectorDrive(joyStickSpeed);
               drive.withVelocityX(chassisSpeed.vxMetersPerSecond)
@@ -264,6 +265,10 @@ public class RobotContainer {
     }
   }
 
+  public double getElevatorRealPercent() {
+    return getElevatorPercentSpeed() / Constants.Swerve.maxSpeed;
+  }
+
   public double getElevatorPercentSpeed() {
     double maxSpeed = Constants.Swerve.maxSpeed;
     double minSpeed = 1;
@@ -302,9 +307,9 @@ public class RobotContainer {
     xAxis = MathUtil.applyDeadband(xAxis, Constants.Swerve.kDeadband);
     yAxis = MathUtil.applyDeadband(yAxis, Constants.Swerve.kDeadband);
     rotation = MathUtil.applyDeadband(rotation, Constants.Swerve.kDeadband);
-    xAxis *= Math.abs(xAxis) * Constants.Swerve.maxSpeed;
-    yAxis *= Math.abs(yAxis) * Constants.Swerve.maxSpeed;
-    rotation *= Math.abs(rotation) * Constants.Swerve.maxAngularRate;
+    xAxis *= Math.abs(xAxis) * Constants.Swerve.maxSpeed * getElevatorRealPercent();
+    yAxis *= Math.abs(yAxis) * Constants.Swerve.maxSpeed * getElevatorRealPercent();
+    rotation *= Math.abs(rotation) * Constants.Swerve.maxAngularRate * getElevatorRealPercent();
     return new ChassisSpeeds(xAxis, yAxis, rotation);
   }
 
@@ -321,6 +326,8 @@ public class RobotContainer {
            var mag = vector.getNorm() * cos;
            driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
            mag = driveLimiter.calculate(mag);
+           double limit = thetaLimiterConstant/mag;
+           thetaLimiter.updateValues(limit, -limit);
            var theta = thetaLimiter.angleCalculate(vector.getAngle().getRadians());
            Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
            return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
