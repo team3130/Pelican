@@ -12,6 +12,7 @@ import frc.robot.commands.Elevator.GoToHome;
 import frc.robot.commands.Elevator.GoToL4;
 import frc.robot.commands.Elevator.GoToMinPosition;
 import frc.robot.commands.Manipulator.LimitedManipIntake;
+import frc.robot.commands.Manipulator.LimitedManipIntakeReverse;
 import frc.robot.commands.Manipulator.LimitedManipOuttake;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
@@ -82,12 +83,17 @@ public class PathChooser {
                 stationChooser1.addOption("Left Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
                         new SequentialCommandGroup(
-                                new LimitedManipIntake(manip, elevator).asProxy())
+                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                new LimitedManipIntakeReverse(manip).asProxy()
                         )
-                );
+                ));
                 stationChooser1.addOption("Right Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
-                        new LimitedManipIntake(manip, elevator).asProxy()));
+                        new SequentialCommandGroup(
+                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                new LimitedManipIntakeReverse(manip).asProxy()
+                        )
+                ));
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -98,10 +104,18 @@ public class PathChooser {
             try {
                 stationChooser2.addOption("Left Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
-                        new LimitedManipIntake(manip, elevator).asProxy()));
+                        new SequentialCommandGroup(
+                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                new LimitedManipIntakeReverse(manip).asProxy()
+                        )
+                ));
                 stationChooser2.addOption("Right Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
-                        new LimitedManipIntake(manip, elevator).asProxy()));
+                        new SequentialCommandGroup(
+                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                new LimitedManipIntakeReverse(manip).asProxy()
+                        )
+                ));
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -112,10 +126,18 @@ public class PathChooser {
             try {
                 stationChooser3.addOption("Left Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
-                        new LimitedManipIntake(manip, elevator).asProxy()));
+                        new SequentialCommandGroup(
+                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                new LimitedManipIntakeReverse(manip).asProxy()
+                        )
+                ));
                 stationChooser3.addOption("Right Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
-                        new LimitedManipIntake(manip, elevator).asProxy()));
+                        new SequentialCommandGroup(
+                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                new LimitedManipIntakeReverse(manip).asProxy()
+                        )
+                ));
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }

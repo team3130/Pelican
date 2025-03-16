@@ -15,7 +15,6 @@ public class LimitedManipIntake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
   private final Elevator elevator;
-  private final Timer timer = new Timer();
 
   /**
    * Creates a new ExampleCommand.
@@ -53,13 +52,11 @@ public class LimitedManipIntake extends Command {
   @Override
   public void end(boolean interrupted) {
     manip.stopManip();
-    timer.stop();
-    timer.reset();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return timer.get() > 0.5;
+    return manip.getFirstBeam() && !manip.getSecondBeam();
   }
 }

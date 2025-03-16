@@ -13,17 +13,14 @@ import frc.robot.subsystems.Manipulator;
 public class GoToL3 extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
-  private final Manipulator manip;
-  private boolean runnable;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL3(Elevator elevator, Manipulator manip) {
+  public GoToL3(Elevator elevator) {
     this.elevator = elevator;
-    this.manip = manip;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
