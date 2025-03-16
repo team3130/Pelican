@@ -37,7 +37,7 @@ public class PathChooser {
     private static SendableChooser<Command> stationChooser2 = null;
     private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
-            3, 1.5,
+            1, 3,
             Units.degreesToRadians(360), Units.degreesToRadians(540));
 
     // For convenience a programmer could change this when going to competition.
@@ -208,14 +208,15 @@ public class PathChooser {
                                                 pathfindThenFollowPath(path, defaultConstraints),
                                                 new GoToL4(elevator).asProxy()
                                         ),
-                                        new LimitedManipOuttake(manip, elevator).asProxy(),
+                                        new LimitedManipOuttake(manip).asProxy(),
                                         new ParallelCommandGroup(
                                                 AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path.name)),
                                                 new SequentialCommandGroup(
                                                         new WaitCommand(0.5),
                                                         new GoToMinPosition(elevator).asProxy()
                                                 )
-                        )));
+                                        )
+                                ));
                     } catch (IOException | ParseException e) {
                         throw new RuntimeException(e);
                     }

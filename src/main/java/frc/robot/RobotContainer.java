@@ -84,7 +84,7 @@ public class RobotContainer {
     camera = new Camera();
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
-    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator));
+    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
 
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
@@ -126,7 +126,7 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.R2().onTrue(new LimitedManipOuttake(manip, elevator));
+    driverController.R2().onTrue(new LimitedManipOuttake(manip));
     driverController.L2().onTrue(new SequentialCommandGroup(new LimitedManipIntake(manip, elevator), new LimitedManipIntakeReverse(manip)));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
@@ -136,7 +136,7 @@ public class RobotContainer {
     driverController.square().onTrue(new GoToL3(elevator));
     driverController.cross().onTrue(new GoToL2(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
-    driverController.povDown().whileTrue(new GoToHome(elevator));
+    driverController.povDown().whileTrue(new GoHome(elevator));
     driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
@@ -176,6 +176,9 @@ public class RobotContainer {
 
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
+
+    operatorController.rightBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
+    operatorController.leftBumper().whileTrue(new DriveWithRotPID(driveTrain, drive));
 
 
     // Note that X is defined as forward according to WPILib convention,

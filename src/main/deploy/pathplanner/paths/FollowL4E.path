@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.132100519236773,
-        "y": 2.567702505125626
+        "x": 5.046469715114475,
+        "y": 2.752981343041146
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.92137884464294,
-        "y": 2.9155102489983533
+        "x": 4.908533169666711,
+        "y": 2.9616235238545894
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.99556430837384,
-        "y": 2.8066408741357556
+        "x": 4.979953876234211,
+        "y": 2.8444406215015077
       },
       "prevControl": {
-        "x": 5.273550642579868,
-        "y": 2.383724843776065
+        "x": 5.130645671327499,
+        "y": 2.6145677884851852
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 1.5,
+    "maxVelocity": 1.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "Reef Followers",
   "idealStartingState": {
-    "velocity": 0.5,
+    "velocity": 0.0,
     "rotation": 119.99999999999999
   },
   "useDefaultConstraints": true
