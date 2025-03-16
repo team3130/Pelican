@@ -8,6 +8,14 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.commands.Elevator.GoToHome;
+import frc.robot.commands.Elevator.GoToL4;
+import frc.robot.commands.Elevator.GoToMinPosition;
+import frc.robot.commands.Manipulator.LimitedManipIntake;
+import frc.robot.commands.Manipulator.LimitedManipOuttake;
+import frc.robot.subsystems.CoralIntake;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Manipulator;
 import org.json.simple.parser.ParseException;
 
 import java.io.File;
@@ -28,13 +36,13 @@ public class PathChooser {
     private static SendableChooser<Command> stationChooser2 = null;
     private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
-            2.5, 1,
+            4, 5,
             Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // For convenience a programmer could change this when going to competition.
     private static final boolean isCompetition = true;
 
-    public static SendableChooser<Command> buildAndSendCoralChooser(String chooserType) {
+    public static SendableChooser<Command> buildAndSendCoralChooser(String chooserType, Manipulator manip, Elevator elevator) {
         // Build an auto chooser. This will use empty instant command as the default option.
         // As an example, this will only show autos that start with "comp" while at
         // competition as defined by the programmer
@@ -42,34 +50,41 @@ public class PathChooser {
             pathChooser1 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
                             ? stream.filter(path -> path.name.startsWith("Follow"))
-                            :stream
+                            :stream,
+                    manip, elevator
             );
             return pathChooser1;
         } else if(chooserType.equals("Coral 2")) {
             pathChooser2 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
                             ? stream.filter(path -> path.name.startsWith("Follow"))
-                            :stream
+                            :stream,
+                    manip, elevator
             );
             return pathChooser2;
         } else if(chooserType.equals("Coral 3")) {
             pathChooser3 = buildPathChooserWithOptionsModifier(
                     (stream) -> isCompetition
                             ? stream.filter(path -> path.name.startsWith("Follow"))
-                            :stream
+                            :stream,
+                    manip, elevator
             );
             return pathChooser3;
         }
         return null;
     }
 
-    public static SendableChooser<Command> buildAndSendStationChooser(String chooserType) {
+    public static SendableChooser<Command> buildAndSendStationChooser(String chooserType, Manipulator manip, Elevator elevator) {
         if (chooserType.equals("Station 1")) {
             stationChooser1 = new SendableChooser<>();
             stationChooser1.setDefaultOption("None", new InstantCommand());
             try {
-                stationChooser1.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
-                stationChooser1.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+                stationChooser1.addOption("Left Station", new SequentialCommandGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
+                        new LimitedManipIntake(manip, elevator).asProxy()));
+                stationChooser1.addOption("Right Station", new SequentialCommandGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
+                        new LimitedManipIntake(manip, elevator).asProxy()));
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -78,8 +93,12 @@ public class PathChooser {
             stationChooser2 = new SendableChooser<>();
             stationChooser2.setDefaultOption("None", new InstantCommand());
             try {
-                stationChooser2.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
-                stationChooser2.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+                stationChooser2.addOption("Left Station", new SequentialCommandGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
+                        new LimitedManipIntake(manip, elevator).asProxy()));
+                stationChooser2.addOption("Right Station", new SequentialCommandGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
+                        new LimitedManipIntake(manip, elevator).asProxy()));
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -88,8 +107,12 @@ public class PathChooser {
             stationChooser3 = new SendableChooser<>();
             stationChooser3.setDefaultOption("None", new InstantCommand());
             try {
-                stationChooser3.addOption("Left Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints));
-                stationChooser3.addOption("Right Station", pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints));
+                stationChooser3.addOption("Left Station", new SequentialCommandGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
+                        new LimitedManipIntake(manip, elevator).asProxy()));
+                stationChooser3.addOption("Right Station", new SequentialCommandGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
+                        new LimitedManipIntake(manip, elevator).asProxy()));
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -108,13 +131,15 @@ public class PathChooser {
     }
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
-            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) {
-        return buildPathChooserWithOptionsModifier("", optionsModifier);
+            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier,
+            Manipulator manip, Elevator elevator) {
+        return buildPathChooserWithOptionsModifier("", optionsModifier, manip, elevator);
     }
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
             String defaultPathName,
-            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier) {
+            Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier,
+            Manipulator manip, Elevator elevator) {
         if (!AutoBuilder.isConfigured()) {
             throw new RuntimeException(
                     "AutoBuilder was not configured before attempting to build an auto chooser");
@@ -154,9 +179,18 @@ public class PathChooser {
                     try {
                         chooser.addOption(path.name,
                                 new SequentialCommandGroup(
-                                        pathfindThenFollowPath(path, defaultConstraints),
-                                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path.name))
-                        ));
+                                        new ParallelCommandGroup(
+                                                pathfindThenFollowPath(path, defaultConstraints),
+                                                new GoToL4(elevator).asProxy()
+                                        ),
+                                        new LimitedManipOuttake(manip, elevator).asProxy(),
+                                        new ParallelCommandGroup(
+                                                AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path.name)),
+                                                new SequentialCommandGroup(
+                                                        new WaitCommand(0.5),
+                                                        new GoToMinPosition(elevator).asProxy()
+                                                )
+                        )));
                     } catch (IOException | ParseException e) {
                         throw new RuntimeException(e);
                     }
@@ -180,7 +214,7 @@ public class PathChooser {
                 .collect(Collectors.toList());
     }
 
-    public static SequentialCommandGroup buildAutoCommand() {
+    public static SequentialCommandGroup buildAutoCommand(Elevator elevator) {
         //for now only 3 coral and two trips to coral station
         Command coral1Choice = getPathFollowCommand(pathChooser1).asProxy();
         Command coral2Choice = getPathFollowCommand(pathChooser2).asProxy();
@@ -188,18 +222,13 @@ public class PathChooser {
         Command stationChoice1 = getPathFollowCommand(stationChooser1).asProxy();
         Command stationChoice2 = getPathFollowCommand(stationChooser2).asProxy();
         Command stationChoice3 = getPathFollowCommand(stationChooser3).asProxy();
-        Command waitStation1 = Commands.waitSeconds(0.5);
-        Command waitStation2 = Commands.waitSeconds(0.5);
-        Command waitStation3 = Commands.waitSeconds(0.5);
-        Command waitCoral1 = Commands.waitSeconds(0.5);
-        Command waitCoral2 = Commands.waitSeconds(0.5);
-        Command waitCoral3 = Commands.waitSeconds(0.5);
         return new SequentialCommandGroup(
-                coral1Choice, waitCoral1,
-                stationChoice1, waitStation1,
-                coral2Choice, waitCoral2,
-                stationChoice2, waitStation2,
-                coral3Choice, waitCoral3);
+                new GoToHome(elevator).asProxy(),
+                coral1Choice,
+                stationChoice1,
+                coral2Choice,
+                stationChoice2,
+                coral3Choice);
         //return new SequentialCommandGroup(coral1Choice, coral2Choice, coral3Choice);
     }
 }

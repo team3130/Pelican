@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5653516295025727,
-        "y": 6.5310677530017145
+        "x": 1.3009262094189034,
+        "y": 6.886156337590599
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.2099003290886954,
-        "y": 7.032808347086677
+        "x": 1.1396869194295465,
+        "y": 7.086932027662866
       },
       "isLocked": false,
       "linkedName": null
@@ -20,8 +20,8 @@
         "y": 7.027765866209262
       },
       "prevControl": {
-        "x": 1.4129003416188095,
-        "y": 6.711075246785973
+        "x": 1.3827207771733419,
+        "y": 6.779472759350456
       },
       "nextControl": null,
       "isLocked": false,
@@ -65,7 +65,7 @@
   "reversed": false,
   "folder": "Feeder Follower Paths",
   "idealStartingState": {
-    "velocity": 1.5,
+    "velocity": 0.5,
     "rotation": -53.75
   },
   "useDefaultConstraints": true

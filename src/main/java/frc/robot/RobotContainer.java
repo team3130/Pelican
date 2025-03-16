@@ -227,13 +227,12 @@ public class RobotContainer {
   public void visionResetOdo() {camera.getVisionOdometry(driveTrain, logger);}
 
   public void sendAutonChoosers() {
-    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1");
-    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2");
-    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3");
-    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1");
-    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2");
-    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3");
-
+    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator);
+    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2", manip, elevator);
+    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3", manip, elevator);
+    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1", manip, elevator);
+    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2", manip, elevator);
+    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3", manip, elevator);
 
     SmartDashboard.putData("Coral 1 Path", pathChooser1);
     SmartDashboard.putData("Coral 2 Path", pathChooser2);
@@ -244,7 +243,7 @@ public class RobotContainer {
   }
 
   public SequentialCommandGroup configureAuton() {
-    return PathChooser.buildAutoCommand();
+    return PathChooser.buildAutoCommand(elevator);
   }
 
   public double getModularSpeed() {

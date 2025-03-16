@@ -3,24 +3,24 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.5991423670668965,
-        "y": 1.7898584905660369
+        "x": 5.132100519236773,
+        "y": 2.567702505125626
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.388420692473064,
-        "y": 2.1376662344387634
+        "x": 4.92137884464294,
+        "y": 2.9155102489983533
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.006942325945751,
+        "x": 4.99556430837384,
         "y": 2.8066408741357556
       },
       "prevControl": {
-        "x": 5.284928660151778,
+        "x": 5.273550642579868,
         "y": 2.383724843776065
       },
       "nextControl": null,
@@ -31,33 +31,10 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Go L4 Event",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Go L4"
-        }
-      }
-    },
-    {
-      "name": "Limited Manip Outtake Event",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Limited Manip Outtake"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.5,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
@@ -70,8 +47,8 @@
   "reversed": false,
   "folder": "Reef Followers",
   "idealStartingState": {
-    "velocity": 0.0,
+    "velocity": 0.5,
     "rotation": 119.99999999999999
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }
