@@ -81,7 +81,10 @@ public class PathChooser {
             try {
                 stationChooser1.addOption("Left Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
-                        new LimitedManipIntake(manip, elevator).asProxy()));
+                        new SequentialCommandGroup(
+                                new LimitedManipIntake(manip, elevator).asProxy())
+                        )
+                );
                 stationChooser1.addOption("Right Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
                         new LimitedManipIntake(manip, elevator).asProxy()));
