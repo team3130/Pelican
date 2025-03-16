@@ -321,7 +321,7 @@ public class RobotContainer {
            var mag = vector.getNorm() * cos;
            driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
            mag = driveLimiter.calculate(mag);
-           var theta = thetaLimiter.calculate(vector.getAngle().getRadians());
+           var theta = thetaLimiter.angleCalculate(vector.getAngle().getRadians());
            Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
            return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
          }
