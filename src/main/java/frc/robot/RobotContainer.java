@@ -319,6 +319,7 @@ public class RobotContainer {
         double cos = Math.cos(delta);
          if(cos > 0){ //positive cos means keep moving (turn angle is small)
            var mag = vector.getNorm() * cos;
+           driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
            mag = driveLimiter.calculate(mag);
            var theta = thetaLimiter.calculate(vector.getAngle().getRadians());
            Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
@@ -327,6 +328,7 @@ public class RobotContainer {
       }
       //here we continue if we are decelerating, either small mag or big turn.
       thetaLimiter.reset(thetaLimiter.lastValue());
+      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
       var newMag = driveLimiter.calculate(0);
       Translation2d newVector = new Translation2d(newMag, thetaLimiter.lastValue());
       if(newMag < 0.0001){ // we have stopped moving
@@ -342,6 +344,7 @@ public class RobotContainer {
         else{ //if the norm is significant, start driving
           isAngleReal = true;
           thetaLimiter.reset(vector.getAngle().getRadians());
+          driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
           var mag = driveLimiter.calculate(vector.getNorm());
           Translation2d newVector = new Translation2d(mag, vector.getAngle());
           return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
