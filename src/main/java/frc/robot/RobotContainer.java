@@ -185,16 +185,10 @@ public class RobotContainer {
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             driveTrain.applyRequest(() -> {
-              ChassisSpeeds chassisSpeeds = getHIDspeedsMPS();
-              double xAxis = chassisSpeeds.vxMetersPerSecond;
-              double yAxis = chassisSpeeds.vyMetersPerSecond;
-              double rotation = chassisSpeeds.omegaRadiansPerSecond;
-              ChassisSpeeds joyStickSpeed = new ChassisSpeeds(xAxis, yAxis, rotation);
-              ChassisSpeeds chassisSpeed = accelLimitVectorDrive(joyStickSpeed);
-              drive.withVelocityX(chassisSpeed.vxMetersPerSecond)
-                    .withVelocityY(chassisSpeed.vyMetersPerSecond)
-                    .withRotationalRate(chassisSpeed.omegaRadiansPerSecond);
-              return drive;
+              ChassisSpeeds chassisSpeed = accelLimitVectorDrive(getHIDspeedsMPS());
+              return drive.withVelocityX(chassisSpeed.vxMetersPerSecond)
+                      .withVelocityY(chassisSpeed.vyMetersPerSecond)
+                      .withRotationalRate(chassisSpeed.omegaRadiansPerSecond);
             }));
 
 
@@ -337,25 +331,26 @@ public class RobotContainer {
       thetaLimiter.reset(thetaLimiter.lastValue());
       driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
       var newMag = driveLimiter.calculate(0);
-      Translation2d newVector = new Translation2d(newMag, thetaLimiter.lastValue());
-      if(newMag < 0.0001){ // we have stopped moving
+      Rotation2d angle = new Rotation2d(thetaLimiter.lastValue());
+      Translation2d newVector = new Translation2d(newMag, angle);
+      if(newMag < 0.1){ // we have stopped moving
         isAngleReal = false;
       }
       return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
     }
-      else{ //if angle is not real, then we were standing still 20 ms ago
-        if(vector.getNorm() < 0.0001){ //if the norm is still tiny, then keep idling
-          driveLimiter.reset(0);
-          return new ChassisSpeeds(0,0, rotation);
-        }
-        else{ //if the norm is significant, start driving
-          isAngleReal = true;
-          thetaLimiter.reset(vector.getAngle().getRadians());
-          driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
-          var mag = driveLimiter.calculate(vector.getNorm());
-          Translation2d newVector = new Translation2d(mag, vector.getAngle());
-          return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
-        }
+    else { //if angle is not real, then we were standing still 20 ms ago
+      if(vector.getNorm() < 0.1){ //if the norm is still tiny, then keep idling
+        driveLimiter.reset(0);
+        return new ChassisSpeeds(0,0, rotation);
+      }
+      else { //if the norm is significant, start driving
+        isAngleReal = true;
+        thetaLimiter.reset(vector.getAngle().getRadians());
+        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+        var mag = driveLimiter.calculate(vector.getNorm());
+        Translation2d newVector = new Translation2d(mag, vector.getAngle());
+        return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+      }
     }
   }
 }
