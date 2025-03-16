@@ -25,7 +25,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
             Constants.Swerve.maxAngularRate,
             Constants.Swerve.maxAngularRate);
-    private final ProfiledPIDController turningController = new ProfiledPIDController(4, 0, 0, rotationConstraints);
+    private final ProfiledPIDController turningController = new ProfiledPIDController(12, 0, 0, rotationConstraints);
     private final Telemetry logger;
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
@@ -108,8 +108,9 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * robotContainer.getElevatorPercentSpeed();
-            double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * robotContainer.getElevatorPercentSpeed();
+            ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
+            double xAxis = chassisSpeeds.vxMetersPerSecond;
+            double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
             double magnitude = vector.getNorm();
             Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
