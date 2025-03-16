@@ -115,7 +115,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
             approach = approach.times(magnitude);
             if (!onBlue) {
-                approach.rotateBy(Rotation2d.k180deg);
+                approach = approach.rotateBy(Rotation2d.k180deg);
             }
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                     targetPose.getRotation().getRadians());
