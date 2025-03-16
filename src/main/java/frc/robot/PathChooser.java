@@ -37,8 +37,8 @@ public class PathChooser {
     private static SendableChooser<Command> stationChooser2 = null;
     private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
-            4, 5,
-            Units.degreesToRadians(540), Units.degreesToRadians(720));
+            3, 1.5,
+            Units.degreesToRadians(360), Units.degreesToRadians(540));
 
     // For convenience a programmer could change this when going to competition.
     private static final boolean isCompetition = true;
