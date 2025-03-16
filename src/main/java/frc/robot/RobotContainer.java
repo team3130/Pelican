@@ -312,7 +312,7 @@ public class RobotContainer {
     double rotation = desiredSpeed.omegaRadiansPerSecond;
     Translation2d vector = new Translation2d(xAxis, yAxis);
     if(isAngleReal) { //if angle is real, then we were moving 20 ms ago
-      if(vector.getNorm() > 0.0001){ //if the norm is significant, we continue to move
+      if(vector.getNorm() > 0.001){ //if the norm is significant, we continue to move
         double delta = thetaLimiter.getDelta(vector.getAngle().getRadians());
         double cos = Math.cos(delta);
          if(cos > 0){ //positive cos means keep moving (turn angle is small)
@@ -333,13 +333,13 @@ public class RobotContainer {
       var newMag = driveLimiter.calculate(0);
       Rotation2d angle = new Rotation2d(thetaLimiter.lastValue());
       Translation2d newVector = new Translation2d(newMag, angle);
-      if(newMag < 0.1){ // we have stopped moving
+      if(newMag < 0.001){ // we have stopped moving
         isAngleReal = false;
       }
       return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
     }
     else { //if angle is not real, then we were standing still 20 ms ago
-      if(vector.getNorm() < 0.1){ //if the norm is still tiny, then keep idling
+      if(vector.getNorm() < 0.001){ //if the norm is still tiny, then keep idling
         driveLimiter.reset(0);
         return new ChassisSpeeds(0,0, rotation);
       }
