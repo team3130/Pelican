@@ -6,6 +6,8 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
 public class GoToL3 extends Command {
@@ -26,8 +28,7 @@ public class GoToL3 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.updateElevatorPID();
-    if(elevator.isZeroed()) {
+    if (elevator.isZeroed()) {
       elevator.goToL3();
     } else {
       elevator.goToHome();
@@ -44,12 +45,12 @@ public class GoToL3 extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-
+    elevator.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.brokeTopLimitSwitch();
+    return elevator.brokeTopLimitSwitch();
   }
 }

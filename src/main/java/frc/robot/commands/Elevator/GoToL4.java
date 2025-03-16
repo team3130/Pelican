@@ -6,11 +6,14 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
 public class GoToL4 extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private boolean runnable;
 
   /**
    * Creates a new ExampleCommand.
@@ -26,7 +29,7 @@ public class GoToL4 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(elevator.isZeroed()) {
+    if (elevator.isZeroed()) {
       elevator.goToL4();
     } else {
       elevator.goToHome();
@@ -49,6 +52,6 @@ public class GoToL4 extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.brokeTopLimitSwitch();
+    return elevator.brokeTopLimitSwitch();
   }
 }

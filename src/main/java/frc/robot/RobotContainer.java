@@ -19,12 +19,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
-import frc.robot.commands.Camera.UpdateOdoFromPose;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
-import frc.robot.commands.Camera.UpdateSmartDashFromVisionOnly;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.BasicClimberDown;
 import frc.robot.commands.Climber.BasicClimberUp;
+import frc.robot.commands.Climber.GoToExtended;
+import frc.robot.commands.Climber.ZeroClimber;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
@@ -33,6 +33,9 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -107,6 +110,8 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    sendAutonChoosers();
   }
 
   /**
@@ -122,16 +127,18 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.R2().whileTrue(new LimitedManipIntakeOuttake(manip, elevator));
-    driverController.R3().whileTrue(new GoUp(elevator));
+    driverController.R2().onTrue(new LimitedManipOuttake(manip, elevator));
+    driverController.L2().onTrue(new SequentialCommandGroup(new LimitedManipIntake(manip, elevator), new LimitedManipIntakeReverse(manip)));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.L1().onTrue(new GoToMinPosition(elevator)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator));
-    driverController.L2().onTrue(new GoToL3(elevator));
+    driverController.square().onTrue(new GoToL3(elevator));
     driverController.cross().onTrue(new GoToL2(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
+    driverController.povDown().whileTrue(new GoToHome(elevator));
+    driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -139,7 +146,7 @@ public class RobotContainer {
     //driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
     //driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
     //camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
-    camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
+    //camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
 
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
@@ -149,13 +156,13 @@ public class RobotContainer {
 
     //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    driverController.circle().onTrue(new IntakeActuate(coralIntake));
+    //driverController.circle().onTrue(new IntakeActuate(coralIntake));
     driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
-    //driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new Climber))
+    //driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
     driverController.triangle().whileTrue(new BasicClimberDown(climber));
-    driverController.square().whileTrue(new BasicClimberUp(climber));
+    driverController.povRight().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -168,10 +175,8 @@ public class RobotContainer {
     //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
-    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
-    //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
-    operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    operatorController.a().whileTrue(new IntakeActuate(coralIntake));
+    operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
 
 
     // Note that X is defined as forward according to WPILib convention,
@@ -211,6 +216,7 @@ public class RobotContainer {
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
+    SmartDashboard.putData(climber);
     SmartDashboard.putData(thetaLimiter);
     SmartDashboard.putData(camera);
 
@@ -223,6 +229,29 @@ public class RobotContainer {
 
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
+  public Command climberHome() {return new ZeroClimber(climber);}
+  public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
+  public void visionResetOdo() {camera.getVisionOdometry(driveTrain, logger);}
+
+  public void sendAutonChoosers() {
+    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator);
+    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2", manip, elevator);
+    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3", manip, elevator);
+    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1", manip, elevator);
+    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2", manip, elevator);
+    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3", manip, elevator);
+
+    SmartDashboard.putData("Coral 1 Path", pathChooser1);
+    SmartDashboard.putData("Coral 2 Path", pathChooser2);
+    SmartDashboard.putData("Coral 3 Path", pathChooser3);
+    SmartDashboard.putData("Station 1 Path", stationChooser1);
+    SmartDashboard.putData("Station 2 Path", stationChooser2);
+    SmartDashboard.putData("Station 3 Path", stationChooser3);
+  }
+
+  public SequentialCommandGroup configureAuton() {
+    return PathChooser.buildAutoCommand(elevator);
+  }
 
   public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {

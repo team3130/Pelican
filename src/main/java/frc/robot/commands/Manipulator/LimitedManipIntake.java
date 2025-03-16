@@ -4,6 +4,7 @@
 
 package frc.robot.commands.Manipulator;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -30,15 +31,21 @@ public class LimitedManipIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    if (elevator.isAtMinPosition()) {
+      manip.runManip();
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //if (elevator.isAtMinPosition()) {
-      manip.runManip();
-    //}
+    if(elevator.isAtMinPosition()) {
+      if(!manip.getFirstBeam() && !manip.getSecondBeam()) {
+        manip.manipAtSpeed(0.4);
+      } else {
+        manip.runManip();
+      }
+    }
   }
 
   // Called once the command ends or is interrupted.

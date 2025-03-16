@@ -183,8 +183,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                     new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                            new PIDConstants(0.1, 0, 0), // Translation PID constants
-                            new PIDConstants(0.1, 0, 0) // Rotation PID constants
+                            new PIDConstants(11, 0, 0), // Translation PID constants
+                            new PIDConstants(12, 0, 0) // Rotation PID constants
                     ),
                     config, //the robot configuration
                     () -> {
@@ -205,7 +205,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path.
         PathConstraints constraints = new PathConstraints(
-                1, 1,
+                2.5, 1,
                 Units.degreesToRadians(540), Units.degreesToRadians(720));
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands

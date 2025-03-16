@@ -85,7 +85,7 @@ public final class Constants {
     public final static double backDriveGearRatio = 6.75; //Checked 12/18/24
     public final static double frontSteerGearRatio = 18.75; // Checked 12/18/24
     public final static double backSteerGearRatio = 21.42857; // Checked 12/18/24
-    public static final double wheelDiameter = Units.inchesToMeters(3.9);
+    public static final double wheelDiameter = Units.inchesToMeters(3.9 * 0.96);
     public static final double wheelCircumference = wheelDiameter * Math.PI;
     public final static double frontDriveRotToMeters = wheelDiameter * Math.PI * (1/(frontDriveGearRatio)); // multiply by
     public final static double backDriveRotToMeters =  wheelDiameter * Math.PI * (1/backDriveGearRatio);

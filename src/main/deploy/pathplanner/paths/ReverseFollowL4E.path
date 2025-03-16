@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.166700819672132,
-        "y": 2.5325307377049184
+        "x": 5.011,
+        "y": 2.784
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.955979145078299,
-        "y": 2.880338481577646
+        "x": 5.144540137952687,
+        "y": 2.5726542369585386
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.010860655737704,
-        "y": 2.7842725409836064
+        "x": 5.167,
+        "y": 2.533
       },
       "prevControl": {
-        "x": 5.288846989943732,
-        "y": 2.361356510623916
+        "x": 5.033459862047313,
+        "y": 2.744345763041461
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,22 +33,22 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.5,
-    "maxAcceleration": 2.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
+    "velocity": 1.0,
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "Follow Paths",
+  "folder": "Reef Followers",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 0.0,
     "rotation": 119.99999999999999
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

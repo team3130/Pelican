@@ -1,0 +1,72 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.3009262094189034,
+        "y": 6.886156337590599
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.1396869194295465,
+        "y": 7.086932027662866
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.189065180102916,
+        "y": 7.027765866209262
+      },
+      "prevControl": {
+        "x": 1.3827207771733419,
+        "y": 6.779472759350456
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Go Min Position Event",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Go Min Position"
+        }
+      }
+    },
+    {
+      "name": "Limited Manip Intake",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": -53.75
+  },
+  "reversed": false,
+  "folder": "Feeder Follower Paths",
+  "idealStartingState": {
+    "velocity": 0.5,
+    "rotation": -53.75
+  },
+  "useDefaultConstraints": true
+}
