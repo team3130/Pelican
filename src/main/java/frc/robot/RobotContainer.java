@@ -49,7 +49,6 @@ public class RobotContainer {
   public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
 
   public final MySlewRateLimiter thetaLimiter;
-  private final double thetaLimiterConstant = 4;
   private boolean isAngleReal = false;
   private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
@@ -320,7 +319,8 @@ public class RobotContainer {
            var mag = vector.getNorm() * cos;
            driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
            mag = driveLimiter.calculate(mag);
-           double limit = thetaLimiterConstant/mag;
+           double thetaLimiterConstant = 10;
+           double limit = thetaLimiterConstant /mag;
            thetaLimiter.updateValues(limit, -limit);
            var theta = thetaLimiter.angleCalculate(vector.getAngle().getRadians());
            Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
