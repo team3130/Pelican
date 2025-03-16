@@ -17,8 +17,10 @@ public class Manipulator extends SubsystemBase {
   private final TalonSRX manip;
   private final DigitalInput firstBeam;
   private final DigitalInput secondBeam;
+  private boolean isIntaking = false;
+  private boolean isOuttaking = false;
 
-  private double manipSpeed = 0.4;
+  private double manipSpeed = 0.6;
   public Manipulator() {
     manip = new TalonSRX(Constants.CAN.Manipulator);
     firstBeam = new DigitalInput(Constants.IDs.ManipulatorFirstBeam);
@@ -32,8 +34,9 @@ public class Manipulator extends SubsystemBase {
     manip.set(ControlMode.PercentOutput, manipSpeed);
   }
   public void reverseManip() {
-    manip.set(ControlMode.PercentOutput, -0.3);
+    manip.set(ControlMode.PercentOutput, -manipSpeed);
   }
+  public void manipAtSpeed(double speed) {manip.set(ControlMode.PercentOutput, speed);}
   public void stopManip() {
     manip.set(ControlMode.PercentOutput, 0);
   }
@@ -44,6 +47,12 @@ public class Manipulator extends SubsystemBase {
   public double getManipSpeed() {return manipSpeed;}
   public void setManipSpeed(double value) {manipSpeed = value;}
 
+  public boolean getIsIntaking() {return isIntaking;}
+  public void setIsIntaking(boolean value) {isIntaking = value;}
+
+  public boolean getIsOuttaking() {return isOuttaking;}
+  public void setIsOuttaking(boolean value) {isOuttaking = value;}
+
   public void initSendable(SendableBuilder builder) {
     if (Constants.debugMode) {
       builder.setSmartDashboardType("Manipulator");
@@ -52,6 +61,9 @@ public class Manipulator extends SubsystemBase {
       builder.addBooleanProperty("Manip Second Beam", this::getSecondBeam, null);
 
       builder.addDoubleProperty("Manipulator Speed", this::getManipSpeed, this::setManipSpeed);
+
+      builder.addBooleanProperty("Is Intaking", this::getIsIntaking, this::setIsIntaking);
+      builder.addBooleanProperty("Is Outtaking", this::getIsOuttaking, this::setIsOuttaking);
     }
   }
 

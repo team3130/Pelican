@@ -40,9 +40,12 @@ public class LimitedManipIntake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(manip.getFirstBeam() && !manip.getSecondBeam()) {
-      timer.start();
-      manip.reverseManip();
+    if(elevator.isAtMinPosition()) {
+      if(!manip.getFirstBeam() && !manip.getSecondBeam()) {
+        manip.manipAtSpeed(0.4);
+      } else {
+        manip.runManip();
+      }
     }
   }
 

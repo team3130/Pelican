@@ -82,6 +82,8 @@ public class Robot extends TimedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    CommandScheduler.getInstance().schedule(m_robotContainer.intakeDeactuate());
+    CommandScheduler.getInstance().schedule(m_robotContainer.climberHome());
     //CommandScheduler.getInstance().schedule(m_robotContainer.algaeActuationHome());
   }
 

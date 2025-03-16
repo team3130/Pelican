@@ -22,6 +22,8 @@ import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.BasicClimberDown;
 import frc.robot.commands.Climber.BasicClimberUp;
+import frc.robot.commands.Climber.GoToExtended;
+import frc.robot.commands.Climber.ZeroClimber;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
@@ -87,10 +89,10 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
     NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator));
-    NamedCommands.registerCommand("Go L4", new GoToL4(elevator));
-    NamedCommands.registerCommand("Go L3", new GoToL3(elevator));
-    NamedCommands.registerCommand("Go L2", new GoToL2(elevator));
-    NamedCommands.registerCommand("Go L1", new GoToL1(elevator));
+    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip));
+    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip));
+    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip));
+    NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip));
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator));
     NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator));
 
@@ -122,19 +124,20 @@ public class RobotContainer {
    */
   private void configureBindings() {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
-    driverController.L2().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
+    driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.R2().whileTrue(new LimitedManipIntake(manip, elevator));
-    driverController.R3().whileTrue(new LimitedManipOuttake(manip, elevator));
+    driverController.R2().onTrue(new LimitedManipOuttake(manip, elevator));
+    driverController.L2().onTrue(new SequentialCommandGroup(new LimitedManipIntake(manip, elevator), new LimitedManipIntakeReverse(manip)));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
-    driverController.L3().onTrue(new GoToMinPosition(elevator)); //loading position
-    driverController.R1().onTrue(new GoToL4(elevator));
-    driverController.cross().onTrue(new GoToL3(elevator));
-    driverController.circle().onTrue(new GoToL2(elevator));
-    driverController.triangle().onTrue(new GoToL1(elevator));
-    driverController.povDown().onTrue(new GoToHome(elevator));
+    driverController.L1().onTrue(new GoToMinPosition(elevator)); //loading position
+    driverController.R1().onTrue(new GoToL4(elevator, manip));
+    driverController.square().onTrue(new GoToL3(elevator, manip));
+    driverController.cross().onTrue(new GoToL2(elevator, manip));
+    //driverController.triangle().onTrue(new GoToL1(elevator));
+    driverController.povDown().whileTrue(new GoToHome(elevator));
+    driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -148,25 +151,17 @@ public class RobotContainer {
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
     driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController, logger));
     //driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
-    driverController.L1().whileTrue(new DriveWithTransPID(driveTrain, drive));
-    driverController.povRight().whileTrue(new DriveWithRotPID(driveTrain, drive));
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
-    //driverController.L1().whileTrue(new GoToL1(elevator));
-    //driverController.L1().whileTrue(new GoDown(elevator));
-    //driverController.R3().whileTrue(new GoUp(elevator));
-
-    //driverController.cross().whileTrue(new ToggleAlgaeActuation(algaeIntake));
-    //driverController.R3().whileTrue(new RunAlgaeIntake(algaeIntake));
-    //operatorController.y().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    //operatorController.x().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
-    //driverController.L1().whileTrue(new RunAlgaeOuttake(algaeIntake));
-
-    driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
-    driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    //driverController.povUp().onTrue(new IntakeActuate(coralIntake));
-    //driverController.povDown().onTrue(new IntakeDeactuate(coralIntake));
+    //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
+    //driverController.circle().onTrue(new IntakeActuate(coralIntake));
+    driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
+    //driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
+
+    driverController.triangle().whileTrue(new BasicClimberDown(climber));
+    driverController.povRight().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -179,13 +174,9 @@ public class RobotContainer {
     //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
-    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
-    //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
-    operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    operatorController.a().whileTrue(new IntakeActuate(coralIntake));
+    operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
 
-    operatorController.a().whileTrue(new BasicClimberUp(climber));
-    operatorController.b().whileTrue(new BasicClimberDown(climber));
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
@@ -212,6 +203,7 @@ public class RobotContainer {
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
+    SmartDashboard.putData(climber);
     SmartDashboard.putData(thetaLimiter);
     SmartDashboard.putData(camera);
 
@@ -224,6 +216,8 @@ public class RobotContainer {
 
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
+  public Command climberHome() {return new ZeroClimber(climber);}
+  public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
   public void visionResetOdo() {camera.getVisionOdometry(driveTrain, logger);}
 
   public void sendAutonChoosers() {

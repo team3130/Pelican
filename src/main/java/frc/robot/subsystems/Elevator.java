@@ -31,8 +31,8 @@ public class Elevator extends SubsystemBase {
   private double L1 = 47;
   private double L2 = 59;
   private double L3 = 90;
-  private double L4 = 135;
-  private double maxPosition = 137;
+  private double L4 = 137;
+  private double maxPosition = 139;
 
   private final MotionMagicDutyCycle voltRequest0;
   private TalonFXConfiguration config;
@@ -50,6 +50,7 @@ public class Elevator extends SubsystemBase {
   private boolean atL3 = false;
   private boolean atL4 = false;
   private boolean atMaxPosition = false;
+  private boolean runnable = false;
   public Elevator() {
     leftMotor = new TalonFX(Constants.CAN.ElevatorLeft);
     rightMotor = new TalonFX(Constants.CAN.ElevatorRight);
@@ -82,7 +83,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void goUp() {
-    leftMotor.set(0.2);
+    leftMotor.set(0.4);
   }
 
   public void goToSetpoint(double setpoint) {
@@ -95,6 +96,15 @@ public class Elevator extends SubsystemBase {
       setPosition(0);
       setZeroed(true);
     }
+    setAtHome(true);
+    setAtMinPosition(false);
+    setAtL1(false);
+    setAtL2(false);
+    setAtL3(false);
+    setAtL4(false);
+  }
+  public void goToHomeSetpoint() {
+    goToSetpoint(home);
     setAtHome(true);
     setAtMinPosition(false);
     setAtL1(false);
@@ -165,6 +175,7 @@ public class Elevator extends SubsystemBase {
   public boolean isAtL3() {return atL3;}
   public boolean isAtL4() {return atL4;}
   public boolean isAtMaxPosition() {return atMaxPosition;}
+  public boolean isRunnable() {return runnable;}
   public void setZeroed(boolean value) {zeroed = value;}
   public void setAtHome(boolean value) {
     atHome = value;}
@@ -180,6 +191,8 @@ public class Elevator extends SubsystemBase {
     atL4 = value;}
   public void setAtMaxPosition(boolean value) {
     atMaxPosition = value;}
+  public void setRunnable(boolean value) {
+    runnable = value;}
 
   public double getHome() {return home;}
   public double getMinPosition() {return minPosition;}
@@ -266,6 +279,7 @@ public class Elevator extends SubsystemBase {
       builder.addBooleanProperty("At L3", this::isAtL3, this::setAtL3);
       builder.addBooleanProperty("At L4", this::isAtL4, this::setAtL4);
       builder.addBooleanProperty("At Max Position", this::isAtMaxPosition, this::setAtMaxPosition);
+      builder.addBooleanProperty("Is Runnable", this::isRunnable, this::setRunnable);
     }
   }
   @Override

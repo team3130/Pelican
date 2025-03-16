@@ -28,10 +28,11 @@ public class Climber extends SubsystemBase {
   private double kI = 0;
   private double kD = 0;
 
-  private double climberSpeed = 0.5;
+  private double climberSpeedOut = 1.0;
+  private double climberSpeedIn = -0.5;
 
   private double homePos = 0;
-  private double extendedPos = 0;
+  private double extendedPos = 172;
 
   private boolean isZeroed = false;
   public Climber() {
@@ -40,7 +41,7 @@ public class Climber extends SubsystemBase {
     extendedLimit = new DigitalInput(Constants.IDs.ClimberLimitSwitchExtended);
 
     climber.getConfigurator().apply(new TalonFXConfiguration());
-    climber.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
+    climber.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
 
     voltRequest = new MotionMagicVoltage(0);
     //slot0Configs = new Slot0Configs().withGravityType(GravityTypeValue.Arm_Cosine);
@@ -63,22 +64,26 @@ public class Climber extends SubsystemBase {
   }
 
   public void climbUp() {
-    climber.set(climberSpeed);
+    climber.set(climberSpeedOut);
   }
   public void climbDown() {
-    climber.set(-climberSpeed);
+    climber.set(climberSpeedIn);
   }
   public void stopClimb() {
     climber.set(0);
   }
 
   public double getPosition() {return climber.getPosition().getValueAsDouble();}
+  public void setPosition(double position) {climber.setPosition(position);}
 
   public boolean brokeHomeLimit() {return homeLimit.get();}
   public boolean brokeExtendedLimit() {return extendedLimit.get();}
 
-  public double getClimberSpeed() {return climberSpeed;}
-  public void setClimberSpeed(double value) {climberSpeed = value;}
+  public double getClimberSpeedOut() {return climberSpeedOut;}
+  public void setClimberSpeedOut(double value) {climberSpeedOut = value;}
+
+  public double getClimberSpeedIn() {return climberSpeedIn;}
+  public void setClimberSpeedIn(double speed) {climberSpeedIn = speed;}
 
   public double getHomePos() {return homePos;}
   public void setHomePos(double value) {homePos = value;}
@@ -107,7 +112,8 @@ public class Climber extends SubsystemBase {
       builder.addBooleanProperty("Is Zeroed", this::isZeroed, this::setZeroed);
 
       builder.addDoubleProperty("Position", this::getPosition, null);
-      builder.addDoubleProperty("Climber Speed", this::getClimberSpeed, this::setClimberSpeed);
+      builder.addDoubleProperty("Climber Speed Out", this::getClimberSpeedOut, this::setClimberSpeedOut);
+      builder.addDoubleProperty("Climber Speed In", this::getClimberSpeedIn, this::setClimberSpeedIn);
       builder.addDoubleProperty("Home Position", this::getHomePos, this::setHomePos);
       builder.addDoubleProperty("Extended Position", this::getExtendedPos, this::setExtendedPos);
 
