@@ -8,6 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -294,48 +295,57 @@ public class RobotContainer {
     return (vector.getNorm() <= deadband);
   }
 
+  public ChassisSpeeds getHIDspeedsMPS() {
+    double xAxis = -driverController.getLeftY();
+    double yAxis = -driverController.getLeftX();
+    double rotation = -driverController.getRightX();
+    xAxis = MathUtil.applyDeadband(xAxis, Constants.Swerve.kDeadband);
+    yAxis = MathUtil.applyDeadband(yAxis, Constants.Swerve.kDeadband);
+    rotation = MathUtil.applyDeadband(rotation, Constants.Swerve.kDeadband);
+    xAxis *= Math.abs(xAxis) * Constants.Swerve.maxSpeed;
+    yAxis *= Math.abs(yAxis) * Constants.Swerve.maxSpeed;
+    rotation *= Math.abs(rotation) * Constants.Swerve.maxAngularRate;
+    return new ChassisSpeeds(xAxis, yAxis, rotation);
+  }
+
   public ChassisSpeeds accelLimitVectorDrive(ChassisSpeeds desiredSpeed) {
     double xAxis = desiredSpeed.vxMetersPerSecond;
     double yAxis = desiredSpeed.vyMetersPerSecond;
     double rotation = desiredSpeed.omegaRadiansPerSecond;
     Translation2d vector = new Translation2d(xAxis, yAxis);
-    if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
-      if(isWithinDeadband(vector)) { // Checking if within deadband
-        thetaLimiter.reset(0);
-        driveLimiter.reset(0);
-        return new ChassisSpeeds(0, 0, 0);
-       // TODO: Make sure the chassis speed omegaRadianPerSecond is correct on this one
-      } else { // Robot starts moving
-        isAngleReal = true;
-        thetaLimiter.reset(vector.getAngle().getRadians());
-        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
-        double mag = driveLimiter.calculate(vector.getNorm());
-        vector = new Translation2d(mag, vector.getAngle());
-        return new ChassisSpeeds(vector.getX(), vector.getY(), rotation);
-        //return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+    if(isAngleReal) { //if angle is real, then we were moving 20 ms ago
+      if(vector.getNorm() > 0.0001){ //if the norm is significant, we continue to move
+        double delta = thetaLimiter.getDelta(vector.getAngle().getRadians());
+        double cos = Math.cos(delta);
+         if(cos > 0){ //positive cos means keep moving (turn angle is small)
+           var mag = vector.getNorm() * cos;
+           mag = driveLimiter.calculate(mag);
+           var theta = thetaLimiter.calculate(vector.getAngle().getRadians());
+           Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
+           return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+         }
       }
-    } else { // Robot was moving last cycle
-      double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
-      if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) { // If turn is greater than 90 degrees, slow to a stop
-        thetaLimiter.reset(thetaLimiter.lastValue());
-        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
-        double newMag = driveLimiter.calculate(0);
-        vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
-        if(isWithinDeadband(vector)) { // If new mag is within deadband, slow to a stop
-          isAngleReal = false;
-          vector = new Translation2d(0, 0);
+      //here we continue if we are decelerating, either small mag or big turn.
+      thetaLimiter.reset(thetaLimiter.lastValue());
+      var newMag = driveLimiter.calculate(0);
+      Translation2d newVector = new Translation2d(newMag, thetaLimiter.lastValue());
+      if(newMag < 0.0001){ // we have stopped moving
+        isAngleReal = false;
+      }
+      return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+    }
+      else{ //if angle is not real, then we were standing still 20 ms ago
+        if(vector.getNorm() < 0.0001){ //if the norm is still tiny, then keep idling
+          driveLimiter.reset(0);
+          return new ChassisSpeeds(0,0, rotation);
         }
-        return new ChassisSpeeds(vector.getX(), vector.getY(), rotation);
-         // return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-      }
-      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
-      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Throttle desired vector by angle turned before calculating new magnitude
-      double limit = thetaLimiterConstant/mag;
-      thetaLimiter.updateValues(limit, -limit);
-      Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
-      vector = new Translation2d(mag, angle);
-      return new ChassisSpeeds(vector.getX(), vector.getY(), rotation);
-      //return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+        else{ //if the norm is significant, start driving
+          isAngleReal = true;
+          thetaLimiter.reset(vector.getAngle().getRadians());
+          var mag = driveLimiter.calculate(vector.getNorm());
+          Translation2d newVector = new Translation2d(mag, vector.getAngle());
+          return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+        }
     }
   }
 }
