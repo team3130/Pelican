@@ -58,6 +58,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
+        isAtPP = false;
         var alliance = DriverStation.getAlliance();
         alliance.ifPresent(value -> onBlue = value == DriverStation.Alliance.Blue);
         turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
@@ -122,9 +123,11 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
             else {
                 Rotation2d angle = targetPose.getRotation();
-                double cos = vector.getAngle().getCos();
+                Rotation2d stickAngle = vector.getAngle();
+                Rotation2d diffAngle = angle.minus(stickAngle);
+                double cos = diffAngle.getCos();
                 approach = new Translation2d(1, angle);
-                approach = approach.times(magnitude * (cos / Math.abs(cos)));
+                approach = approach.times(magnitude * cos);
             }
 
             if (!onBlue) {
