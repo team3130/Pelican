@@ -31,6 +31,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     boolean onBlue = true;
+    boolean isAtPP = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -113,8 +114,19 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
             double magnitude = vector.getNorm();
-            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-            approach = approach.times(magnitude);
+
+            Translation2d approach;
+            if (!isAtPP) {
+                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+                approach = approach.times(magnitude);
+            }
+            else {
+                Rotation2d angle = targetPose.getRotation();
+                double cos = vector.getAngle().getCos();
+                approach = new Translation2d(1, angle);
+                approach = approach.times(magnitude * (cos / Math.abs(cos)));
+            }
+
             if (!onBlue) {
                 approach = approach.rotateBy(Rotation2d.k180deg);
             }
@@ -125,6 +137,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
+            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
+            if (!isAtPP) {
+                isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
+            }
         }
     }
 
@@ -144,12 +162,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public boolean isFinished() {
-        double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-        double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-        double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
-        return (tolerance >= distance);
-        //TODO: create another command which starts when robot hits PP. This command should keep the bot on railroads
-        // perpendicular to the reef, so driver can make placing adjustments without worrying about getting unaligned.
+        return false;
     }
 
     /**
