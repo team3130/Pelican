@@ -204,7 +204,7 @@ public class PathChooser {
                     try {
                         chooser.addOption(path.name,
                                 new SequentialCommandGroup(
-                                        new ParallelCommandGroup(
+                                        new ParallelDeadlineGroup(
                                                 pathfindThenFollowPath(path, defaultConstraints),
                                                 new GoToL4(elevator).asProxy()
                                         ),
