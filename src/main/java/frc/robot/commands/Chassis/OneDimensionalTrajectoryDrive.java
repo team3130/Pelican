@@ -126,6 +126,9 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 Rotation2d stickAngle = vector.getAngle();
                 Rotation2d diffAngle = angle.minus(stickAngle);
                 double cos = diffAngle.getCos();
+                if (!onBlue){
+                    cos = -cos;
+                }
                 approach = new Translation2d(1, angle);
                 approach = approach.times(magnitude * cos);
             }
