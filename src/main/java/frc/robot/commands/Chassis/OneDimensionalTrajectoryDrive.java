@@ -137,7 +137,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
                 approach = new Translation2d(1, angle); //made a unit vector with the right rotation
                 approach = approach.times(magnitude * cos); //basically multiplying by our speed
-            } else { //if we are not at pp yet
+            }
+            else { //if we are not at pp yet
                 if (distanceFromReef > distanceFromPP) {
                     approach = driveTrain.getStatePose().getTranslation().minus(targetPose.getTranslation());
                     approach = approach.times(magnitude / approach.getNorm()); //making it a unit vector then multiplying by speed
@@ -145,7 +146,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
                     approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
                     approach = approach.times(magnitude);
                 }
-
+            }
                 if (!onBlue) { //red side driver flipping again
                     approach = approach.rotateBy(Rotation2d.k180deg);
                 }
@@ -163,7 +164,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 if (!isAtPP) {
                     isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
                 }
-            }
         }
     }
 
