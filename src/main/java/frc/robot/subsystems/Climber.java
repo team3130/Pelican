@@ -29,7 +29,7 @@ public class Climber extends SubsystemBase {
   private double kD = 0;
 
   private double climberSpeedOut = 1.0;
-  private double climberSpeedIn = -0.5;
+  private double climberSpeedIn = -0.4;
 
   private double homePos = 0;
   private double extendedPos = 172;

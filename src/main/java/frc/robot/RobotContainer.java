@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.PS5Controller;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -22,12 +23,10 @@ import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
-import frc.robot.commands.Climber.BasicClimberDown;
-import frc.robot.commands.Climber.BasicClimberUp;
-import frc.robot.commands.Climber.GoToExtended;
-import frc.robot.commands.Climber.ZeroClimber;
+import frc.robot.commands.Climber.*;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
+import frc.robot.commands.Elevator.GoToHome;
 import frc.robot.commands.Manipulator.*;
 import frc.robot.sensors.Camera;
 import frc.robot.subsystems.*;
@@ -45,6 +44,7 @@ import java.util.function.BooleanSupplier;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final Timer timer = new Timer();
   public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
 
   public final MySlewRateLimiter thetaLimiter;
@@ -84,7 +84,7 @@ public class RobotContainer {
     camera = new Camera();
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator));
-    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator));
+    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
 
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator));
@@ -126,7 +126,7 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.R2().onTrue(new LimitedManipOuttake(manip, elevator));
+    driverController.R2().onTrue(new LimitedManipOuttake(manip));
     driverController.L2().onTrue(new SequentialCommandGroup(new LimitedManipIntake(manip, elevator), new LimitedManipIntakeReverse(manip)));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
@@ -136,7 +136,7 @@ public class RobotContainer {
     driverController.square().onTrue(new GoToL3(elevator));
     driverController.cross().onTrue(new GoToL2(elevator));
     //driverController.triangle().onTrue(new GoToL1(elevator));
-    driverController.povDown().whileTrue(new GoToHome(elevator));
+    driverController.povDown().whileTrue(new GoHome(elevator));
     driverController.R3().whileTrue(new GoUp(elevator));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
@@ -160,7 +160,7 @@ public class RobotContainer {
     //driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
-    driverController.triangle().whileTrue(new BasicClimberDown(climber));
+    driverController.triangle().whileTrue(new AdvancedClimberDown(climber));
     driverController.povRight().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
@@ -176,6 +176,9 @@ public class RobotContainer {
 
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
+
+    operatorController.rightBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
+    operatorController.leftBumper().whileTrue(new DriveWithRotPID(driveTrain, drive));
 
 
     // Note that X is defined as forward according to WPILib convention,
@@ -221,11 +224,27 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 
+  public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
   public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
-  public void visionResetOdo() {camera.getVisionOdometry(driveTrain, logger);}
+  public void visionResetOdo() {
+    if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
+      if(timer.isRunning()) {
+        if (timer.hasElapsed(0.1)) {
+          if (driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
+            camera.getVisionOdometry(driveTrain, logger);
+          } else {
+            timer.stop();
+            timer.reset();
+          }
+        }
+      } else {
+        timer.start();
+      }
+    }
+  }
 
   public void sendAutonChoosers() {
     SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator);
