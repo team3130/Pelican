@@ -28,6 +28,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final ProfiledPIDController turningController = new ProfiledPIDController(12, 0, 0, rotationConstraints);
     private final Telemetry logger;
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
+    private Pose2d reefPose;
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     boolean onBlue = true;
@@ -98,6 +99,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
             else {
                 targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
+            //reefpose is the point directly on the wall of the reef that we're going towards
+            reefPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.k180deg), Rotation2d.kZero));
             runnable = true;
         }
         logger.updateTarget(targetPose);
@@ -115,25 +118,37 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
             double magnitude = vector.getNorm();
-
             Translation2d approach;
-            if (!isAtPP) {
-                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-                approach = approach.times(magnitude);
-            }
-            else {
+
+            double targetXdiff = targetPose.getX() - driveTrain.getStatePose().getX();
+            double targetYdiff = targetPose.getY() - driveTrain.getStatePose().getY();
+            double distanceFromPP = Math.sqrt((targetXdiff * targetXdiff) + (targetYdiff * targetYdiff));
+            double reefXdiff = reefPose.getX() - driveTrain.getStatePose().getX();
+            double reefYdiff = reefPose.getY() - driveTrain.getStatePose().getY();
+            double distanceFromReef = Math.sqrt((reefXdiff * reefXdiff) + (reefYdiff * reefYdiff));
+
+            if(isAtPP) { //if we are at PP, then we begin railroaded driving, either directly towards or away from the reef
                 Rotation2d angle = targetPose.getRotation();
                 Rotation2d stickAngle = vector.getAngle();
                 Rotation2d diffAngle = angle.minus(stickAngle);
                 double cos = diffAngle.getCos();
-                if (!onBlue){
+                if (!onBlue){ //if we're on red we gotta flip stuff because of driver perspective
                     cos = -cos;
-                }
-                approach = new Translation2d(1, angle);
-                approach = approach.times(magnitude * cos);
+                approach = new Translation2d(1, angle); //made a unit vector with the right rotation
+                approach = approach.times(magnitude * cos); //basically multiplying by our speed
             }
 
-            if (!onBlue) {
+            else { //if we are not at pp yet
+            if(distanceFromReef > distanceFromPP) {
+                approach = driveTrain.getStatePose().getTranslation().minus(targetPose.getTranslation());
+                approach = approach.times(magnitude / approach.getNorm()); //making it a unit vector then multiplying by speed
+            }
+            else{
+                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+                approach = approach.times(magnitude);
+            }
+
+            if (!onBlue) { //red side driver flipping again
                 approach = approach.rotateBy(Rotation2d.k180deg);
             }
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
@@ -143,9 +158,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
+
             double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
             double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
+            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY)); //this is robot's distance from target
             if (!isAtPP) {
                 isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
             }
