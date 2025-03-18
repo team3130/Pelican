@@ -112,7 +112,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void execute() {
-        if(runnable) {
+        if (runnable) {
             ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
             double xAxis = chassisSpeeds.vxMetersPerSecond;
             double yAxis = chassisSpeeds.vyMetersPerSecond;
@@ -127,43 +127,42 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double reefYdiff = reefPose.getY() - driveTrain.getStatePose().getY();
             double distanceFromReef = Math.sqrt((reefXdiff * reefXdiff) + (reefYdiff * reefYdiff));
 
-            if(isAtPP) { //if we are at PP, then we begin railroaded driving, either directly towards or away from the reef
+            if (isAtPP) { //if we are at PP, then we begin railroaded driving, either directly towards or away from the reef
                 Rotation2d angle = targetPose.getRotation();
                 Rotation2d stickAngle = vector.getAngle();
                 Rotation2d diffAngle = angle.minus(stickAngle);
                 double cos = diffAngle.getCos();
-                if (!onBlue){ //if we're on red we gotta flip stuff because of driver perspective
+                if (!onBlue) { //if we're on red we gotta flip stuff because of driver perspective
                     cos = -cos;
+                }
                 approach = new Translation2d(1, angle); //made a unit vector with the right rotation
                 approach = approach.times(magnitude * cos); //basically multiplying by our speed
-            }
+            } else { //if we are not at pp yet
+                if (distanceFromReef > distanceFromPP) {
+                    approach = driveTrain.getStatePose().getTranslation().minus(targetPose.getTranslation());
+                    approach = approach.times(magnitude / approach.getNorm()); //making it a unit vector then multiplying by speed
+                } else {
+                    approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+                    approach = approach.times(magnitude);
+                }
 
-            else { //if we are not at pp yet
-            if(distanceFromReef > distanceFromPP) {
-                approach = driveTrain.getStatePose().getTranslation().minus(targetPose.getTranslation());
-                approach = approach.times(magnitude / approach.getNorm()); //making it a unit vector then multiplying by speed
-            }
-            else{
-                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-                approach = approach.times(magnitude);
-            }
+                if (!onBlue) { //red side driver flipping again
+                    approach = approach.rotateBy(Rotation2d.k180deg);
+                }
+                double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
+                        targetPose.getRotation().getRadians());
+                ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
+                ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
+                driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
+                        withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
+                        withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
 
-            if (!onBlue) { //red side driver flipping again
-                approach = approach.rotateBy(Rotation2d.k180deg);
-            }
-            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
-                    targetPose.getRotation().getRadians());
-            ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
-            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
-            driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
-                    withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
-                    withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
-
-            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY)); //this is robot's distance from target
-            if (!isAtPP) {
-                isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
+                double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+                double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+                double distance = Math.sqrt((diffX * diffX) + (diffY * diffY)); //this is robot's distance from target
+                if (!isAtPP) {
+                    isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
+                }
             }
         }
     }
