@@ -3,32 +3,35 @@ package frc.robot.commands.Chassis;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
-import frc.robot.MySlewRateLimiter;
+import frc.robot.RobotContainer;
 import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final SwerveRequest.FieldCentric drive;
+    private final double tolerance = .03;
+    private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
-            Constants.Swerve.maxAngularRate / (2 * Math.PI),
-            Constants.Swerve.maxAngularRate/Math.PI);
-    private final ProfiledPIDController turningController = new ProfiledPIDController(4, 0, 0, rotationConstraints);
-    private final MySlewRateLimiter turningLimiter;
+            Constants.Swerve.maxAngularRate,
+            Constants.Swerve.maxAngularRate);
+    private final ProfiledPIDController turningController = new ProfiledPIDController(12, 0, 0, rotationConstraints);
     private final Telemetry logger;
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+    boolean onBlue = true;
+    boolean isAtPP = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -38,17 +41,16 @@ public class OneDimensionalTrajectoryDrive extends Command {
             field.getTagPose(10).get(), field.getTagPose(7).get(),
             field.getTagPose(9).get(), field.getTagPose(11).get()};
 
-    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, SwerveRequest.FieldCentric drive,
+    public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, RobotContainer robotContainer,
                                          CommandPS5Controller driverController, Telemetry logger) {
         this.driveTrain = commandSwerveDrivetrain;
-        this.drive = drive;
+        this.robotContainer = robotContainer;
         this.driverController = driverController;
         this.logger = logger;
-        turningLimiter = new MySlewRateLimiter(0.25, -0.25, driveTrain.getStatePose().getRotation().getRotations());
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
-        turningController.enableContinuousInput(-.5, .5);
+        turningController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
@@ -56,7 +58,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
-        boolean onBlue = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue;
+        isAtPP = false;
+        var alliance = DriverStation.getAlliance();
+        alliance.ifPresent(value -> onBlue = value == DriverStation.Alliance.Blue);
+        turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
@@ -71,12 +76,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
         } else {
             double lowestDistance = 1000;
-            for(int i = 0; i < redCoralTagPoses.length; i++) {
-                Pose2d currentPose = redCoralTagPoses[i].toPose2d();
+            for (Pose3d redCoralTagPose : redCoralTagPoses) {
+                Pose2d currentPose = redCoralTagPose.toPose2d();
                 double x = currentPose.getX() - driveTrain.getStatePose().getX();
                 double y = currentPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
-                if(distance < lowestDistance) {
+                if (distance < lowestDistance) {
                     lowestDistance = distance;
                     targetPose = currentPose;
                 }
@@ -105,17 +110,45 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            Translation2d approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-            approach = approach.div(approach.getNorm());
-            Translation2d joystick = new Translation2d(driverController.getLeftX(), driverController.getLeftY());
-            double magnitude = (-joystick.getY() * approach.getX()) + (-joystick.getX() * approach.getY()); //x and y should be flipped for field oriented
-            magnitude *= Constants.Swerve.maxSpeed;
-            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRotations(), targetPose.getRotation().getRotations());
-            driveTrain.setControl(
-                    drive.withVelocityX(approach.getX() * magnitude)
-                            .withVelocityY(approach.getY() * magnitude)
-                            .withRotationalRate(rotation)
-            );
+            ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
+            double xAxis = chassisSpeeds.vxMetersPerSecond;
+            double yAxis = chassisSpeeds.vyMetersPerSecond;
+            Translation2d vector = new Translation2d(xAxis, yAxis);
+            double magnitude = vector.getNorm();
+
+            Translation2d approach;
+            if (!isAtPP) {
+                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+                approach = approach.times(magnitude);
+            }
+            else {
+                Rotation2d angle = targetPose.getRotation();
+                Rotation2d stickAngle = vector.getAngle();
+                Rotation2d diffAngle = angle.minus(stickAngle);
+                double cos = diffAngle.getCos();
+                if (!onBlue){
+                    cos = -cos;
+                }
+                approach = new Translation2d(1, angle);
+                approach = approach.times(magnitude * cos);
+            }
+
+            if (!onBlue) {
+                approach = approach.rotateBy(Rotation2d.k180deg);
+            }
+            double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
+                    targetPose.getRotation().getRadians());
+            ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
+            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
+            driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
+                    withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
+                    withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
+            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
+            if (!isAtPP) {
+                isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
+            }
         }
     }
 
@@ -127,7 +160,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      * Returning false will result in the command never ending automatically. It may still be
      * cancelled manually or interrupted by another command. Hard coding this command to always
      * return true will result in the command executing once and finishing immediately. It is
-     * recommended to use * {@link edu.wpi.first.wpilibj2.command.InstantCommand InstantCommand}
+     * recommended to use * {@link InstantCommand InstantCommand}
      * for such an operation.
      * </p>
      *
@@ -135,7 +168,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public boolean isFinished() {
-        // TODO: Make this return true when this Command no longer needs to run execute()
         return false;
     }
 
