@@ -54,7 +54,7 @@ public class RobotContainer {
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
   private final Climber climber;
-  private final Camera camera;
+  private final Camera Camera;
   private final LEDs LED;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
@@ -80,7 +80,7 @@ public class RobotContainer {
     coralIntake = new CoralIntake();
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
-    camera = new Camera();
+    Camera = new Camera();
     LED = new LEDs(elevator, manip);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
