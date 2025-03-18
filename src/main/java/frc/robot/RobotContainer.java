@@ -60,8 +60,9 @@ public class RobotContainer {
   private final LEDs LED;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
-  private final Camera camera;
+  
           .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
+  private final Camera camera;
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
