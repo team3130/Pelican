@@ -29,6 +29,7 @@ import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Manipulator.*;
 import frc.robot.sensors.Camera;
 import frc.robot.subsystems.*;
+import frc.robot.subsystems.LEDs;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
