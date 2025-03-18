@@ -205,6 +205,13 @@ public class PathChooser {
                         chooser.addOption(path.name,
                                 new SequentialCommandGroup(
                                         new ParallelDeadlineGroup(
+                                                new SequentialCommandGroup(
+                                                        new WaitCommand(0.5),
+                                                        new SequentialCommandGroup(
+                                                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                                                new LimitedManipIntakeReverse(manip).asProxy()
+                                                        )
+                                                ),
                                                 pathfindThenFollowPath(path, defaultConstraints),
                                                 new GoToL4(elevator).asProxy()
                                         ),

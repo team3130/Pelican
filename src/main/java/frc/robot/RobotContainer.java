@@ -180,6 +180,10 @@ public class RobotContainer {
     operatorController.rightBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     operatorController.leftBumper().whileTrue(new DriveWithRotPID(driveTrain, drive));
 
+    if(Constants.debugMode) {
+      operatorController.b().onTrue(new IntakeActuateToSetpoint(coralIntake));
+    }
+
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
@@ -222,6 +226,9 @@ public class RobotContainer {
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
+  public void basicVisionResetOdo() {
+    camera.getVisionOdometry(driveTrain, logger);
+  }
   public void visionResetOdo() {
     if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
       if(timer.isRunning()) {
