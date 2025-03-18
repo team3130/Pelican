@@ -9,7 +9,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
-public class UnlimitedReverseRunManip extends Command {
+public class AutonLimitedManipIntake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
   private final Elevator elevator;
@@ -19,7 +19,7 @@ public class UnlimitedReverseRunManip extends Command {
    *
    * @param manip The subsystem used by this command.
    */
-  public UnlimitedReverseRunManip(Manipulator manip, Elevator elevator) {
+  public AutonLimitedManipIntake(Manipulator manip, Elevator elevator) {
     this.manip = manip;
     this.elevator = elevator;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -29,14 +29,16 @@ public class UnlimitedReverseRunManip extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    manip.runManip();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (elevator.isAtL4()) {
-      manip.reverseManip();
+    if(!manip.getFirstBeam() && !manip.getSecondBeam()) {
+      manip.manipAtSpeed(0.4);
+      } else {
+      manip.runManip();
     }
   }
 
@@ -49,6 +51,6 @@ public class UnlimitedReverseRunManip extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return manip.getFirstBeam() && !manip.getSecondBeam();
   }
 }
