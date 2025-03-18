@@ -58,7 +58,7 @@ public class RobotContainer {
   private final Climber climber;
   private final Camera camera;
   public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-          .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
+          .withDeadband(Constants.Swerve.maxSpeed * 0.001).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.001) // Deadband is very small but nonzero
           .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
