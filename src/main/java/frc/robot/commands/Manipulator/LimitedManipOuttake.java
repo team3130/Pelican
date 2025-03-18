@@ -4,6 +4,7 @@
 
 package frc.robot.commands.Manipulator;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LEDs;
@@ -15,6 +16,7 @@ public class LimitedManipOuttake extends Command {
   private final Manipulator manip;
   private final Elevator elevator;
   private final LEDs LED;
+  private final Timer timer = new Timer();
 
   /**
    * Creates a new ExampleCommand.
@@ -33,6 +35,8 @@ public class LimitedManipOuttake extends Command {
   @Override
   public void initialize() {
     LED.setLEDstateManipulator();
+    timer.stop();
+    timer.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -47,11 +51,12 @@ public class LimitedManipOuttake extends Command {
   @Override
   public void end(boolean interrupted) {
     manip.stopManip();
+    timer.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return manip.getSecondBeam();
+    return (manip.getSecondBeam() && manip.getFirstBeam()) || timer.hasElapsed(10);
   }
 }

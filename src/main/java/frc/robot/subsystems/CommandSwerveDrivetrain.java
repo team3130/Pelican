@@ -17,6 +17,8 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.pathfinding.LocalADStar;
+import com.pathplanner.lib.pathfinding.Pathfinding;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -183,8 +185,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                     new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                            new PIDConstants(0.1, 0, 0), // Translation PID constants
-                            new PIDConstants(0.1, 0, 0) // Rotation PID constants
+                            new PIDConstants(25, 0.5, 0.04), // Translation PID constants
+                            new PIDConstants(12, 0, 0) // Rotation PID constants
                     ),
                     config, //the robot configuration
                     () -> {
@@ -205,7 +207,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path.
         PathConstraints constraints = new PathConstraints(
-                1, 1,
+                2.5, 1,
                 Units.degreesToRadians(540), Units.degreesToRadians(720));
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
@@ -217,7 +219,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     //targetPose must be the final desired pose of the robot in Pose2d
     public Translation2d produceOneDimensionalTrajectory(Pose2d targetPose) {
 
-        double radius = 1;
+        double radius = .5;
         Transform2d goLeft = new Transform2d(new Translation2d(radius, Rotation2d.kCCW_90deg), Rotation2d.kZero);
         Translation2d OLeft = targetPose.plus(goLeft).getTranslation();
         Transform2d goRight = new Transform2d(new Translation2d(radius, Rotation2d.kCW_90deg), Rotation2d.kZero);
@@ -243,9 +245,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         } else {
             Translation2d radiusVector = targetPose.getTranslation().minus(chosenO);
             double RdotD = (radiusVector.getX() * distance.getX()) + (radiusVector.getY() * distance.getY());
-            double denominator = 2 * ((radius * radius) - RdotD);
+            double denominator = 2 * ((radius * radius) + RdotD);
             double numerator = (radius * radius) - (distance.getNorm() * distance.getNorm());
-            Translation2d littleR = distance.plus(radiusVector.times(numerator/denominator));
+            Translation2d littleR = distance.minus(radiusVector.times(numerator/denominator));
             if(rotateClockwise) {
                 return new Translation2d(1, littleR.getAngle().plus(Rotation2d.kCW_90deg));
             } else {

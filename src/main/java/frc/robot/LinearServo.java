@@ -48,6 +48,7 @@ public class LinearServo extends Servo {
         }else{
             curPos = setPos;
         }
+        lastTime = Timer.getFPGATimestamp();
     }
 
     /**

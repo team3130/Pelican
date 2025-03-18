@@ -8,31 +8,34 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.PS5Controller;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
-import frc.robot.commands.Climber.BasicClimberDown;
-import frc.robot.commands.Climber.BasicClimberUp;
-import frc.robot.commands.Climber.GoToExtended;
-import frc.robot.commands.Climber.ZeroClimber;
+import frc.robot.commands.Climber.*;
 import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
+import frc.robot.commands.Elevator.GoToHome;
 import frc.robot.commands.Manipulator.*;
 import frc.robot.sensors.Camera;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.LEDs;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.util.function.BooleanSupplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -42,10 +45,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  private final Timer timer = new Timer();
   public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
 
   public final MySlewRateLimiter thetaLimiter;
-  private final double thetaLimiterConstant = 4;
   private boolean isAngleReal = false;
   private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
@@ -54,10 +57,10 @@ public class RobotContainer {
   private final CoralIntake coralIntake;
   private final AlgaeIntake algaeIntake;
   private final Climber climber;
-  private final Camera Camera;
   private final LEDs LED;
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
+  private final Camera camera;
           .withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Use velocity control for drive motors
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -66,7 +69,7 @@ public class RobotContainer {
 
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
-  public final CommandSwerveDrivetrain driveTrain = frc.robot.TunerConstants.createDrivetrain();
+  public final CommandSwerveDrivetrain driveTrain = TunerConstants.createDrivetrain();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
@@ -110,21 +113,24 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
+
+    sendAutonChoosers();
   }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * {@link Trigger#Trigger(BooleanSupplier)} constructor with an arbitrary
    * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * CommandGenericHID}'s subclasses for {@link
+   * CommandXboxController Xbox}/{@link CommandPS4Controller
+   * PS4} controllers or {@link CommandJoystick Flight
    * joysticks}.
    */
   private void configureBindings() {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
+    driverController.L2().onTrue(new SequentialCommandGroup(new LimitedManipIntake(manip, elevator), new LimitedManipIntakeReverse(manip)));
     driverController.R2().whileTrue(new LimitedManipIntakeOuttake(manip, elevator, LED));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
@@ -143,23 +149,23 @@ public class RobotContainer {
     //driverController.triangle().whileTrue(new UpdateOdoFromVision(driveTrain, camera, logger));
     //driverController.square().whileTrue(new UpdateOdoFromPose(driveTrain, camera));
     //camera.setDefaultCommand(new UpdateSmartDashFromVisionOnly(driveTrain, camera, logger));
-    camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
+    //camera.setDefaultCommand(new UpdateOdoFromVision(driveTrain, camera, logger));
 
     //driverController.square().whileTrue(new TopALeftFolllowPath(driveTrain));
     //driverController.triangle().whileTrue(new TopARightFolllowPath(driveTrain));2
-    driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, drive, driverController, logger));
+    driverController.axisMagnitudeGreaterThan(PS5Controller.Axis.kRightY.value, 0.7).whileTrue(new OneDimensionalTrajectoryDrive(driveTrain, this, driverController, logger));
     //driverController.povRight().whileTrue(new FollowClosestPath(driveTrain, driverController));
     //driverController.povRight().whileTrue(new DriveAtVelocity(driveTrain, drive));
 
     //driverController.povLeft().whileTrue(new UnlimitedCoralOuttake(coralIntake));
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    driverController.povRight().onTrue(new IntakeActuate(coralIntake));
+    //driverController.circle().onTrue(new IntakeActuate(coralIntake));
     driverController.povLeft().onTrue(new IntakeDeactuate(coralIntake));
-    driverController.square().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
+    //driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
-    driverController.triangle().whileTrue(new BasicClimberDown(climber));
-    //driverController.square().whileTrue(new BasicClimberUp(climber));
+    driverController.triangle().whileTrue(new AdvancedClimberDown(climber));
+    driverController.povRight().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -172,18 +178,30 @@ public class RobotContainer {
     //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
-    operatorController.rightTrigger().whileTrue(new UnlimitedRunManip(manip, elevator));
-    //operatorController.leftTrigger().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
-    operatorController.rightTrigger().whileTrue(new UnlimitedCoralIntake(coralIntake));
-    operatorController.leftTrigger().whileTrue(new UnlimitedCoralOuttake(coralIntake));
+    operatorController.a().whileTrue(new IntakeActuate(coralIntake));
+    operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
+
+    operatorController.rightBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
+    operatorController.leftBumper().whileTrue(new DriveWithRotPID(driveTrain, drive));
+
+    if(Constants.debugMode) {
+      operatorController.b().onTrue(new IntakeActuateToSetpoint(coralIntake));
+    }
 
 
     // Note that X is defined as forward according to WPILib convention,
     // and Y is defined as to the left according to WPILib convention.
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
-            driveTrain.applyRequest(this::accelLimitVectorDrive)
-    );
+            driveTrain.applyRequest(() -> {
+              ChassisSpeeds chassisSpeed = accelLimitVectorDrive(getHIDspeedsMPS());
+              return drive.withVelocityX(chassisSpeed.vxMetersPerSecond)
+                      .withVelocityY(chassisSpeed.vyMetersPerSecond)
+                      .withRotationalRate(chassisSpeed.omegaRadiansPerSecond);
+            }));
+
+
+            //driveTrain.applyRequest(this::accelLimitVectorDrive)
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
@@ -203,6 +221,7 @@ public class RobotContainer {
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
+    SmartDashboard.putData(climber);
     SmartDashboard.putData(thetaLimiter);
     SmartDashboard.putData(camera);
 
@@ -213,9 +232,50 @@ public class RobotContainer {
     return autoChooser.getSelected();
   }
 
-  public Command elevatorHome() {return new GoToHome(elevator, LED);}
+  public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
+  public Command elevatorHome() {return new GoToHome(elevator);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber);}
+  public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
+  public void basicVisionResetOdo() {
+    camera.getVisionOdometry(driveTrain, logger);
+  }
+  public void visionResetOdo() {
+    if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
+      if(timer.isRunning()) {
+        if (timer.hasElapsed(0.1)) {
+          if (driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
+            camera.getVisionOdometry(driveTrain, logger);
+          } else {
+            timer.stop();
+            timer.reset();
+          }
+        }
+      } else {
+        timer.start();
+      }
+    }
+  }
+
+  public void sendAutonChoosers() {
+    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator);
+    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2", manip, elevator);
+    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3", manip, elevator);
+    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1", manip, elevator);
+    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2", manip, elevator);
+    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3", manip, elevator);
+
+    SmartDashboard.putData("Coral 1 Path", pathChooser1);
+    SmartDashboard.putData("Coral 2 Path", pathChooser2);
+    SmartDashboard.putData("Coral 3 Path", pathChooser3);
+    SmartDashboard.putData("Station 1 Path", stationChooser1);
+    SmartDashboard.putData("Station 2 Path", stationChooser2);
+    SmartDashboard.putData("Station 3 Path", stationChooser3);
+  }
+
+  public SequentialCommandGroup configureAuton() {
+    return PathChooser.buildAutoCommand(elevator);
+  }
 
   public double getModularSpeed() {
     if(elevator.brokeBottomLimitSwitch()) {
@@ -227,8 +287,12 @@ public class RobotContainer {
     }
   }
 
+  public double getElevatorRealPercent() {
+    return getElevatorPercentSpeed() / Constants.Swerve.maxSpeed;
+  }
+
   public double getElevatorPercentSpeed() {
-    double maxSpeed = 2.75;
+    double maxSpeed = Constants.Swerve.maxSpeed;
     double minSpeed = 1;
     double range = maxSpeed - minSpeed;
     double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
@@ -258,44 +322,64 @@ public class RobotContainer {
     return (vector.getNorm() <= deadband);
   }
 
-  public SwerveRequest accelLimitVectorDrive() {
-    double xAxis = -driverController.getLeftY() * Math.abs(driverController.getLeftY()) * getElevatorPercentSpeed();
-    double yAxis = -driverController.getLeftX() * Math.abs(driverController.getLeftX()) * getElevatorPercentSpeed();
-    double rotation = -driverController.getRightX() * Constants.Swerve.maxAngularRate;
+  public ChassisSpeeds getHIDspeedsMPS() {
+    double xAxis = -driverController.getLeftY();
+    double yAxis = -driverController.getLeftX();
+    double rotation = -driverController.getRightX();
+    xAxis = MathUtil.applyDeadband(xAxis, Constants.Swerve.kDeadband);
+    yAxis = MathUtil.applyDeadband(yAxis, Constants.Swerve.kDeadband);
+    rotation = MathUtil.applyDeadband(rotation, Constants.Swerve.kDeadband);
+    xAxis *= Math.abs(xAxis) * Constants.Swerve.maxSpeed * getElevatorRealPercent();
+    yAxis *= Math.abs(yAxis) * Constants.Swerve.maxSpeed * getElevatorRealPercent();
+    rotation *= Math.abs(rotation) * Constants.Swerve.maxAngularRate * getElevatorRealPercent();
+    return new ChassisSpeeds(xAxis, yAxis, rotation);
+  }
+
+  public ChassisSpeeds accelLimitVectorDrive(ChassisSpeeds desiredSpeed) {
+    double xAxis = desiredSpeed.vxMetersPerSecond;
+    double yAxis = desiredSpeed.vyMetersPerSecond;
+    double rotation = desiredSpeed.omegaRadiansPerSecond;
     Translation2d vector = new Translation2d(xAxis, yAxis);
-    if(!isAngleReal) { // Evaluates to true when robot was not moving last cycle
-      if(isWithinDeadband(vector)) { // Checking if within deadband
-        thetaLimiter.reset(0);
+    if(isAngleReal) { //if angle is real, then we were moving 20 ms ago
+      if(vector.getNorm() > 0.001){ //if the norm is significant, we continue to move
+        double delta = thetaLimiter.getDelta(vector.getAngle().getRadians());
+        double cos = Math.cos(delta);
+         if(cos > 0){ //positive cos means keep moving (turn angle is small)
+           var mag = vector.getNorm() * cos;
+           driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+           mag = driveLimiter.calculate(mag);
+           double thetaLimiterConstant = 10;
+           double limit = thetaLimiterConstant /mag;
+           thetaLimiter.updateValues(limit, -limit);
+           var theta = thetaLimiter.angleCalculate(vector.getAngle().getRadians());
+           Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
+           return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+         }
+      }
+      //here we continue if we are decelerating, either small mag or big turn.
+      thetaLimiter.reset(thetaLimiter.lastValue());
+      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+      var newMag = driveLimiter.calculate(0);
+      Rotation2d angle = new Rotation2d(thetaLimiter.lastValue());
+      Translation2d newVector = new Translation2d(newMag, angle);
+      if(newMag < 0.001){ // we have stopped moving
+        isAngleReal = false;
+      }
+      return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+    }
+    else { //if angle is not real, then we were standing still 20 ms ago
+      if(vector.getNorm() < 0.001){ //if the norm is still tiny, then keep idling
         driveLimiter.reset(0);
-        return drive.withVelocityX(xAxis).withVelocityY(yAxis).withRotationalRate(rotation);
-      } else { // Robot starts moving
+        return new ChassisSpeeds(0,0, rotation);
+      }
+      else { //if the norm is significant, start driving
         isAngleReal = true;
         thetaLimiter.reset(vector.getAngle().getRadians());
-        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
-        double mag = driveLimiter.calculate(vector.getNorm());
-        vector = new Translation2d(mag, vector.getAngle());
-        return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
+        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+        var mag = driveLimiter.calculate(vector.getNorm());
+        Translation2d newVector = new Translation2d(mag, vector.getAngle());
+        return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
       }
-    } else { // Robot was moving last cycle
-      double theta  = thetaLimiter.getDelta(vector.getAngle().getRadians());
-      if(Math.cos(theta) <= 0 || isWithinDeadband(vector)) { // If turn is greater than 90 degrees, slow to a stop
-        thetaLimiter.reset(thetaLimiter.lastValue());
-        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
-        double newMag = driveLimiter.calculate(0);
-        vector = new Translation2d(newMag, new Rotation2d(thetaLimiter.lastValue()));
-        if(isWithinDeadband(vector)) { // If new mag is within deadband, slow to a stop
-          isAngleReal = false;
-          vector = new Translation2d(0, 0);
-        }
-          return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
-      }
-      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(vector));
-      double mag = driveLimiter.calculate(vector.getNorm() * Math.cos(theta)); // Throttle desired vector by angle turned before calculating new magnitude
-      double limit = thetaLimiterConstant/mag;
-      thetaLimiter.updateValues(limit, -limit);
-      Rotation2d angle = new Rotation2d(thetaLimiter.angleCalculate(vector.getAngle().getRadians())); //calculate method with -pi to pi bounds
-      vector = new Translation2d(mag, angle);
-      return drive.withVelocityX(vector.getX()).withVelocityY(vector.getY()).withRotationalRate(rotation);
     }
   }
 }

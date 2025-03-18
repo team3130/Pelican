@@ -33,51 +33,52 @@ public class LimitedManipIntakeOuttake extends Command {
         addRequirements(manip);
     }
 
-    // Called when the command is initially scheduled.
-    @Override
-    public void initialize() {
-        LED.setLEDstateManipulator();
-        if(elevator.isAtMinPosition()) {
-            isIntaking = true;
-            isOuttaking = false;
-            manip.runManip();
-        }
+        
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize() {
+    if(elevator.isAtMinPosition()) {
+      isIntaking = true;
+      isOuttaking = false;
+      manip.runManip();
     }
+  }
 
-    // Called every time the scheduler runs while the command is scheduled.
-    @Override
-    public void execute() {
-        if (isIntaking) {
-            if(manip.getFirstBeam() && !manip.getSecondBeam()) {
-                timer.start();
-                manip.reverseManip();
-            } else {
-                manip.runManip();
-            }
-        } else if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
-            manip.runManip();
-            isIntaking = false;
-            isOuttaking = true;
-        }
+  // Called every time the scheduler runs while the command is scheduled.
+  @Override
+  public void execute() {
+    LED.setLEDstateManipulator();
+    if (elevator.isAtMinPosition()) {
+      isIntaking = true;
+      isOuttaking = false;
+      if(manip.getFirstBeam() && !manip.getSecondBeam()) {
+        timer.start();
+        manip.reverseManip();
+      }
+    } else if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
+      manip.runManip();
+      isIntaking = false;
+      isOuttaking = true;
     }
+  }
 
-    // Called once the command ends or is interrupted.
-    @Override
-    public void end(boolean interrupted) {
-        manip.stopManip();
-        timer.stop();
-        timer.reset();
-    }
+  // Called once the command ends or is interrupted.
+  @Override
+  public void end(boolean interrupted) {
+    manip.stopManip();
+    timer.stop();
+    timer.reset();
+  }
 
-    // Returns true when the command should end.
-    @Override
-    public boolean isFinished() {
-        if(isIntaking) {
-            return timer.get() < 0.5;
-        } else if(isOuttaking) {
-            return manip.getSecondBeam();
-        }
-        return false;
+  // Returns true when the command should end.
+  @Override
+  public boolean isFinished() {
+    if(isIntaking) {
+      return timer.get() < 0.5;
+    } else if(isOuttaking) {
+      return manip.getSecondBeam();
     }
+    return false;
+  }
 }
 

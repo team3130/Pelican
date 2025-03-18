@@ -2,26 +2,25 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.CoralIntake;
+package frc.robot.commands.Climber;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.CoralIntake;
+import frc.robot.subsystems.Climber;
 
 /** An example command that uses an example subsystem. */
-public class IntakeActuateToSetpoint extends Command {
+public class AdvancedClimberDown extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final CoralIntake coralIntake;
+  private final Climber climber;
 
   /**
    * Creates a new ExampleCommand.
    *
-   * @param coralIntake The subsystem used by this command.
+   * @param climber The subsystem used by this command.
    */
-  public IntakeActuateToSetpoint(CoralIntake coralIntake) {
-    this.coralIntake = coralIntake;
+  public AdvancedClimberDown(Climber climber) {
+    this.climber = climber;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(coralIntake);
+    addRequirements(climber);
   }
 
   // Called when the command is initially scheduled.
@@ -33,13 +32,16 @@ public class IntakeActuateToSetpoint extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    coralIntake.gotoSetpoint1(0);
-    coralIntake.gotoSetpoint2(0);
+    if(climber.getPosition() < 10) {
+      climber.climbDown();
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    climber.stopClimb();
+  }
 
   // Returns true when the command should end.
   @Override

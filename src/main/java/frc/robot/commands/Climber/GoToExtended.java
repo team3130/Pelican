@@ -27,7 +27,7 @@ public class GoToExtended extends Command {
   @Override
   public void initialize() {
     if(climber.isZeroed()) {
-      climber.climbDown();
+      climber.climbUp();
     }
   }
 

@@ -34,24 +34,18 @@ public class GoToL1 extends Command {
   @Override
   public void initialize() {
     LED.setLEDstateElevator();
-    if(elevator.isAtMinPosition()) {
-        elevator.setRunnable(!manip.getFirstBeam() && !manip.getSecondBeam());
+    if (elevator.isZeroed()) {
+      elevator.goToL1();
     } else {
-      elevator.setRunnable(true);
+      elevator.goToHome();
+      elevator.goToL1();
     }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(elevator.isRunnable()) {
-      if (elevator.isZeroed()) {
-        elevator.goToL1();
-      } else {
-        elevator.goToHome();
-        elevator.goToL1();
-      }
-    }
+
   }
 
   // Called once the command ends or is interrupted.
