@@ -20,6 +20,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double tolerance = .03;
+    private final double minLogicDistance = .5;
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -109,6 +110,9 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void execute() {
+        double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+        double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+        double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
         if(runnable) {
             ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
             double xAxis = chassisSpeeds.vxMetersPerSecond;
@@ -139,13 +143,15 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                     targetPose.getRotation().getRadians());
             ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
+            if(minLogicDistance > distance) {
+                Translation2d desiredVector = new Translation2d(targetPose.getX() - driveTrain.getStatePose().getX(), targetPose.getY() - driveTrain.getStatePose().getY());
+                desiredVector.times(magnitude/desiredVector.getNorm()); //making desired a unit and then multiplying by speed
+                desiredDrive = new ChassisSpeeds(desiredVector.getX(), desiredVector.getY(), rotation);
+            }
             ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
-            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
             if (!isAtPP) {
                 isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
             }
