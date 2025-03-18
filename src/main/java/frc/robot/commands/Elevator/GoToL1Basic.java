@@ -6,6 +6,7 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
 public class GoToL1Basic extends Command {
