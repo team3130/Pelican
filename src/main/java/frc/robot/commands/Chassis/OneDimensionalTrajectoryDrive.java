@@ -143,7 +143,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                     targetPose.getRotation().getRadians());
             ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
-            if(minLogicDistance > distance) {
+            if(minLogicDistance > distance && !isAtPP) {
                 Translation2d desiredVector = new Translation2d(targetPose.getX() - driveTrain.getStatePose().getX(), targetPose.getY() - driveTrain.getStatePose().getY());
                 desiredVector.times(magnitude/desiredVector.getNorm()); //making desired a unit and then multiplying by speed
                 desiredDrive = new ChassisSpeeds(desiredVector.getX(), desiredVector.getY(), rotation);
