@@ -33,7 +33,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     boolean onBlue = true;
     boolean isAtPP = false;
-    boolean isInMinLogicDist = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -153,9 +152,13 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 desiredDrive = new ChassisSpeeds(desiredVector.getX(), desiredVector.getY(), rotation);
             }
             ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
-            driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
-                    withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
-                    withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
+            ChassisSpeeds secondLimitedDesiredDrive = limitedDesiredDrive;
+            if(minLogicDistance > distance && !isAtPP) {
+                secondLimitedDesiredDrive = limitedDesiredDrive.times(2);
+            }
+            driveTrain.setControl(robotContainer.drive.withVelocityX(secondLimitedDesiredDrive.vxMetersPerSecond).
+                    withVelocityY(secondLimitedDesiredDrive.vyMetersPerSecond).
+                    withRotationalRate(secondLimitedDesiredDrive.omegaRadiansPerSecond));
             if (!isAtPP) {
                 isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
             }
