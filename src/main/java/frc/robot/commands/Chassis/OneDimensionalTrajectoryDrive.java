@@ -62,7 +62,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
         isAtPP = false;
         var alliance = DriverStation.getAlliance();
         alliance.ifPresent(value -> onBlue = value == DriverStation.Alliance.Blue);
-        turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
+        turningController.reset(driveTrain.getStatePose().getRotation().getRadians()); //field oriented
         if(onBlue) {
             double lowestDistance = 1000;
             for(int i = 0; i < blueCoralTagPoses.length; i++) {
@@ -88,7 +88,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
             }
         }
-        targetPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.kZero), Rotation2d.k180deg)); //.8 is in meters
+        targetPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.kZero), Rotation2d.k180deg));
+        //.8 is in meters, and targetPose is field oriented
         double deadband = 0.7;
         double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
@@ -100,7 +101,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
             //reefpose is the point directly on the wall of the reef that we're going towards
-            reefPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.k180deg), Rotation2d.kZero));
+            reefPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.kZero), Rotation2d.kZero));
+            //reefPose is field oriented
             runnable = true;
         }
         logger.updateTarget(targetPose);
@@ -113,10 +115,13 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if (runnable) {
-            ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
-            double xAxis = chassisSpeeds.vxMetersPerSecond;
-            double yAxis = chassisSpeeds.vyMetersPerSecond;
-            Translation2d vector = new Translation2d(xAxis, yAxis);
+            ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS(); //this returns driver (human) oriented values
+            double xAxis = chassisSpeeds.vxMetersPerSecond; //human oriented
+            double yAxis = chassisSpeeds.vyMetersPerSecond; //human oriented
+            Translation2d vector = new Translation2d(xAxis, yAxis); //human oriented
+            if(!onBlue){
+                vector = vector.rotateBy(Rotation2d.k180deg);
+            } //now vector is field oriented
             double magnitude = vector.getNorm();
             Translation2d approach;
 
@@ -126,30 +131,25 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double reefXdiff = reefPose.getX() - driveTrain.getStatePose().getX();
             double reefYdiff = reefPose.getY() - driveTrain.getStatePose().getY();
             double distanceFromReef = Math.sqrt((reefXdiff * reefXdiff) + (reefYdiff * reefYdiff));
+            //all of this is field oriented
 
             if (isAtPP) { //if we are at PP, then we begin railroaded driving, either directly towards or away from the reef
                 Rotation2d angle = targetPose.getRotation();
-                Rotation2d stickAngle = vector.getAngle();
-                Rotation2d diffAngle = angle.minus(stickAngle);
+                Rotation2d driveAngle = vector.getAngle();
+                Rotation2d diffAngle = angle.minus(driveAngle);
                 double cos = diffAngle.getCos();
-                if (!onBlue) { //if we're on red we gotta flip stuff because of driver perspective
-                    cos = -cos;
-                }
                 approach = new Translation2d(1, angle); //made a unit vector with the right rotation
                 approach = approach.times(magnitude * cos); //basically multiplying by our speed
             }
             else { //if we are not at pp yet
-                if (distanceFromReef > distanceFromPP) {
-                    approach = driveTrain.getStatePose().getTranslation().minus(targetPose.getTranslation());
+                if (distanceFromReef < distanceFromPP) {
+                    approach = targetPose.minus(driveTrain.getStatePose()).getTranslation(); // field oriented
                     approach = approach.times(magnitude / approach.getNorm()); //making it a unit vector then multiplying by speed
                 } else {
                     approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
                     approach = approach.times(magnitude);
                 }
             }
-                if (!onBlue) { //red side driver flipping again
-                    approach = approach.rotateBy(Rotation2d.k180deg);
-                }
                 double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                         targetPose.getRotation().getRadians());
                 ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
@@ -157,7 +157,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                         withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                         withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
-
                 double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
                 double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((diffX * diffX) + (diffY * diffY)); //this is robot's distance from target
