@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public class Camera implements Sendable, Subsystem {
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
-    private final Transform3d robotToCamera = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(Math.PI,0,0));
+    private final Transform3d robotToCamera = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(Math.PI,0,-0.005));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
