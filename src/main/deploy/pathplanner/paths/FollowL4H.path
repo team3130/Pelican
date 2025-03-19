@@ -31,30 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Go L4 Event",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Go L4 Event"
-        }
-      }
-    },
-    {
-      "name": "Limited Manip Outtake Event",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Limited Manip Outtake"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 0.5,
     "maxAcceleration": 1.0,
@@ -70,7 +47,7 @@
   "reversed": false,
   "folder": "Reef Followers",
   "idealStartingState": {
-    "velocity": 0.5,
+    "velocity": 0.0,
     "rotation": 180.0
   },
   "useDefaultConstraints": false

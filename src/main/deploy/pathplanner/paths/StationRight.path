@@ -31,30 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Go Min Position Event",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Go Min Position"
-        }
-      }
-    },
-    {
-      "name": "Limited Manip Intake Event",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Limited Manip Intake"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 1.0,
     "maxAcceleration": 3.0,
@@ -70,7 +47,7 @@
   "reversed": false,
   "folder": "Feeder Follower Paths",
   "idealStartingState": {
-    "velocity": 0.5,
+    "velocity": 0.0,
     "rotation": 53.75
   },
   "useDefaultConstraints": true

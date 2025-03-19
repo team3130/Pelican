@@ -165,7 +165,7 @@ public class RobotContainer {
     //driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
-    driverController.triangle().whileTrue(new AdvancedClimberDown(climber));
+    driverController.triangle().whileTrue(new BasicClimberDown(climber));
     driverController.povRight().whileTrue(new BasicClimberUp(climber));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
@@ -182,11 +182,10 @@ public class RobotContainer {
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
 
-    operatorController.rightBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
-    operatorController.leftBumper().whileTrue(new DriveWithRotPID(driveTrain, drive));
-
     if(Constants.debugMode) {
       operatorController.b().onTrue(new IntakeActuateToSetpoint(coralIntake));
+      operatorController.rightBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
+      operatorController.leftBumper().whileTrue(new DriveWithRotPID(driveTrain, drive));
     }
 
 
