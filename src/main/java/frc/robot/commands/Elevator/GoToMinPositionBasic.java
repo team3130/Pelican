@@ -40,7 +40,7 @@ public class GoToMinPositionBasic extends Command {
     }else if(elevator.getPosition() < elevator.getMinPosition()) {
       elevator.goUp();
     }
-    LED.setLEDstateElevator();
+    //LED.setLEDstateElevator();
   }
 
   // Called once the command ends or is interrupted.

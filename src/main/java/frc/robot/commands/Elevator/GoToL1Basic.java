@@ -40,7 +40,7 @@ public class GoToL1Basic extends Command {
     }else if(elevator.getPosition() < elevator.getL1()) {
       elevator.goUp();
     }
-    LED.setLEDstateElevator();
+    //LED.setLEDstateElevator();
   }
 
   // Called once the command ends or is interrupted.
