@@ -26,7 +26,7 @@ public class LEDs extends SubsystemBase{
   private Elevator elevator;
   private Manipulator manip;
   private Climber climber;
-  private final int LEDLength = 140; //TODO UPDATE TO NEW LENGTH
+  private final int LEDLength = 129; //should be the correct length as of 3/19/25
   private final int pwmPort = 2;
   private boolean completeClimb = false;
 
