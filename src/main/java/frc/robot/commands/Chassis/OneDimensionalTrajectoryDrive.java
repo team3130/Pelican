@@ -156,7 +156,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
             ChassisSpeeds secondLimitedDesiredDrive = limitedDesiredDrive;
             if(minLogicDistance > distance && !isAtPP) {
-                secondLimitedDesiredDrive = limitedDesiredDrive.times(2.5);
+                secondLimitedDesiredDrive = limitedDesiredDrive.times(2);
             }
             driveTrain.setControl(robotContainer.drive.withVelocityX(secondLimitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(secondLimitedDesiredDrive.vyMetersPerSecond).
