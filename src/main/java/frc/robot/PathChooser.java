@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.Elevator.GoToHome;
 import frc.robot.commands.Elevator.GoToL4;
 import frc.robot.commands.Elevator.GoToMinPosition;
+import frc.robot.commands.Manipulator.AutonLimitedManipIntake;
 import frc.robot.commands.Manipulator.LimitedManipIntake;
 import frc.robot.commands.Manipulator.LimitedManipIntakeReverse;
 import frc.robot.commands.Manipulator.LimitedManipOuttake;
@@ -205,15 +206,15 @@ public class PathChooser {
                         chooser.addOption(path.name,
                                 new SequentialCommandGroup(
                                         new ParallelDeadlineGroup(
+                                                pathfindThenFollowPath(path, defaultConstraints),
+                                                new GoToL4(elevator).asProxy(),
                                                 new SequentialCommandGroup(
                                                         new WaitCommand(0.5),
                                                         new SequentialCommandGroup(
-                                                                new LimitedManipIntake(manip, elevator).asProxy(),
+                                                                new AutonLimitedManipIntake(manip, elevator).asProxy(),
                                                                 new LimitedManipIntakeReverse(manip).asProxy()
                                                         )
-                                                ),
-                                                pathfindThenFollowPath(path, defaultConstraints),
-                                                new GoToL4(elevator).asProxy()
+                                                )
                                         ),
                                         new LimitedManipOuttake(manip).asProxy(),
                                         new ParallelCommandGroup(
