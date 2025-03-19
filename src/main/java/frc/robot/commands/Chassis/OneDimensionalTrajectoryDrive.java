@@ -145,13 +145,13 @@ public class OneDimensionalTrajectoryDrive extends Command {
             ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
             if(minLogicDistance > distance && !isAtPP) {
                 Translation2d desiredVector = new Translation2d(targetPose.getX() - driveTrain.getStatePose().getX(), targetPose.getY() - driveTrain.getStatePose().getY());
-                desiredVector.times(1000*magnitude/desiredVector.getNorm()); //making desired a unit and then multiplying by speed
+                desiredVector.times(magnitude/desiredVector.getNorm()); //making desired a unit and then multiplying by speed
                 if(!onBlue) {
                     desiredVector = desiredVector.rotateBy(Rotation2d.k180deg);
                 }
                 desiredDrive = new ChassisSpeeds(desiredVector.getX(), desiredVector.getY(), rotation);
             }
-            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
+            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive).times(2);
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
