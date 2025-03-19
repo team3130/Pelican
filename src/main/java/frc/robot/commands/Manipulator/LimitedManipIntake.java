@@ -36,7 +36,6 @@ public class LimitedManipIntake extends Command {
     if (elevator.isAtMinPosition()) {
       manip.runManip();
     }
-    LED.setLEDstateManipulator();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -49,6 +48,7 @@ public class LimitedManipIntake extends Command {
         manip.runManip();
       }
     }
+    LED.setLEDstateManipulator();
   }
 
   // Called once the command ends or is interrupted.

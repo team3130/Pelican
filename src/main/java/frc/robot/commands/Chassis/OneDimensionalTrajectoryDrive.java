@@ -140,7 +140,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
                     targetPose.getRotation().getRadians());
             ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
             ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
-            driveTrain.setControl(RobotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
+            driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
             double diffX = targetPose.getX() - driveTrain.getStatePose().getX();

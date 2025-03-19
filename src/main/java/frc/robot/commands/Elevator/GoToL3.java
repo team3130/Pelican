@@ -34,7 +34,6 @@ public class GoToL3 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    LED.setLEDstateElevator();
     if (elevator.isZeroed()) {
       elevator.goToL3();
     } else {
@@ -46,7 +45,7 @@ public class GoToL3 extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
+    //LED.setLEDstateElevator();
   }
 
   // Called once the command ends or is interrupted.

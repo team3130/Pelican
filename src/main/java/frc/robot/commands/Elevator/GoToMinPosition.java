@@ -30,13 +30,12 @@ public class GoToMinPosition extends Command {
   @Override
   public void initialize() {
     elevator.goToMinPosition();
-    LED.setLEDstateElevator();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
+    //LED.setLEDstateElevator();
   }
 
   // Called once the command ends or is interrupted.

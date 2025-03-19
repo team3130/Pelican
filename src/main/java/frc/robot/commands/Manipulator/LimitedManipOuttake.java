@@ -34,9 +34,7 @@ public class LimitedManipOuttake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    LED.setLEDstateManipulator();
-    timer.stop();
-    timer.reset();
+    timer.restart();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -45,6 +43,7 @@ public class LimitedManipOuttake extends Command {
     if(elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
       manip.runManip();
     }
+    LED.setLEDstateManipulator();
   }
 
   // Called once the command ends or is interrupted.

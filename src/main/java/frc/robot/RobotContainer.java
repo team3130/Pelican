@@ -131,7 +131,10 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.L2().onTrue(new SequentialCommandGroup(new LimitedManipIntake(manip, elevator), new LimitedManipIntakeReverse(manip)));
+    driverController.L2().onTrue(new SequentialCommandGroup(
+            new LimitedManipIntake(manip, elevator, LED),
+            new LimitedManipIntakeReverse(manip, LED)
+    ));
     driverController.R2().whileTrue(new LimitedManipIntakeOuttake(manip, elevator, LED));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
@@ -233,7 +236,7 @@ public class RobotContainer {
   }
 
   public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
-  public Command elevatorHome() {return new GoToHome(elevator);}
+  public Command elevatorHome() {return new GoToHome(elevator, LED);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
@@ -258,12 +261,12 @@ public class RobotContainer {
   }
 
   public void sendAutonChoosers() {
-    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator);
-    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2", manip, elevator);
-    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3", manip, elevator);
-    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1", manip, elevator);
-    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2", manip, elevator);
-    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3", manip, elevator);
+    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator, LED);
+    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2", manip, elevator, LED);
+    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3", manip, elevator, LED);
+    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1", manip, elevator, LED);
+    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2", manip, elevator, LED);
+    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3", manip, elevator, LED);
 
     SmartDashboard.putData("Coral 1 Path", pathChooser1);
     SmartDashboard.putData("Coral 2 Path", pathChooser2);
@@ -274,7 +277,7 @@ public class RobotContainer {
   }
 
   public SequentialCommandGroup configureAuton() {
-    return PathChooser.buildAutoCommand(elevator);
+    return PathChooser.buildAutoCommand(elevator, LED);
   }
 
   public double getModularSpeed() {
