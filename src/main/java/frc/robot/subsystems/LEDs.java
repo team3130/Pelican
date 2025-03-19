@@ -24,7 +24,7 @@ public class LEDs extends SubsystemBase{
   private AddressableLEDBuffer LEDBuffer;
   private Elevator elevator;
   private Manipulator manip;
-  private final int LEDLength = 37; //TODO UPDATE TO NEW LENGTH
+  private final int LEDLength = 140; //TODO UPDATE TO NEW LENGTH
   private final int pwmPort = 2;
 
   //LEDs per Meter
