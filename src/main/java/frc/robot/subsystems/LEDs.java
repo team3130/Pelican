@@ -18,14 +18,17 @@ import edu.wpi.first.wpilibj.util.Color;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static java.awt.Color.*;
+import frc.robot.subsystems.Climber;
 
 public class LEDs extends SubsystemBase{
   private AddressableLED LED;
   private AddressableLEDBuffer LEDBuffer;
   private Elevator elevator;
   private Manipulator manip;
+  private Climber climber;
   private final int LEDLength = 140; //TODO UPDATE TO NEW LENGTH
   private final int pwmPort = 2;
+  private boolean completeClimb = false;
 
   //LEDs per Meter
   Distance kLedSpacing = Meters.of((double) 1 / LEDLength);
@@ -52,9 +55,10 @@ public class LEDs extends SubsystemBase{
   LEDPattern elevatorDeltaHome = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getHome()));
   LEDPattern elevatorDeltaMaxPos = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getMaxPosition()));
   LEDPattern elevatorDeltaMinPos = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getMinPosition()));
-  public LEDs(Elevator elevator, Manipulator manip) {
+  public LEDs(Elevator elevator, Manipulator manip, Climber climber) {
       this.elevator = elevator;
       this.manip = manip;
+      this.climber = climber;
       
       //set pwmPort
       LED = new AddressableLED(pwmPort);
@@ -136,6 +140,28 @@ public class LEDs extends SubsystemBase{
     }
     else if (!manip.getFirstBeam() && !manip.getSecondBeam()){
       setLEDsGreen();
+    }
+  }
+
+  //Added climber LED logic, 
+  //when extending climber show orange,
+  //when at full extension show red and blue, 
+  //when retracting show rainbow, 
+  //when finished show scrolling rainbow
+  public void setLEDstateClimber(){
+    if (climber.getHomePos() < climber.getPosition() && climber.getPosition() < climber.getExtendedPos() &&  climber.brokeExtendedLimit()){ //if climber is not at a max position but it has hit the maximum previously, the climber is currently climbing
+      setLEDsRainbow();
+    }
+    else if (climber.brokeHomeLimit() && completeClimb){ //if climber is a min position, and was previously at full extension, climb is completed
+      setLEDsScrollingRainbow();
+    }
+    else if (climber.getHomePos() < climber.getPosition() && climber.getPosition() < climber.getExtendedPos() && !climber.brokeExtendedLimit()){ //if climber is not at either extrema and has not hit the upper limit, it is coming out of robot frame 
+      setLEDsOrange();
+    }
+    //this is placed last because it should only trigger at one particular point, and if placed earlier it would unintentionally trigger even after the desired point
+    else if (climber.brokeExtendedLimit()){//if at maximum position, climber is ready to climb
+      setLEDsRedAndBlue();
+      completeClimb = true;
     }
   }
 }

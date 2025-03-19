@@ -85,7 +85,7 @@ public class RobotContainer {
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
     camera = new Camera();
-    LED = new LEDs(elevator, manip);
+    LED = new LEDs(elevator, manip, climber);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
@@ -98,8 +98,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip, LED));
     NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip, LED));
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
-    NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator));
-    NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator));
+    NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator, LED));
+    NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator, LED));
 
     NamedCommands.registerCommand("Toggle Algae Intake", new ActuateAlgaeIntake(algaeIntake));
     NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
@@ -139,7 +139,7 @@ public class RobotContainer {
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
-    driverController.R3().whileTrue(new GoUp(elevator));
+    driverController.R3().whileTrue(new GoUp(elevator, LED));
     driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
     driverController.L2().onTrue(new GoToL3(elevator, manip, LED));
@@ -168,8 +168,8 @@ public class RobotContainer {
     //driverController.circle().onTrue(new SequentialCommandGroup(new IntakeActuate(coralIntake), new GoToExtended(climber)));
     //coralIntake.setDefaultCommand(new IntakeActuateToSetpoint(coralIntake, operatorController));
 
-    driverController.triangle().whileTrue(new BasicClimberDown(climber));
-    driverController.povRight().whileTrue(new BasicClimberUp(climber));
+    driverController.triangle().whileTrue(new BasicClimberDown(climber, LED));
+    driverController.povRight().whileTrue(new BasicClimberUp(climber, LED));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -183,7 +183,7 @@ public class RobotContainer {
     //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
-    operatorController.povLeft().whileTrue(new BasicClimberUp(climber));
+    operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
 
     if(Constants.debugMode) {
       operatorController.b().onTrue(new IntakeActuateToSetpoint(coralIntake));
@@ -238,7 +238,7 @@ public class RobotContainer {
   public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
   public Command elevatorHome() {return new GoToHome(elevator, LED);}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
-  public Command climberHome() {return new ZeroClimber(climber);}
+  public Command climberHome() {return new ZeroClimber(climber, LED);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
   public void basicVisionResetOdo() {
     camera.getVisionOdometry(driveTrain, logger);

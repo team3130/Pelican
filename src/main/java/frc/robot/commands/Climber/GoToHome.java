@@ -6,20 +6,22 @@ package frc.robot.commands.Climber;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
 public class GoToHome extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Climber climber;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param climber The subsystem used by this command.
    */
-  public GoToHome(Climber climber) {
+  public GoToHome(Climber climber, LEDs LED) {
     this.climber = climber;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(climber);
   }
@@ -35,6 +37,7 @@ public class GoToHome extends Command {
     if(climber.isZeroed()) {
       climber.goToHome();
     }
+    LED.setLEDstateClimber();
   }
 
   // Called once the command ends or is interrupted.
