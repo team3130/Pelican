@@ -35,12 +35,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
     boolean isAtPP = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
-    private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
-            field.getTagPose(18).get(), field.getTagPose(21).get(),
-            field.getTagPose(17).get(), field.getTagPose(22).get()};
-    private final Pose3d[] redCoralTagPoses = {field.getTagPose(6).get(), field.getTagPose(8).get(),
-            field.getTagPose(10).get(), field.getTagPose(7).get(),
-            field.getTagPose(9).get(), field.getTagPose(11).get()};
+    private final Pose3d[] blueCoralTagPoses = {field.getTagPose(17).get(), field.getTagPose(18).get(),
+            field.getTagPose(19).get(), field.getTagPose(20).get(),
+            field.getTagPose(21).get(), field.getTagPose(22).get()};
+    private final Pose3d[] redCoralTagPoses = {field.getTagPose(6).get(), field.getTagPose(7).get(),
+            field.getTagPose(8).get(), field.getTagPose(9).get(),
+            field.getTagPose(10).get(), field.getTagPose(11).get()};
 
     public OneDimensionalTrajectoryDrive(CommandSwerveDrivetrain commandSwerveDrivetrain, RobotContainer robotContainer,
                                          CommandPS5Controller driverController, Telemetry logger) {
@@ -65,12 +65,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
         turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
         if(onBlue) {
             double lowestDistance = 1000;
-            for(int i = 0; i < blueCoralTagPoses.length; i++) {
-                Pose2d currentPose = blueCoralTagPoses[i].toPose2d();
+            for (Pose3d blueCoralTagPose : blueCoralTagPoses) {
+                Pose2d currentPose = blueCoralTagPose.toPose2d();
                 double x = currentPose.getX() - driveTrain.getStatePose().getX();
                 double y = currentPose.getY() - driveTrain.getStatePose().getY();
                 double distance = Math.sqrt((x * x) + (y * y));
-                if(distance < lowestDistance) {
+                if (distance < lowestDistance) {
                     lowestDistance = distance;
                     targetPose = currentPose;
                 }
@@ -135,9 +135,11 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
                 approach = new Translation2d(1, angle);
                 approach = approach.times(magnitude * cos);
+                if ((onBlue && (targetPose.getX() > 4.3434)) || (!onBlue && (targetPose.getX() < 13.0302))) {
+                    approach = approach.rotateBy(Rotation2d.k180deg);
+                }
             }
-
-            if (!onBlue) {
+            if(!onBlue) {
                 approach = approach.rotateBy(Rotation2d.k180deg);
             }
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
@@ -154,7 +156,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
             ChassisSpeeds secondLimitedDesiredDrive = limitedDesiredDrive;
             if(minLogicDistance > distance && !isAtPP) {
-                secondLimitedDesiredDrive = limitedDesiredDrive.times(2);
+                secondLimitedDesiredDrive = limitedDesiredDrive.times(2.5);
             }
             driveTrain.setControl(robotContainer.drive.withVelocityX(secondLimitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(secondLimitedDesiredDrive.vyMetersPerSecond).
