@@ -33,6 +33,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     boolean onBlue = true;
     boolean isAtPP = false;
+    boolean isInMinLogicDist = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -143,6 +144,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                     targetPose.getRotation().getRadians());
             ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
+            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
             if(minLogicDistance > distance && !isAtPP) {
                 Translation2d desiredVector = new Translation2d(targetPose.getX() - driveTrain.getStatePose().getX(), targetPose.getY() - driveTrain.getStatePose().getY());
                 desiredVector.times(magnitude/desiredVector.getNorm()); //making desired a unit and then multiplying by speed
@@ -150,8 +152,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
                     desiredVector = desiredVector.rotateBy(Rotation2d.k180deg);
                 }
                 desiredDrive = new ChassisSpeeds(desiredVector.getX(), desiredVector.getY(), rotation);
+                limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive).times(2.5);
             }
-            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive).times(2);
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
