@@ -68,6 +68,7 @@ public class Elevator extends SubsystemBase {
 
     config = new TalonFXConfiguration();
     config.MotionMagic.withMotionMagicCruiseVelocity(targetVelocity).withMotionMagicAcceleration(targetAcceleration);
+    config.CurrentLimits.withStatorCurrentLimitEnable(true).withStatorCurrentLimit(40);
     config.Slot0 = slot0Configs;
     config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake);
 
