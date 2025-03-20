@@ -21,6 +21,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double minLogicDistance = 1;
     private final double normalCorrectionSpeed = 2;
+    private final double tangentJoystickMultiplier = 2;
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -113,6 +114,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
         double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
         double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
         double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
+        double joystickY = driverController.getLeftY();
         if(runnable) {
             ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
             double xAxis = chassisSpeeds.vxMetersPerSecond;
@@ -122,17 +124,16 @@ public class OneDimensionalTrajectoryDrive extends Command {
 
             Translation2d approach;
             if (minLogicDistance > distance) {
-                Translation2d robotToTarget = new Translation2d(targetPose.getX() - driveTrain.getStatePose().getX(), targetPose.getY() - driveTrain.getStatePose().getY());
-                Translation2d UnitTangent = new Translation2d(1, targetPose.getRotation());
-                Translation2d tangent = new Translation2d(UnitTangent.getX()*robotToTarget.getX(), UnitTangent.getY()*robotToTarget.getY());
-                if(!onBlue) {
-                    tangent = tangent.rotateBy(Rotation2d.k180deg);
-                    robotToTarget = robotToTarget.rotateBy(Rotation2d.k180deg);
-                }
+                Translation2d robotToTarget = new Translation2d(diffX, diffY);
+                Translation2d unitTangent = new Translation2d(1, targetPose.getRotation());
+                Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
                 Translation2d normal = robotToTarget.minus(tangent);
-                approach = (UnitTangent.times(magnitude)).plus(normal.times(normalCorrectionSpeed));
-            }
-            else {
+                approach = (unitTangent.times(tangentJoystickMultiplier*joystickY));
+                if(targetPose.getX() < 4.3434 || targetPose.getX() > 13.0302) {
+                    approach = approach.times(-1);
+                }
+                approach = approach.plus(normal.times(normalCorrectionSpeed));
+            } else {
                 Rotation2d angle = targetPose.getRotation();
                 Rotation2d stickAngle = vector.getAngle();
                 Rotation2d diffAngle = angle.minus(stickAngle);
