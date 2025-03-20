@@ -20,8 +20,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double minLogicDistance = 1;
-    private final double normalCorrectionSpeed = 3;
-    private final double tangentJoystickMultiplier = 3;
+    private final double normalCorrectionSpeed = 2.5;
+    private final double tangentJoystickMultiplier = 2;
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
