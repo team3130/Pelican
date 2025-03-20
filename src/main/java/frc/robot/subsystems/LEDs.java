@@ -39,8 +39,10 @@ public class LEDs extends SubsystemBase{
   LEDPattern blue = LEDPattern.solid(Color.kBlue);
   LEDPattern green = LEDPattern.solid(Color.kGreen);
   LEDPattern yellow = LEDPattern.solid(Color.kYellow);
+  LEDPattern gold = LEDPattern.solid(Color.kGold);
   LEDPattern orange = LEDPattern.solid(Color.kOrange);
   LEDPattern purple = LEDPattern.solid(Color.kPurple);
+  LEDPattern manualYellow = LEDPattern.solid(new Color(255, 135, 0));
 
   //animated colors
   LEDPattern rainbow = LEDPattern.rainbow(255, 255);
@@ -66,7 +68,8 @@ public class LEDs extends SubsystemBase{
       //set strip length
       LEDBuffer = new AddressableLEDBuffer(LEDLength);
       LED.setLength(LEDBuffer.getLength());
-      yellow.applyTo(LEDBuffer);
+      LED.stop();
+      manualYellow.applyTo(LEDBuffer);
       LED.setData(LEDBuffer);
       LED.start();
   }
@@ -75,7 +78,7 @@ public class LEDs extends SubsystemBase{
   //public void setLEDsRed(){red.applyTo(LEDBuffer);}
   //public void setLEDsBlue(){blue.applyTo(LEDBuffer);}
   //public void setLEDsGreen(){green.applyTo(LEDBuffer);}
-  public void setLEDsYellow(){yellow.applyTo(LEDBuffer);}
+  //public void setLEDsYellow(){yellow.applyTo(LEDBuffer);}
   //public void setLEDsOrange(){orange.applyTo(LEDBuffer);}
   //public void setLEDsPurple(){purple.applyTo(LEDBuffer);}
   //public void setLEDsRainbow(){rainbow.applyTo(LEDBuffer);}
