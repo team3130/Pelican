@@ -19,8 +19,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final double tolerance = .03;
     private final double minLogicDistance = 1;
+    private final double normalCorrectionSpeed = 2;
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -121,9 +121,16 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double magnitude = vector.getNorm();
 
             Translation2d approach;
-            if (!isAtPP) {
-                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-                approach = approach.times(magnitude);
+            if (minLogicDistance > distance) {
+                Translation2d robotToTarget = new Translation2d(targetPose.getX() - driveTrain.getStatePose().getX(), targetPose.getY() - driveTrain.getStatePose().getY());
+                Translation2d UnitTangent = new Translation2d(1, targetPose.getRotation());
+                Translation2d tangent = new Translation2d(UnitTangent.getX()*robotToTarget.getX(), UnitTangent.getY()*robotToTarget.getY());
+                if(!onBlue) {
+                    tangent = tangent.rotateBy(Rotation2d.k180deg);
+                    robotToTarget = robotToTarget.rotateBy(Rotation2d.k180deg);
+                }
+                Translation2d normal = robotToTarget.minus(tangent);
+                approach = (UnitTangent.times(magnitude)).plus(normal.times(normalCorrectionSpeed));
             }
             else {
                 Rotation2d angle = targetPose.getRotation();
@@ -143,25 +150,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                     targetPose.getRotation().getRadians());
             ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
-            if(minLogicDistance > distance && !isAtPP) {
-                Translation2d desiredVector = new Translation2d(targetPose.getX() - driveTrain.getStatePose().getX(), targetPose.getY() - driveTrain.getStatePose().getY());
-                desiredVector.times(magnitude/desiredVector.getNorm()); //making desired a unit and then multiplying by speed
-                if(!onBlue) {
-                    desiredVector = desiredVector.rotateBy(Rotation2d.k180deg);
-                }
-                desiredDrive = new ChassisSpeeds(desiredVector.getX(), desiredVector.getY(), rotation);
-            }
             ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
-            ChassisSpeeds secondLimitedDesiredDrive = limitedDesiredDrive;
-            if(minLogicDistance > distance && !isAtPP) {
-                secondLimitedDesiredDrive = limitedDesiredDrive.times(2);
-            }
-            driveTrain.setControl(robotContainer.drive.withVelocityX(secondLimitedDesiredDrive.vxMetersPerSecond).
-                    withVelocityY(secondLimitedDesiredDrive.vyMetersPerSecond).
-                    withRotationalRate(secondLimitedDesiredDrive.omegaRadiansPerSecond));
-            if (!isAtPP) {
-                isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
-            }
+            driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
+                    withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
+                    withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
         }
     }
 
