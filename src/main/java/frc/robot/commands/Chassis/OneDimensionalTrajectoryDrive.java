@@ -21,6 +21,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double tolerance = .03;
     private final double minLogicDistance = 1;
+    private final double autoAdjustSpeed = 2;
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -156,7 +157,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
             ChassisSpeeds secondLimitedDesiredDrive = limitedDesiredDrive;
             if(minLogicDistance > distance && !isAtPP) {
-                secondLimitedDesiredDrive = limitedDesiredDrive.times(2);
+                secondLimitedDesiredDrive = limitedDesiredDrive.times(autoAdjustSpeed);
             }
             driveTrain.setControl(robotContainer.drive.withVelocityX(secondLimitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(secondLimitedDesiredDrive.vyMetersPerSecond).
