@@ -19,9 +19,9 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final double minLogicDistance = 1.5;
-    private final double normalCorrectionSpeed = 2;
-    private final double tangentJoystickMultiplier = 2;
+    private final double minLogicDistance = 1;
+    private final double normalCorrectionSpeed = 3;
+    private final double tangentJoystickMultiplier = 3;
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -33,7 +33,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     boolean onBlue = true;
-    boolean isAtPP = false;
+    boolean useMinLogicDistance = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -60,7 +60,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
-        isAtPP = false;
+        useMinLogicDistance = false;
         var alliance = DriverStation.getAlliance();
         alliance.ifPresent(value -> onBlue = value == DriverStation.Alliance.Blue);
         turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
@@ -123,7 +123,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double magnitude = vector.getNorm();
 
             Translation2d approach;
-            if (minLogicDistance > distance) {
+            if ((minLogicDistance > distance) || useMinLogicDistance) {
+                useMinLogicDistance = true;
                 Translation2d robotToTarget = new Translation2d(diffX, diffY);
                 Translation2d unitTangent = new Translation2d(1, targetPose.getRotation());
                 Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
@@ -135,10 +136,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 approach = approach.plus(normal.times(normalCorrectionSpeed));
             } else {
                 approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-                approach = approach.times(-magnitude*joystickY);
-                if((targetPose.getX() > 4.3434) && (targetPose.getX() < 13.0302)) {
-                    approach = approach.times(-1);
-                }
+                approach = approach.times(magnitude);
             }
 
             if (!onBlue) {
