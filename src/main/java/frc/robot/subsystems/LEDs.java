@@ -68,10 +68,6 @@ public class LEDs extends SubsystemBase{
       //set strip length
       LEDBuffer = new AddressableLEDBuffer(LEDLength);
       LED.setLength(LEDBuffer.getLength());
-      LED.stop();
-      manualYellow.applyTo(LEDBuffer);
-      LED.setData(LEDBuffer);
-      LED.start();
   }
   
 
@@ -169,4 +165,20 @@ public class LEDs extends SubsystemBase{
       completeClimb = true;
     }
   } */
+
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+        if(DriverStation.getMatchTime() > 130) {
+            LED.stop();
+            rainbow.applyTo(LEDBuffer);
+            LED.setData(LEDBuffer);
+            LED.start();
+        } else {
+            LED.stop();
+            manualYellow.applyTo(LEDBuffer);
+            LED.setData(LEDBuffer);
+            LED.start();
+        }
+    }
 }
