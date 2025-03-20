@@ -19,7 +19,9 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final double tolerance = .03;
+    private final double minLogicDistance = 1;
+    private final double normalCorrectionSpeed = 2.5;
+    private final double tangentJoystickMultiplier = 2;
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -31,7 +33,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     boolean onBlue = true;
-    boolean isAtPP = false;
+    boolean useMinLogicDistance = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -58,7 +60,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void initialize() {
-        isAtPP = false;
+        useMinLogicDistance = false;
         var alliance = DriverStation.getAlliance();
         alliance.ifPresent(value -> onBlue = value == DriverStation.Alliance.Blue);
         turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
@@ -109,6 +111,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void execute() {
+        double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+        double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+        double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
+        double joystickY = driverController.getLeftY();
         if(runnable) {
             ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
             double xAxis = chassisSpeeds.vxMetersPerSecond;
@@ -117,20 +123,20 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double magnitude = vector.getNorm();
 
             Translation2d approach;
-            if (!isAtPP) {
+            if ((minLogicDistance > distance) || useMinLogicDistance) {
+                useMinLogicDistance = true;
+                Translation2d robotToTarget = new Translation2d(diffX, diffY);
+                Translation2d unitTangent = new Translation2d(1, targetPose.getRotation());
+                Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
+                Translation2d normal = robotToTarget.minus(tangent);
+                approach = (unitTangent.times(tangentJoystickMultiplier*joystickY));
+                if((targetPose.getX() < 4.3434) || (targetPose.getX() > 13.0302)) {
+                    approach = approach.times(-1);
+                }
+                approach = approach.plus(normal.times(normalCorrectionSpeed));
+            } else {
                 approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
                 approach = approach.times(magnitude);
-            }
-            else {
-                Rotation2d angle = targetPose.getRotation();
-                Rotation2d stickAngle = vector.getAngle();
-                Rotation2d diffAngle = angle.minus(stickAngle);
-                double cos = diffAngle.getCos();
-                if (!onBlue){
-                    cos = -cos;
-                }
-                approach = new Translation2d(1, angle);
-                approach = approach.times(magnitude * cos);
             }
 
             if (!onBlue) {
@@ -143,12 +149,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
-            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
-            if (!isAtPP) {
-                isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
-            }
         }
     }
 
