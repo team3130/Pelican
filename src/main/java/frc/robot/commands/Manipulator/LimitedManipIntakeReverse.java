@@ -37,7 +37,7 @@ public class LimitedManipIntakeReverse extends Command {
   @Override
   public void execute() {
     manip.manipAtSpeed(-0.3);
-    LED.setLEDstateManipulator();
+    //LED.setLEDstateManipulator();
   }
 
   // Called once the command ends or is interrupted.

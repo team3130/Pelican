@@ -36,7 +36,7 @@ public class BasicClimberDown extends Command {
   @Override
   public void execute() {
     climber.climbDown();
-    LED.setLEDstateClimber();
+    //LED.setLEDstateClimber();
   }
 
   // Called once the command ends or is interrupted.

@@ -43,7 +43,7 @@ public class AutonLimitedManipIntake extends Command {
       } else {
       manip.runManip();
     }
-    LED.setLEDstateManipulator();
+    //LED.setLEDstateManipulator();
   }
 
   // Called once the command ends or is interrupted.

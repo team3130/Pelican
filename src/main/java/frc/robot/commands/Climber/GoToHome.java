@@ -37,7 +37,7 @@ public class GoToHome extends Command {
     if(climber.isZeroed()) {
       climber.goToHome();
     }
-    LED.setLEDstateClimber();
+    //LED.setLEDstateClimber();
   }
 
   // Called once the command ends or is interrupted.

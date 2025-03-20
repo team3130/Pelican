@@ -38,7 +38,7 @@ public class AdvancedClimberDown extends Command {
     if(climber.getPosition() < 10) {
       climber.climbDown();
     }
-    LED.setLEDstateClimber();
+    //LED.setLEDstateClimber();
   }
 
   // Called once the command ends or is interrupted.
