@@ -17,6 +17,7 @@ import frc.robot.commands.Manipulator.LimitedManipIntakeReverse;
 import frc.robot.commands.Manipulator.LimitedManipOuttake;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 import org.json.simple.parser.ParseException;
 
@@ -38,13 +39,13 @@ public class PathChooser {
     private static SendableChooser<Command> stationChooser2 = null;
     private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
-            1, 3,
+            1, 1,
             Units.degreesToRadians(360), Units.degreesToRadians(540));
 
     // For convenience a programmer could change this when going to competition.
     private static final boolean isCompetition = true;
 
-    public static SendableChooser<Command> buildAndSendCoralChooser(String chooserType, Manipulator manip, Elevator elevator) {
+    public static SendableChooser<Command> buildAndSendCoralChooser(String chooserType, Manipulator manip, Elevator elevator, LEDs LED) {
         // Build an auto chooser. This will use empty instant command as the default option.
         // As an example, this will only show autos that start with "comp" while at
         // competition as defined by the programmer
@@ -53,7 +54,7 @@ public class PathChooser {
                     (stream) -> isCompetition
                             ? stream.filter(path -> path.name.startsWith("Follow"))
                             :stream,
-                    manip, elevator
+                    manip, elevator, LED
             );
             return pathChooser1;
         } else if(chooserType.equals("Coral 2")) {
@@ -61,7 +62,7 @@ public class PathChooser {
                     (stream) -> isCompetition
                             ? stream.filter(path -> path.name.startsWith("Follow"))
                             :stream,
-                    manip, elevator
+                    manip, elevator, LED
             );
             return pathChooser2;
         } else if(chooserType.equals("Coral 3")) {
@@ -69,14 +70,14 @@ public class PathChooser {
                     (stream) -> isCompetition
                             ? stream.filter(path -> path.name.startsWith("Follow"))
                             :stream,
-                    manip, elevator
+                    manip, elevator, LED
             );
             return pathChooser3;
         }
         return null;
     }
 
-    public static SendableChooser<Command> buildAndSendStationChooser(String chooserType, Manipulator manip, Elevator elevator) {
+    public static SendableChooser<Command> buildAndSendStationChooser(String chooserType, Manipulator manip, Elevator elevator, LEDs LED) {
         if (chooserType.equals("Station 1")) {
             stationChooser1 = new SendableChooser<>();
             stationChooser1.setDefaultOption("None", new InstantCommand());
@@ -84,15 +85,15 @@ public class PathChooser {
                 stationChooser1.addOption("Left Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
                         new SequentialCommandGroup(
-                                new LimitedManipIntake(manip, elevator).asProxy(),
-                                new LimitedManipIntakeReverse(manip).asProxy()
+                                new LimitedManipIntake(manip, elevator, LED).asProxy(),
+                                new LimitedManipIntakeReverse(manip, LED).asProxy()
                         )
                 ));
                 stationChooser1.addOption("Right Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
                         new SequentialCommandGroup(
-                                new LimitedManipIntake(manip, elevator).asProxy(),
-                                new LimitedManipIntakeReverse(manip).asProxy()
+                                new LimitedManipIntake(manip, elevator, LED).asProxy(),
+                                new LimitedManipIntakeReverse(manip, LED).asProxy()
                         )
                 ));
             } catch (IOException | ParseException e) {
@@ -106,15 +107,15 @@ public class PathChooser {
                 stationChooser2.addOption("Left Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
                         new SequentialCommandGroup(
-                                new LimitedManipIntake(manip, elevator).asProxy(),
-                                new LimitedManipIntakeReverse(manip).asProxy()
+                                new LimitedManipIntake(manip, elevator, LED).asProxy(),
+                                new LimitedManipIntakeReverse(manip, LED).asProxy()
                         )
                 ));
                 stationChooser2.addOption("Right Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
                         new SequentialCommandGroup(
-                                new LimitedManipIntake(manip, elevator).asProxy(),
-                                new LimitedManipIntakeReverse(manip).asProxy()
+                                new LimitedManipIntake(manip, elevator, LED).asProxy(),
+                                new LimitedManipIntakeReverse(manip, LED).asProxy()
                         )
                 ));
             } catch (IOException | ParseException e) {
@@ -128,15 +129,15 @@ public class PathChooser {
                 stationChooser3.addOption("Left Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationLeft"), defaultConstraints),
                         new SequentialCommandGroup(
-                                new LimitedManipIntake(manip, elevator).asProxy(),
-                                new LimitedManipIntakeReverse(manip).asProxy()
+                                new LimitedManipIntake(manip, elevator, LED).asProxy(),
+                                new LimitedManipIntakeReverse(manip, LED).asProxy()
                         )
                 ));
                 stationChooser3.addOption("Right Station", new SequentialCommandGroup(
                         pathfindThenFollowPath(PathPlannerPath.fromPathFile("StationRight"), defaultConstraints),
                         new SequentialCommandGroup(
-                                new LimitedManipIntake(manip, elevator).asProxy(),
-                                new LimitedManipIntakeReverse(manip).asProxy()
+                                new LimitedManipIntake(manip, elevator, LED).asProxy(),
+                                new LimitedManipIntakeReverse(manip, LED).asProxy()
                         )
                 ));
             } catch (IOException | ParseException e) {
@@ -158,14 +159,14 @@ public class PathChooser {
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
             Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier,
-            Manipulator manip, Elevator elevator) {
-        return buildPathChooserWithOptionsModifier("", optionsModifier, manip, elevator);
+            Manipulator manip, Elevator elevator, LEDs LED) {
+        return buildPathChooserWithOptionsModifier("", optionsModifier, manip, elevator, LED);
     }
 
     public static SendableChooser<Command> buildPathChooserWithOptionsModifier(
             String defaultPathName,
             Function<Stream<PathPlannerPath>, Stream<PathPlannerPath>> optionsModifier,
-            Manipulator manip, Elevator elevator) {
+            Manipulator manip, Elevator elevator, LEDs LED) {
         if (!AutoBuilder.isConfigured()) {
             throw new RuntimeException(
                     "AutoBuilder was not configured before attempting to build an auto chooser");
@@ -207,21 +208,21 @@ public class PathChooser {
                                 new SequentialCommandGroup(
                                         new ParallelDeadlineGroup(
                                                 pathfindThenFollowPath(path, defaultConstraints),
-                                                new GoToL4(elevator).asProxy(),
+                                                new GoToL4(elevator, manip, LED).asProxy(),
                                                 new SequentialCommandGroup(
                                                         new WaitCommand(0.5),
                                                         new SequentialCommandGroup(
-                                                                new AutonLimitedManipIntake(manip, elevator).asProxy(),
-                                                                new LimitedManipIntakeReverse(manip).asProxy()
+                                                                new AutonLimitedManipIntake(manip, elevator, LED).asProxy(),
+                                                                new LimitedManipIntakeReverse(manip, LED).asProxy()
                                                         )
                                                 )
                                         ),
-                                        new LimitedManipOuttake(manip).asProxy(),
+                                        new LimitedManipOuttake(manip, elevator, LED).asProxy(),
                                         new ParallelCommandGroup(
                                                 AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path.name)),
                                                 new SequentialCommandGroup(
                                                         new WaitCommand(0.5),
-                                                        new GoToMinPosition(elevator).asProxy()
+                                                        new GoToMinPosition(elevator, LED).asProxy()
                                                 )
                                         )
                                 ));
@@ -248,7 +249,7 @@ public class PathChooser {
                 .collect(Collectors.toList());
     }
 
-    public static SequentialCommandGroup buildAutoCommand(Elevator elevator) {
+    public static SequentialCommandGroup buildAutoCommand(Elevator elevator, LEDs LED) {
         //for now only 3 coral and two trips to coral station
         Command coral1Choice = getPathFollowCommand(pathChooser1).asProxy();
         Command coral2Choice = getPathFollowCommand(pathChooser2).asProxy();
@@ -257,7 +258,7 @@ public class PathChooser {
         Command stationChoice2 = getPathFollowCommand(stationChooser2).asProxy();
         Command stationChoice3 = getPathFollowCommand(stationChooser3).asProxy();
         return new SequentialCommandGroup(
-                new GoToHome(elevator).asProxy(),
+                new GoToHome(elevator, LED).asProxy(),
                 coral1Choice,
                 stationChoice1,
                 coral2Choice,

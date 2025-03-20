@@ -6,19 +6,22 @@ package frc.robot.commands.Climber;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
 public class BasicClimberUp extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Climber climber;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param climber The subsystem used by this command.
    */
-  public BasicClimberUp(Climber climber) {
+  public BasicClimberUp(Climber climber, LEDs LED) {
     this.climber = climber;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(climber);
   }
@@ -31,7 +34,10 @@ public class BasicClimberUp extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {climber.climbUp();}
+  public void execute() {
+    climber.climbUp();
+    //LED.setLEDstateClimber();
+  }
 
   // Called once the command ends or is interrupted.
   @Override

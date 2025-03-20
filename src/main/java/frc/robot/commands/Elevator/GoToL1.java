@@ -8,19 +8,24 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Manipulator;
+import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
 public class GoToL1 extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final Manipulator manip;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL1(Elevator elevator) {
+  public GoToL1(Elevator elevator, Manipulator manip, LEDs LED) {
     this.elevator = elevator;
+    this.manip = manip;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -39,7 +44,7 @@ public class GoToL1 extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
+    //LED.setLEDstateElevator();
   }
 
   // Called once the command ends or is interrupted.

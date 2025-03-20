@@ -27,11 +27,11 @@ public class Elevator extends SubsystemBase {
   private double targetAcceleration = 120;
 
   private double home = 0;
-  private double minPosition = 25;
-  private double L1 = 47;
-  private double L2 = 59;
-  private double L3 = 90;
-  private double L4 = 137;
+  private double minPosition = 24;
+  private double L1 = 46;
+  private double L2 = 58;
+  private double L3 = 89;
+  private double L4 = 136;
   private double maxPosition = 139;
 
   private final MotionMagicDutyCycle voltRequest0;
@@ -68,6 +68,7 @@ public class Elevator extends SubsystemBase {
 
     config = new TalonFXConfiguration();
     config.MotionMagic.withMotionMagicCruiseVelocity(targetVelocity).withMotionMagicAcceleration(targetAcceleration);
+    config.CurrentLimits.withStatorCurrentLimitEnable(true).withStatorCurrentLimit(40);
     config.Slot0 = slot0Configs;
     config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake);
 

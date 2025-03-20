@@ -7,29 +7,33 @@ package frc.robot.commands.Manipulator;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
 public class LimitedManipIntakeOuttake extends Command {
-  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final Manipulator manip;
-  private final Elevator elevator;
-  private final Timer timer = new Timer();
-  private boolean isIntaking = false;
-  private boolean isOuttaking = false;
+    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+    private final Manipulator manip;
+    private final Elevator elevator;
+    private final Timer timer = new Timer();
+    private final LEDs LED;
+    private boolean isIntaking = false;
+    private boolean isOuttaking = false;
 
-  /**
-   * Creates a new ExampleCommand.
-   *
-   * @param manip The subsystem used by this command.
-   */
-  public LimitedManipIntakeOuttake(Manipulator manip, Elevator elevator) {
-    this.manip = manip;
-    this.elevator = elevator;
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(manip);
-  }
+    /**
+     * Creates a new ExampleCommand.
+     *
+     * @param manip The subsystem used by this command.
+     */
+    public LimitedManipIntakeOuttake(Manipulator manip, Elevator elevator, LEDs LED) {
+        this.LED = LED;
+        this.manip = manip;
+        this.elevator = elevator;
+        // Use addRequirements() here to declare subsystem dependencies.
+        addRequirements(manip);
+    }
 
+        
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
@@ -43,6 +47,7 @@ public class LimitedManipIntakeOuttake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    //LED.setLEDstateManipulator();
     if (elevator.isAtMinPosition()) {
       isIntaking = true;
       isOuttaking = false;
@@ -76,3 +81,4 @@ public class LimitedManipIntakeOuttake extends Command {
     return false;
   }
 }
+

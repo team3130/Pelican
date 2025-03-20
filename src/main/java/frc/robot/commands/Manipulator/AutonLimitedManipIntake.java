@@ -6,6 +6,7 @@ package frc.robot.commands.Manipulator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
@@ -13,15 +14,17 @@ public class AutonLimitedManipIntake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
   private final Elevator elevator;
+  private final LEDs LED;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param manip The subsystem used by this command.
    */
-  public AutonLimitedManipIntake(Manipulator manip, Elevator elevator) {
+  public AutonLimitedManipIntake(Manipulator manip, Elevator elevator, LEDs LED) {
     this.manip = manip;
     this.elevator = elevator;
+    this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip);
   }
@@ -40,6 +43,7 @@ public class AutonLimitedManipIntake extends Command {
       } else {
       manip.runManip();
     }
+    //LED.setLEDstateManipulator();
   }
 
   // Called once the command ends or is interrupted.

@@ -6,19 +6,22 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
 public class GoToHome extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final LEDs LEDs;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToHome(Elevator elevator) {
+  public GoToHome(Elevator elevator, LEDs LEDs) {
     this.elevator = elevator;
+    this.LEDs = LEDs;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -26,12 +29,14 @@ public class GoToHome extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    elevator.goToHome();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {elevator.goToHome();}
+  public void execute() {
+    //LEDs.setLEDstateElevator();
+  }
 
   // Called once the command ends or is interrupted.
   @Override
