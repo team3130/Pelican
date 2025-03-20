@@ -47,7 +47,7 @@ public class LimitedManipIntakeOuttake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    LED.setLEDstateManipulator();
+    //LED.setLEDstateManipulator();
     if (elevator.isAtMinPosition()) {
       isIntaking = true;
       isOuttaking = false;

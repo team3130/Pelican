@@ -40,7 +40,7 @@ public class OneSwitchLimitedManipOuttake extends Command {
   public void execute() {
     //if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
       manip.runManip();
-      LED.setLEDstateManipulator();
+      //LED.setLEDstateManipulator();
     //}
   }
 

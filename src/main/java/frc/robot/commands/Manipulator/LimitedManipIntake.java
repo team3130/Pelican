@@ -48,7 +48,7 @@ public class LimitedManipIntake extends Command {
         manip.runManip();
       }
     }
-    LED.setLEDstateManipulator();
+    //LED.setLEDstateManipulator();
   }
 
   // Called once the command ends or is interrupted.

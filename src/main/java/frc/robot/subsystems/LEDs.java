@@ -66,22 +66,24 @@ public class LEDs extends SubsystemBase{
       //set strip length
       LEDBuffer = new AddressableLEDBuffer(LEDLength);
       LED.setLength(LEDBuffer.getLength());
+      yellow.applyTo(LEDBuffer);
       LED.setData(LEDBuffer);
       LED.start();
   }
+  
 
-  public void setLEDsRed(){red.applyTo(LEDBuffer);}
-  public void setLEDsBlue(){blue.applyTo(LEDBuffer);}
-  public void setLEDsGreen(){green.applyTo(LEDBuffer);}
+  //public void setLEDsRed(){red.applyTo(LEDBuffer);}
+  //public void setLEDsBlue(){blue.applyTo(LEDBuffer);}
+  //public void setLEDsGreen(){green.applyTo(LEDBuffer);}
   public void setLEDsYellow(){yellow.applyTo(LEDBuffer);}
-  public void setLEDsOrange(){orange.applyTo(LEDBuffer);}
-  public void setLEDsPurple(){purple.applyTo(LEDBuffer);}
-  public void setLEDsRainbow(){rainbow.applyTo(LEDBuffer);}
-  public void setLEDsScrollingRainbow(){scrollingRainbow.applyTo(LEDBuffer);}
-  public void setLEDsRedAndBlue(){redAndBlue.applyTo(LEDBuffer);}
+  //public void setLEDsOrange(){orange.applyTo(LEDBuffer);}
+  //public void setLEDsPurple(){purple.applyTo(LEDBuffer);}
+  //public void setLEDsRainbow(){rainbow.applyTo(LEDBuffer);}
+  //public void setLEDsScrollingRainbow(){scrollingRainbow.applyTo(LEDBuffer);}
+  //public void setLEDsRedAndBlue(){redAndBlue.applyTo(LEDBuffer);}
 
   // elevator LED colors
-  public void setLEDsL1Delta(){
+  /*public void setLEDsL1Delta(){
     elevatorDeltaL1.applyTo(LEDBuffer);
     purple.applyTo(LEDBuffer);
   }
@@ -108,9 +110,9 @@ public class LEDs extends SubsystemBase{
   public void setLEDsMaxDelta(){
     elevatorDeltaMaxPos.applyTo(LEDBuffer);
     purple.applyTo(LEDBuffer);
-  }
+  }*/
 
-  public void setLEDstateElevator(){
+  /*public void setLEDstateElevator(){
     if(elevator.isAtL4()){
       setLEDsL4Delta();
     }
@@ -132,23 +134,23 @@ public class LEDs extends SubsystemBase{
     else if (elevator.isAtMinPosition()){
       setLEDsMinDelta();
     }
-  }
+  }*/
 
-  public void setLEDstateManipulator(){
+  /*public void setLEDstateManipulator(){
     if (manip.getFirstBeam() && manip.getSecondBeam()){
       setLEDsYellow();
     }
     else if (!manip.getFirstBeam() && !manip.getSecondBeam()){
       setLEDsGreen();
     }
-  }
+  }*/
 
   //Added climber LED logic, 
   //when extending climber show orange,
   //when at full extension show red and blue, 
   //when retracting show rainbow, 
   //when finished show scrolling rainbow
-  public void setLEDstateClimber(){
+  /*public void setLEDstateClimber(){
     if (climber.getHomePos() < climber.getPosition() && climber.getPosition() < climber.getExtendedPos() &&  climber.brokeExtendedLimit()){ //if climber is not at a max position but it has hit the maximum previously, the climber is currently climbing
       setLEDsRainbow();
     }
@@ -163,5 +165,5 @@ public class LEDs extends SubsystemBase{
       setLEDsRedAndBlue();
       completeClimb = true;
     }
-  }
+  } */
 }

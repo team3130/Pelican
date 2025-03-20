@@ -43,7 +43,7 @@ public class LimitedManipOuttake extends Command {
     if(elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
       manip.runManip();
     }
-    LED.setLEDstateManipulator();
+    //LED.setLEDstateManipulator();
   }
 
   // Called once the command ends or is interrupted.
