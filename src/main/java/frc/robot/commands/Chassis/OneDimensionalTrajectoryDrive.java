@@ -19,7 +19,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final double minLogicDistance = 1;
+    private final double minLogicDistance = 1.5;
     private final double normalCorrectionSpeed = 2;
     private final double tangentJoystickMultiplier = 2;
     private final RobotContainer robotContainer;
@@ -129,20 +129,16 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
                 Translation2d normal = robotToTarget.minus(tangent);
                 approach = (unitTangent.times(tangentJoystickMultiplier*joystickY));
-                if(targetPose.getX() < 4.3434 || targetPose.getX() > 13.0302) {
+                if((targetPose.getX() < 4.3434) || (targetPose.getX() > 13.0302)) {
                     approach = approach.times(-1);
                 }
                 approach = approach.plus(normal.times(normalCorrectionSpeed));
             } else {
-                Rotation2d angle = targetPose.getRotation();
-                Rotation2d stickAngle = vector.getAngle();
-                Rotation2d diffAngle = angle.minus(stickAngle);
-                double cos = diffAngle.getCos();
-                if (!onBlue){
-                    cos = -cos;
+                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+                approach = approach.times(-magnitude*joystickY);
+                if((targetPose.getX() > 4.3434) && (targetPose.getX() < 13.0302)) {
+                    approach = approach.times(-1);
                 }
-                approach = new Translation2d(1, angle);
-                approach = approach.times(magnitude * cos);
             }
 
             if (!onBlue) {
