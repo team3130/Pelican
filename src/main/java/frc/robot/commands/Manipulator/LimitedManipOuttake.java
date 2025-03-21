@@ -51,6 +51,7 @@ public class LimitedManipOuttake extends Command {
   public void end(boolean interrupted) {
     manip.stopManip();
     timer.stop();
+    manip.setIsOuttaking(true);
   }
 
   // Returns true when the command should end.

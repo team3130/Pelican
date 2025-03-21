@@ -142,10 +142,10 @@ public class RobotContainer {
     driverController.R3().whileTrue(new GoUp(elevator, LED));
     driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
-    driverController.L2().onTrue(new GoToL3(elevator, manip, LED));
+    driverController.square().onTrue(new GoToL3(elevator, manip, LED));
     driverController.cross().onTrue(new GoToL2(elevator, manip, LED));
     //driverController.triangle().onTrue(new GoToL1(elevator, manip, LED));
-    driverController.circle().onTrue(new GoToHome(elevator, LED));
+    driverController.povDown().onTrue(new GoToHome(elevator, LED));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));

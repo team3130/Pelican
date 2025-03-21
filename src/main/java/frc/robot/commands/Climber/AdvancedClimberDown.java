@@ -13,6 +13,7 @@ public class AdvancedClimberDown extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Climber climber;
   private final LEDs LED;
+  private double currentPosition;
 
   /**
    * Creates a new ExampleCommand.
@@ -29,13 +30,13 @@ public class AdvancedClimberDown extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    currentPosition = climber.getPosition();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(climber.getPosition() < 10) {
+    if(climber.getPosition() > currentPosition) {
       climber.climbDown();
     }
     //LED.setLEDstateClimber();
