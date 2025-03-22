@@ -30,8 +30,6 @@ public class LEDs extends SubsystemBase{
   private final int LEDLength = 129; //should be the correct length as of 3/19/25
   private final int pwmPort = 2;
   private final Timer timer = new Timer();
-  private boolean manipIntaked = false;
-  private boolean manipOuttaked = false;
 
   //LEDs per Meter
   Distance kLedSpacing = Meters.of((double) 1 / LEDLength);
@@ -46,8 +44,9 @@ public class LEDs extends SubsystemBase{
   LEDPattern orange = LEDPattern.solid(Color.kOrange);
   LEDPattern purple = LEDPattern.solid(Color.kPurple);
   LEDPattern manualYellow = LEDPattern.solid(new Color(255, 135, 0));
-  LEDPattern flashPurple = purple.blink(Time.ofRelativeUnits(0.5, Seconds.getBaseUnit()));
-  LEDPattern flashGreen = green.blink(Time.ofRelativeUnits(0.5, Seconds.getBaseUnit()));
+  LEDPattern manualGreen = LEDPattern.solid(new Color(0, 255, 0));
+  LEDPattern flashPurple = purple.blink(Time.ofRelativeUnits(0.25, Seconds.getBaseUnit()));
+  LEDPattern flashGreen = manualGreen.blink(Time.ofRelativeUnits(0.5, Seconds.getBaseUnit()));
 
   //animated colors
   LEDPattern rainbow = LEDPattern.rainbow(255, 255);
@@ -174,14 +173,14 @@ public class LEDs extends SubsystemBase{
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 115) { //should be less than 20 logic in actual match
+        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) { //should be less than 20 logic in actual match
             LED.stop();
             rainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
             LED.start();
         } else if(manip.getIsIntaking()) {
             timer.start();
-            if(timer.hasElapsed(5)) {
+            if(timer.hasElapsed(2.5)) {
                 timer.stop();
                 timer.reset();
                 manip.setIsIntaking(false);
@@ -210,10 +209,4 @@ public class LEDs extends SubsystemBase{
             LED.start();
         }
     }
-
-    public boolean isManipIntaked() {return manipIntaked;}
-    public void setManipIntaked(boolean value) {manipIntaked = value;}
-
-    public boolean isManipOuttaked() {return manipOuttaked;}
-    public void setManipOuttaked(boolean value) {manipOuttaked = value;}
 }

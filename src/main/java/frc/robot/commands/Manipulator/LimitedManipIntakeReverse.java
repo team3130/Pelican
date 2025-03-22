@@ -44,7 +44,7 @@ public class LimitedManipIntakeReverse extends Command {
   @Override
   public void end(boolean interrupted) {
     manip.stopManip();
-    LED.setManipIntaked(true);
+    manip.setIsIntaking(true);
   }
 
   // Returns true when the command should end.

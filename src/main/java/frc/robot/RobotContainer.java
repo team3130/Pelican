@@ -247,16 +247,14 @@ public class RobotContainer {
     if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
       if(timer.isRunning()) {
         if (timer.hasElapsed(0.1)) {
-          if (driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
-            camera.getVisionOdometry(driveTrain, logger);
-          } else {
-            timer.stop();
-            timer.reset();
-          }
+          camera.getVisionOdometry(driveTrain, logger);
         }
       } else {
         timer.start();
       }
+    } else {
+      timer.stop();
+      timer.reset();
     }
   }
 
