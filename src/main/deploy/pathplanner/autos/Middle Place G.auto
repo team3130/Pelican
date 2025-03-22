@@ -11,7 +11,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
               {
@@ -25,6 +25,31 @@
                 "data": {
                   "name": "Go L4"
                 }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.35
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Auton One Switch Limited Manip Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Limited Manip Intake Reverse"
+                      }
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -33,6 +58,12 @@
           "type": "named",
           "data": {
             "name": "Limited Manip Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "MMRGReverse"
           }
         }
       ]

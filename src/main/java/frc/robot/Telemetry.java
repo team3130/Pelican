@@ -105,10 +105,10 @@ public class Telemetry {
             m_moduleTargetsArray[i*2 + 1] = state.ModuleTargets[i].speedMetersPerSecond;
         }
 
-        SignalLogger.writeDoubleArray("DriveState/Pose", m_poseArray);
-        SignalLogger.writeDoubleArray("DriveState/ModuleStates", m_moduleStatesArray);
-        SignalLogger.writeDoubleArray("DriveState/ModuleTargets", m_moduleTargetsArray);
-        SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
+        //SignalLogger.writeDoubleArray("DriveState/Pose", m_poseArray);
+        //SignalLogger.writeDoubleArray("DriveState/ModuleStates", m_moduleStatesArray);
+        //SignalLogger.writeDoubleArray("DriveState/ModuleTargets", m_moduleTargetsArray);
+        //SignalLogger.writeDouble("DriveState/OdometryPeriod", state.OdometryPeriod, "seconds");
 
         /* Telemeterize the module states to a Mechanism2d */
         for (int i = 0; i < 4; ++i) {
