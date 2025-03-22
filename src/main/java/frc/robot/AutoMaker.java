@@ -38,6 +38,7 @@ public class AutoMaker {
     private static SendableChooser<Command> stationChooser3 = null;
     private static final PathConstraints defaultConstraints = new PathConstraints(1, 1, Math.PI, Math.PI);
     private static final boolean isCompetition = true;
+    private List<Waypoint>[] waypoints;
 
     public Command produceAutoPart(List<Waypoint> waypoints, GoalEndState endState) {
         // Create a list of waypoints from poses. Each pose represents one waypoint.
