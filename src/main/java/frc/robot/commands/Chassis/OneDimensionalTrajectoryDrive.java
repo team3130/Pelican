@@ -1,6 +1,5 @@
 package frc.robot.commands.Chassis;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -19,9 +18,14 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final double minLogicDistance = 1;
-    private final double normalCorrectionSpeed = 2.5;
+    private final double minLogicDistanceTangent = 2;
+    private final double minLogicDistanceNormal = 0.8;
+    private final double normalCorrectionP = 12;
+    private final double normalCorrectionI = 0.004;
+    private final double normalCorrectionD = 200;
     private final double tangentJoystickMultiplier = 2;
+    Translation2d prevNormal = new Translation2d(0, 0);
+    Translation2d sumNormal = new Translation2d(0, 0);
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -111,34 +115,38 @@ public class OneDimensionalTrajectoryDrive extends Command {
      */
     @Override
     public void execute() {
-        double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-        double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-        double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
-        double joystickY = driverController.getLeftY();
         if(runnable) {
+            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
             ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
             double xAxis = chassisSpeeds.vxMetersPerSecond;
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
             double magnitude = vector.getNorm();
+            Translation2d robotToTarget = new Translation2d(diffX, diffY);
+            Translation2d unitTangent = new Translation2d(1, targetPose.getRotation());
+            Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
+            Translation2d normal = robotToTarget.minus(tangent);
 
             Translation2d approach;
-            if ((minLogicDistance > distance) || useMinLogicDistance) {
+            if (((minLogicDistanceNormal > normal.getNorm()) && (minLogicDistanceTangent > tangent.getNorm())) || useMinLogicDistance) {
                 useMinLogicDistance = true;
-                Translation2d robotToTarget = new Translation2d(diffX, diffY);
-                Translation2d unitTangent = new Translation2d(1, targetPose.getRotation());
-                Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
-                Translation2d normal = robotToTarget.minus(tangent);
-                approach = (unitTangent.times(tangentJoystickMultiplier*joystickY));
-                if((targetPose.getX() < 4.3434) || (targetPose.getX() > 13.0302)) {
-                    approach = approach.times(-1);
+                Translation2d normalCorrection = normal.times(normalCorrectionP);
+                double dotMultiplier = vector.getX()*unitTangent.getX() + vector.getY()*unitTangent.getY();
+                approach = (unitTangent.times(tangentJoystickMultiplier*dotMultiplier));
+                if (!onBlue) {
+                    approach = approach.rotateBy(Rotation2d.k180deg);
                 }
-                approach = approach.plus(normal.times(normalCorrectionSpeed));
+                normalCorrection = normalCorrection.plus((normal.minus(prevNormal)).times(normalCorrectionD));
+                normalCorrection = normalCorrection.plus(sumNormal.times(normalCorrectionI));
+                approach = approach.plus(normalCorrection);
+                prevNormal = normal;
+                sumNormal = sumNormal.plus(normal);
             } else {
                 approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
                 approach = approach.times(magnitude);
             }
-
             if (!onBlue) {
                 approach = approach.rotateBy(Rotation2d.k180deg);
             }
