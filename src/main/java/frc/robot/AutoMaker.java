@@ -5,6 +5,9 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
@@ -38,7 +41,10 @@ public class AutoMaker {
     private static SendableChooser<Command> stationChooser3 = null;
     private static final PathConstraints defaultConstraints = new PathConstraints(1, 1, Math.PI, Math.PI);
     private static final boolean isCompetition = true;
-    private List<Waypoint>[] waypoints;
+    private List<Waypoint> waypoints =
+            PathPlannerPath.waypointsFromPoses(
+                    new Pose2d(3, 3, Rotation2d.k180deg)
+            );
 
     public Command produceAutoPart(List<Waypoint> waypoints, GoalEndState endState) {
         // Create a list of waypoints from poses. Each pose represents one waypoint.
