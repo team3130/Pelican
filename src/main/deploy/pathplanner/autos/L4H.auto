@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "MiddleMoveReefH"
+                  "pathName": "L4H"
                 }
               },
               {
@@ -58,6 +58,12 @@
           "type": "named",
           "data": {
             "name": "Limited Manip Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4HReverse"
           }
         }
       ]

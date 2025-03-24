@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.1566598360655735,
-        "y": 3.8631659836065575
+        "x": 7.157,
+        "y": 4.197
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.906659967337431,
-        "y": 3.8629097885416677
+        "x": 6.907,
+        "y": 4.197
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.769,
-        "y": 3.8631659836065575
+        "x": 5.769140203662305,
+        "y": 4.197
       },
       "prevControl": {
-        "x": 6.018999998131195,
-        "y": 3.8631965516056437
+        "x": 6.019140203662305,
+        "y": 4.197
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "'Dead Reckoning'",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
