@@ -180,7 +180,7 @@ public class LEDs extends SubsystemBase{
             LED.start();
         } else if(manip.getIsIntaking()) {
             timer.start();
-            if(timer >= 2.5) {
+            if(timer.hasElapsed(2.5)) {
                 timer.stop();
                 timer.reset();
                 manip.setIsIntaking(false);
@@ -192,7 +192,7 @@ public class LEDs extends SubsystemBase{
             }
         } else if(manip.getIsOuttaking()) {
             timer.start();
-            if(timer >= 5) {
+            if(timer.hasElapsed(5)) {
                 timer.stop();
                 timer.reset();
                 manip.setIsOuttaking(false);
