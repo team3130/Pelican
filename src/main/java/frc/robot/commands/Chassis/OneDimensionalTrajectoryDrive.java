@@ -20,12 +20,13 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double minLogicDistanceTangent = 2;
     private final double minLogicDistanceNormal = 0.8;
+    private final double minMagForCorrection = 0.05;
     private final double normalCorrectionP = 12;
-    private final double normalCorrectionI = 0.004;
-    private final double normalCorrectionD = 200;
+    private final double normalCorrectionI = 0.01;
+    private final double normalCorrectionD = 100;
     private final double tangentJoystickMultiplier = 2;
-    Translation2d prevNormal = new Translation2d(0, 0);
     Translation2d sumNormal = new Translation2d(0, 0);
+    Translation2d[] last500Errors = new Translation2d[100];
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -107,6 +108,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
             runnable = true;
         }
         logger.updateTarget(targetPose);
+
+        for(int i = 0; i < 100; i++) {
+            last500Errors[i] = new Translation2d(0, 0);
+        }
     }
 
     /**
@@ -132,17 +137,23 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d approach;
             if (((minLogicDistanceNormal > normal.getNorm()) && (minLogicDistanceTangent > tangent.getNorm())) || useMinLogicDistance) {
                 useMinLogicDistance = true;
-                Translation2d normalCorrection = normal.times(normalCorrectionP);
                 double dotMultiplier = vector.getX()*unitTangent.getX() + vector.getY()*unitTangent.getY();
                 approach = (unitTangent.times(tangentJoystickMultiplier*dotMultiplier));
                 if (!onBlue) {
                     approach = approach.rotateBy(Rotation2d.k180deg);
                 }
-                normalCorrection = normalCorrection.plus((normal.minus(prevNormal)).times(normalCorrectionD));
+                Translation2d normalCorrection = normal.times(normalCorrectionP);
+                normalCorrection = normalCorrection.plus((normal.minus(last500Errors[0])).times(normalCorrectionD));
                 normalCorrection = normalCorrection.plus(sumNormal.times(normalCorrectionI));
-                approach = approach.plus(normalCorrection);
-                prevNormal = normal;
-                sumNormal = sumNormal.plus(normal);
+                if(normal.getNorm() > minMagForCorrection) {
+                    approach = approach.plus(normalCorrection);
+                }
+                sumNormal = sumNormal.minus(last500Errors[99]);
+                for(int i = 98; i >= 0; i--) {
+                    last500Errors[i + 1] = last500Errors[i];
+                }
+                last500Errors[0] = normal;
+                sumNormal = sumNormal.plus(last500Errors[0]);
             } else {
                 approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
                 approach = approach.times(magnitude);
