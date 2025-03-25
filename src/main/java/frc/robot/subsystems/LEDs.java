@@ -53,7 +53,7 @@ public class LEDs extends SubsystemBase{
   LEDPattern scrollingRainbow = rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.25), kLedSpacing);
   LEDPattern redAndBlue = LEDPattern.steps(Map.of(0, Color.kRed, 0.5, Color.kBlue));
 
-  LEDPattern timeProgress = LEDPattern.progressMaskLayer(() -> DriverStation.getMatchTime() / 135);
+  LEDPattern timeProgress = LEDPattern.progressMaskLayer(() -> DriverStation.getMatchTime());
   LEDPattern elevatorDeltaL1 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL1()));
   LEDPattern elevatorDeltaL2 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL2()));
   LEDPattern elevatorDeltaL3 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL3()));
@@ -87,53 +87,33 @@ public class LEDs extends SubsystemBase{
 
   // elevator LED colors
   public void setLEDsL1Delta(){
-    LED.stop();
     elevatorDeltaL1.applyTo(LEDBuffer);
-    purple.applyTo(LEDBuffer);
     LED.setData(LEDBuffer);
-    LED.start();
   }
   public void setLEDsL2Delta(){
-    LED.stop();
     elevatorDeltaL2.applyTo(LEDBuffer);
-    purple.applyTo(LEDBuffer);
     LED.setData(LEDBuffer);
-    LED.start();
   }
   public void setLEDsL3Delta(){
-    LED.stop();
     elevatorDeltaL3.applyTo(LEDBuffer);
-    purple.applyTo(LEDBuffer);
     LED.setData(LEDBuffer);
-    LED.start();
   }
   public void setLEDsL4Delta(){
-    LED.stop();
     elevatorDeltaL4.applyTo(LEDBuffer);
-    purple.applyTo(LEDBuffer);
     LED.setData(LEDBuffer);
-    LED.start();
   }
   public void setLEDsHomeDelta(){
-    LED.stop();
     elevatorDeltaHome.applyTo(LEDBuffer);
-    purple.applyTo(LEDBuffer);
     LED.setData(LEDBuffer);
-    LED.start();
   }
   public void setLEDsMinDelta(){
-    LED.stop();
     elevatorDeltaMinPos.applyTo(LEDBuffer);
-    purple.applyTo(LEDBuffer);
+    blue.applyTo(LEDBuffer);
     LED.setData(LEDBuffer);
-    LED.start();
   }
   public void setLEDsMaxDelta(){
-    LED.stop();
     elevatorDeltaMaxPos.applyTo(LEDBuffer);
-    purple.applyTo(LEDBuffer);
     LED.setData(LEDBuffer);
-    LED.start();
   }
 
   /*public void setLEDstateElevator(){
@@ -193,40 +173,36 @@ public class LEDs extends SubsystemBase{
 
     @Override
     public void periodic() {
+        LED.start();
         // This method will be called once per scheduler run
         if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 115) { //should be less than 20 logic in actual match/  or greater than 115 in practice
-            LED.stop();
             rainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
-            LED.start();
         } else if(manip.getIsIntaking()) {
             timer.start();
             if(timer.hasElapsed(2.5)) {
+                manip.setIsIntaking(false);
                 timer.stop();
                 timer.reset();
-                manip.setIsIntaking(false);
             } else {
-                LED.stop();
                 flashPurple.applyTo(LEDBuffer);
                 LED.setData(LEDBuffer);
-                LED.start();
             }
         } else if(manip.getIsOuttaking()) {
             timer.start();
             if(timer.hasElapsed(5)) {
+                manip.setIsOuttaking(false);
                 timer.stop();
                 timer.reset();
-                manip.setIsOuttaking(false);
             } else {
-                LED.stop();
                 flashGreen.applyTo(LEDBuffer);
                 LED.setData(LEDBuffer);
-                LED.start();
             }
           }
           //set elevator LED logic. each is independent
           else if(elevator.isAtL4()){
-            setLEDsL4Delta();
+            elevatorDeltaL4.applyTo(LEDBuffer);
+            LED.setData(LEDBuffer);
           }
           else if (elevator.isAtL3()){
             setLEDsL3Delta();
@@ -247,10 +223,8 @@ public class LEDs extends SubsystemBase{
             setLEDsMinDelta();
           }
           else {
-            LED.stop();
-            manualYellow.applyTo(LEDBuffer);
+            timeProgress.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
-            LED.start();
         }   
     } 
 }
