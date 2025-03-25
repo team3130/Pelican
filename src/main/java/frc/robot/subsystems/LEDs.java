@@ -194,7 +194,7 @@ public class LEDs extends SubsystemBase{
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) { //should be less than 20 logic in actual match or greater than 115
+        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 115) { //should be less than 20 logic in actual match/  or greater than 115 in practice
             LED.stop();
             rainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
