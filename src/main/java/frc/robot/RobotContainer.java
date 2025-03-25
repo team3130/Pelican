@@ -85,7 +85,7 @@ public class RobotContainer {
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
     camera = new Camera();
-    LED = new LEDs(elevator, manip, climber);
+    LED = new LEDs(elevator, manip, climber, driveTrain);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
@@ -260,6 +260,10 @@ public class RobotContainer {
       timer.stop();
       timer.reset();
     }
+  }
+
+  public void LEDDisabledState() {
+    LED.LEDDisabledState();
   }
 
   public void sendAutonChoosers() {
