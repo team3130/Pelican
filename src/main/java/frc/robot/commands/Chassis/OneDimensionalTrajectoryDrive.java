@@ -20,11 +20,11 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double minLogicDistanceTangent = 2;
     private final double minLogicDistanceNormal = 0.8;
-    private final double minMagForCorrection = 0.01;
+    private final double minMagForCorrection = 0;
     private final double normalCorrectionP = 12;
-    private final double normalCorrectionI = 0.01;
+    private final double normalCorrectionI = 0.05;
     private final double normalCorrectionD = 100;
-    private final ProfiledPIDController pidController = new ProfiledPIDController(normalCorrectionP, normalCorrectionI, normalCorrectionD, new TrapezoidProfile.Constraints(1, 1));
+    private final ProfiledPIDController pidController = new ProfiledPIDController(25, 0.5, 0.04, new TrapezoidProfile.Constraints(1, 1));
     private final double tangentJoystickMultiplier = 2;
     Translation2d sumNormal = new Translation2d(0, 0);
     Translation2d[] last500Errors = new Translation2d[100];
@@ -113,6 +113,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
         for(int i = 0; i < 100; i++) {
             last500Errors[i] = new Translation2d(0, 0);
         }
+
+
     }
 
     /**
@@ -147,7 +149,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 normalCorrection = normalCorrection.plus((normal.minus(last500Errors[0])).times(normalCorrectionD));
                 normalCorrection = normalCorrection.plus(sumNormal.times(normalCorrectionI));
                 if(normal.getNorm() > minMagForCorrection) {
-                    approach = approach.plus(normalCorrection);
+                    double mag = pidController.calculate(normal.getNorm());
+                    approach = approach.plus(normal.times(mag/normal.getNorm()));
                 }
                 sumNormal = sumNormal.minus(last500Errors[99]);
                 for(int i = 98; i >= 0; i--) {

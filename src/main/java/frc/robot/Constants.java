@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.PIDConstants;
 import edu.wpi.first.math.util.Units;
 
 import static edu.wpi.first.units.Units.*;
@@ -68,6 +69,8 @@ public final class Constants {
     public static double maxAngularRate = RotationsPerSecond.of(0.6).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
     public static double maxSteerVoltage = 4d;
     public static double maxDriveVoltage = 10d;
+    public static PIDConstants translationPID = new PIDConstants(25, 0.5, 0.04); // Translation PID constants
+    public static PIDConstants rotationPID =  new PIDConstants(6, 0, 0); // Rotation PID constants
 
     public static double tuningDesiredVelocity = 2d;
 
