@@ -286,5 +286,8 @@ public class Elevator extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if(brokeBottomLimitSwitch()) {
+      setPosition(0);
+    }
   }
 }

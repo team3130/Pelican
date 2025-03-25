@@ -10,9 +10,10 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
-public class LimitedManipIntakeReverse extends Command {
+public class AutonOneSwitchLimitedManipIntake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
+  private final Elevator elevator;
   private final LEDs LED;
 
   /**
@@ -20,8 +21,9 @@ public class LimitedManipIntakeReverse extends Command {
    *
    * @param manip The subsystem used by this command.
    */
-  public LimitedManipIntakeReverse(Manipulator manip, LEDs LED) {
+  public AutonOneSwitchLimitedManipIntake(Manipulator manip, Elevator elevator, LEDs LED) {
     this.manip = manip;
+    this.elevator = elevator;
     this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip);
@@ -30,13 +32,13 @@ public class LimitedManipIntakeReverse extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    manip.runManip();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    manip.manipAtSpeed(-0.3);
+    manip.manipAtSpeed(0.4);
     //LED.setLEDstateManipulator();
   }
 
@@ -44,12 +46,11 @@ public class LimitedManipIntakeReverse extends Command {
   @Override
   public void end(boolean interrupted) {
     manip.stopManip();
-    manip.setIsIntaking(true);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return !manip.getFirstBeam();
+    return manip.getFirstBeam();
   }
 }

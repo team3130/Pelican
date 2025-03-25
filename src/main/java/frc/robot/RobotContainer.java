@@ -88,6 +88,10 @@ public class RobotContainer {
     LED = new LEDs(elevator, manip, climber);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
+    NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
+    //only use command below at tulsa regional, fix for second break beam not working
+    NamedCommands.registerCommand("Auton One Switch Limited Manip Intake", new AutonOneSwitchLimitedManipIntake(manip, elevator, LED));
+    NamedCommands.registerCommand("Limited Manip Intake Reverse", new LimitedManipIntakeReverse(manip, LED));
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
 
@@ -142,10 +146,10 @@ public class RobotContainer {
     driverController.R3().whileTrue(new GoUp(elevator, LED));
     driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
-    driverController.L2().onTrue(new GoToL3(elevator, manip, LED));
+    driverController.square().onTrue(new GoToL3(elevator, manip, LED));
     driverController.cross().onTrue(new GoToL2(elevator, manip, LED));
     //driverController.triangle().onTrue(new GoToL1(elevator, manip, LED));
-    driverController.circle().onTrue(new GoToHome(elevator, LED));
+    driverController.povDown().onTrue(new GoToHome(elevator, LED));
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -247,16 +251,14 @@ public class RobotContainer {
     if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
       if(timer.isRunning()) {
         if (timer.hasElapsed(0.1)) {
-          if (driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
-            camera.getVisionOdometry(driveTrain, logger);
-          } else {
-            timer.stop();
-            timer.reset();
-          }
+          camera.getVisionOdometry(driveTrain, logger);
         }
       } else {
         timer.start();
       }
+    } else {
+      timer.stop();
+      timer.reset();
     }
   }
 

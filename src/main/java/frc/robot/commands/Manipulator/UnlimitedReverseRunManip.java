@@ -35,9 +35,7 @@ public class UnlimitedReverseRunManip extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (elevator.isAtL4() || (manip.getFirstBeam() && manip.getSecondBeam())) {
-      manip.reverseManip();
-    }
+    manip.reverseManip();
   }
 
   // Called once the command ends or is interrupted.
