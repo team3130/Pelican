@@ -20,10 +20,11 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double minLogicDistanceTangent = 2;
     private final double minLogicDistanceNormal = 0.8;
-    private final double minMagForCorrection = 0.05;
+    private final double minMagForCorrection = 0.01;
     private final double normalCorrectionP = 12;
     private final double normalCorrectionI = 0.01;
     private final double normalCorrectionD = 100;
+    private final ProfiledPIDController pidController = new ProfiledPIDController(normalCorrectionP, normalCorrectionI, normalCorrectionD, new TrapezoidProfile.Constraints(1, 1));
     private final double tangentJoystickMultiplier = 2;
     Translation2d sumNormal = new Translation2d(0, 0);
     Translation2d[] last500Errors = new Translation2d[100];

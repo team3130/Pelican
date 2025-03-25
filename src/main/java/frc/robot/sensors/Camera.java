@@ -47,7 +47,6 @@ public class Camera implements Sendable, Subsystem {
         for (PhotonPipelineResult result : results) {
             boolean inRange = false;
             double highestAmbiguity = 0;
-            boolean reefId = false;
             for (PhotonTrackedTarget target: result.getTargets()) {
                 double xSquared = target.getBestCameraToTarget().getX() * target.getBestCameraToTarget().getX();
                 double ySquared = target.getBestCameraToTarget().getY() * target.getBestCameraToTarget().getY();
@@ -58,14 +57,8 @@ public class Camera implements Sendable, Subsystem {
                 if(distance < 4){
                     inRange = true;
                 }
-                int[] ids = {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22};
-                for(int id: ids) {
-                    if(id == target.fiducialId) {
-                        reefId = true;
-                    }
-                }
             }
-            if(inRange && highestAmbiguity < 0.1 && reefId) {
+            if(inRange && highestAmbiguity < 0.1) {
                 photonPoseEstimator.setReferencePose(drivetrain.getState().Pose);
                 Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
                 if (optionalOdoState.isPresent()) {
