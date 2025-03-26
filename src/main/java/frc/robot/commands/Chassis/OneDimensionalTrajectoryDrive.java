@@ -20,11 +20,11 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final double minLogicDistanceTangent = 2;
     private final double minLogicDistanceNormal = 0.8;
-    private final double tangentJoystickMultiplier = 0.7;
-    private final double maxTangentAcceleration = 0.3;
-    private double prevDotMultiplier = 0;
-    private final ProfiledPIDController pidController = new ProfiledPIDController(12, 0.05, 10,
-            new TrapezoidProfile.Constraints(Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - tangentJoystickMultiplier*tangentJoystickMultiplier), Math.sqrt(Constants.Swerve.kMaxAccelerationDrive*Constants.Swerve.kMaxAccelerationDrive - maxTangentAcceleration*maxTangentAcceleration)));
+    private final double normSpeed = 2;
+    private final double normAcceleration = 0.7;
+    private final ProfiledPIDController pidController = new ProfiledPIDController(9, 0.05, 1,
+            new TrapezoidProfile.Constraints(normSpeed, normAcceleration));
+    private final double tangentJoystickMultiplier = Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - normSpeed*normSpeed);
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
@@ -134,10 +134,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 useMinLogicDistance = true;
                 double dotMultiplier = vector.getX()*unitTangent.getX() + vector.getY()*unitTangent.getY();
                 approach = (unitTangent.times(tangentJoystickMultiplier*dotMultiplier));
-                if(tangentJoystickMultiplier * (dotMultiplier - prevDotMultiplier)/0.02 > maxTangentAcceleration) {
-                    approach = (unitTangent.times(tangentJoystickMultiplier*(0.02*maxTangentAcceleration/tangentJoystickMultiplier + prevDotMultiplier)));
-                }
-                prevDotMultiplier = dotMultiplier;
                 if (!onBlue) {
                     approach = approach.rotateBy(Rotation2d.k180deg);
                 }
