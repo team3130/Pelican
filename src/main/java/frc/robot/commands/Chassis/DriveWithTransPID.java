@@ -1,8 +1,10 @@
 package frc.robot.commands.Chassis;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -11,11 +13,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class DriveWithTransPID extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final ProfiledPIDController pidController;
-    private final TrapezoidProfile.Constraints constraints;
+    private final PIDController pidController;
     private final SwerveRequest.FieldCentric drive;
-    private double maxVel = 1;
-    private double maxAccel = 3;
     private double kP = 1;
     private double kI = 0;
     private double kD = 0;
@@ -24,8 +23,7 @@ public class DriveWithTransPID extends Command {
     public DriveWithTransPID(CommandSwerveDrivetrain driveTrain, SwerveRequest.FieldCentric drive) {
         this.driveTrain = driveTrain;
         this.drive = drive;
-        constraints = new TrapezoidProfile.Constraints(maxVel, maxAccel);
-        pidController = new ProfiledPIDController(kP, kI, kD, constraints);
+        pidController = new PIDController(kP, kI, kD);
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
@@ -37,8 +35,13 @@ public class DriveWithTransPID extends Command {
      */
     @Override
     public void initialize() {
-      pidController.reset(driveTrain.getStatePose().getX());
-      setpoint  = driveTrain.getStatePose().getX() - 2;
+        if(DriverStation.getAlliance().isPresent()) {
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+                setpoint = 7;
+            } else {
+                setpoint = 10;
+            }
+        }
     }
 
     /**

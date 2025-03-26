@@ -39,7 +39,7 @@ public class Camera implements Sendable, Subsystem {
             System.out.println(fieldName);
         }
          */
-        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE, robotToCamera);
+        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
     }
 
     public void getVisionOdometry(CommandSwerveDrivetrain drivetrain, Telemetry logger) {
@@ -56,6 +56,8 @@ public class Camera implements Sendable, Subsystem {
                 }
                 if(distance < 4){
                     inRange = true;
+                } else {
+                    inRange = false;
                 }
             }
             if(inRange && highestAmbiguity < 0.1) {

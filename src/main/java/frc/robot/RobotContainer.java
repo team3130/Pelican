@@ -144,6 +144,7 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.R3().whileTrue(new GoUp(elevator, LED));
+    //driverController.L1().whileTrue(new GoDown(elevator));
     driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
     driverController.square().onTrue(new GoToL3(elevator, manip, LED));
