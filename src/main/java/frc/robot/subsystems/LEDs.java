@@ -184,6 +184,7 @@ public class LEDs extends SubsystemBase{
     }
   } */
 
+    /*
     public void LEDDisabledState() {
         if (DriverStation.getAlliance().isPresent()) {
             double xDistance = 0;
@@ -216,9 +217,13 @@ public class LEDs extends SubsystemBase{
         }
     }
 
-    public void LEDTeleopState() {
-        //should be less than 20 logic in actual match and greater than 110 when not in match
+     */
+
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
         if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) {
+            //should be less than 20 logic in actual match and greater than 110 when not in match
             rainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
         } else if(manip.getIsIntaking()) {
