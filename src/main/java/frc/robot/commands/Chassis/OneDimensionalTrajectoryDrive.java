@@ -22,7 +22,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final double minLogicDistanceNormal = 0.8;
     private final double normSpeed = 2;
     private final double normAcceleration = 0.7;
-    private final ProfiledPIDController pidController = new ProfiledPIDController(9, 0.05, 1,
+    private final double tolerance = 0.02;
+    private final ProfiledPIDController pidController = new ProfiledPIDController(9, 0.01, 2,
             new TrapezoidProfile.Constraints(normSpeed, normAcceleration));
     private final double tangentJoystickMultiplier = Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - normSpeed*normSpeed);
     private final RobotContainer robotContainer;
@@ -138,7 +139,9 @@ public class OneDimensionalTrajectoryDrive extends Command {
                     approach = approach.rotateBy(Rotation2d.k180deg);
                 }
                 double mag = pidController.calculate(normal.getNorm());
-                approach = approach.plus(normal.times(-mag/normal.getNorm()));
+                if(normal.getNorm() > tolerance) {
+                    approach = approach.plus(normal.times(-mag/normal.getNorm()));
+                }
             } else {
                 approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
                 approach = approach.times(magnitude);
