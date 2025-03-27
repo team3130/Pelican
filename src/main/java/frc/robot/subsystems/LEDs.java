@@ -29,6 +29,34 @@ public class LEDs extends SubsystemBase{
   private final int LEDLength = 129; //should be the correct length as of 3/19/25
   private final int pwmPort = 2;
   private final Timer timer = new Timer();
+  public LEDs(Elevator elevator, Manipulator manip, Climber climber, CommandSwerveDrivetrain driveTrain) {
+      this.elevator = elevator;
+      this.manip = manip;
+      this.climber = climber;
+      this.driveTrain = driveTrain;
+      bluePathStartingPoses = new Pose2d[]{
+              new Pose2d(7.1, 6.5, new Rotation2d(Math.toRadians(-146.598))), //left starting pose
+              new Pose2d(7.157, 4.197, Rotation2d.k180deg), //left middle starting pose
+              new Pose2d(7.157, 3.863, Rotation2d.k180deg), //right middle starting pose
+              new Pose2d(7.1, 1.5, new Rotation2d(Math.toRadians(136.1)))  //right starting pose
+      };
+      redPathStartingPoses = new Pose2d[]{
+              new Pose2d(10.4, 1.5, new Rotation2d(Math.toRadians(33.404))),
+              new Pose2d(10.343, 3.803, Rotation2d.kZero),
+              new Pose2d(10.343, 4.137, Rotation2d.kZero),
+              new Pose2d(10.4, 6.5, new Rotation2d(43.9))
+      };
+
+      //set pwmPort
+      LED = new AddressableLED(pwmPort);
+
+      //set strip length
+      LEDBuffer = new AddressableLEDBuffer(LEDLength);
+      LED.setLength(LEDBuffer.getLength());
+
+      //start LEDs
+      LED.start();
+    }
 
   //LEDs per Meter
   Distance kLedSpacing = Meters.of((double) 1 / LEDLength);
@@ -59,31 +87,6 @@ public class LEDs extends SubsystemBase{
   LEDPattern elevatorDeltaHome = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getHome()));
   LEDPattern elevatorDeltaMaxPos = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getMaxPosition()));
   LEDPattern elevatorDeltaMinPos = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getMinPosition()));
-  public LEDs(Elevator elevator, Manipulator manip, Climber climber, CommandSwerveDrivetrain driveTrain) {
-      this.elevator = elevator;
-      this.manip = manip;
-      this.climber = climber;
-      this.driveTrain = driveTrain;
-      bluePathStartingPoses = new Pose2d[]{
-              new Pose2d(7.1, 6.5, new Rotation2d(Math.toRadians(-146.598))), //left starting pose
-              new Pose2d(7.157, 4.197, Rotation2d.k180deg), //left middle starting pose
-              new Pose2d(7.157, 3.863, Rotation2d.k180deg), //right middle starting pose
-              new Pose2d(7.1, 1.5, new Rotation2d(Math.toRadians(136.1)))  //right starting pose
-      };
-      redPathStartingPoses = new Pose2d[]{
-              new Pose2d(10.4, 1.5, new Rotation2d(Math.toRadians(33.404))),
-              new Pose2d(10.343, 3.803, Rotation2d.kZero),
-              new Pose2d(10.343, 4.137, Rotation2d.kZero),
-              new Pose2d(10.4, 6.5, new Rotation2d(43.9))
-      };
-      
-      //set pwmPort
-      LED = new AddressableLED(pwmPort);
-
-      //set strip length
-      LEDBuffer = new AddressableLEDBuffer(LEDLength);
-      LED.setLength(LEDBuffer.getLength());
-  }
   
 
   //public void setLEDsRed(){red.applyTo(LEDBuffer);}
@@ -183,7 +186,6 @@ public class LEDs extends SubsystemBase{
 
     public void LEDDisabledState() {
         if (DriverStation.getAlliance().isPresent()) {
-            LED.start();
             double xDistance = 0;
             double yDistance = 0;
             double rotationDistance = 0;
@@ -214,10 +216,9 @@ public class LEDs extends SubsystemBase{
         }
     }
 
-    public void teleopPeriodic() {
-        LED.start();
-        // This method will be called once per scheduler run
-        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) { //should be less than 20 logic in actual match
+    public void LEDTeleopState() {
+        //should be less than 20 logic in actual match and greater than 110 when not in match
+        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) {
             rainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
         } else if(manip.getIsIntaking()) {

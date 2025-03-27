@@ -24,7 +24,7 @@ public class Elevator extends SubsystemBase {
   private final DigitalInput bottomLimitSwitch;
   private final DigitalInput topLimitSwitch;
   private double targetVelocity = 100;
-  private double targetAcceleration = 100;
+  private double targetAcceleration = 130;
 
   private double home = 0;
   private double minPosition = 8;
