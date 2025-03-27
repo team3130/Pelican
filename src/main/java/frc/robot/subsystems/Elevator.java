@@ -23,7 +23,7 @@ public class Elevator extends SubsystemBase {
   private final TalonFX rightMotor;
   private final DigitalInput bottomLimitSwitch;
   private final DigitalInput topLimitSwitch;
-  private double targetVelocity = 100;
+  private double targetVelocity = 70;
   private double targetAcceleration = 130;
 
   private double home = 0;
@@ -37,10 +37,10 @@ public class Elevator extends SubsystemBase {
   private final MotionMagicDutyCycle voltRequest0;
   private TalonFXConfiguration config;
   private Slot0Configs slot0Configs;
-  private double slot0kG = 0.0175; //old value: 0.0175
-  private double slot0kP = 0.15; //old value: 0.15
+  private double slot0kG = 0.045; //old value: 0.0175
+  private double slot0kP = 1; //old value: 0.15
   private double slot0kI = 0;
-  private double slot0kD = 0;
+  private double slot0kD = 0.025;
 
   private boolean zeroed = false;
   private boolean atHome = false;
