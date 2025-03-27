@@ -85,7 +85,7 @@ public class RobotContainer {
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
     camera = new Camera();
-    LED = new LEDs(elevator, manip, climber);
+    LED = new LEDs(elevator, manip, climber, driveTrain);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
@@ -143,6 +143,7 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.R3().whileTrue(new GoUp(elevator, LED));
+    //driverController.L1().whileTrue(new GoDown(elevator));
     driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
     driverController.square().onTrue(new GoToL3(elevator, manip, LED));
@@ -259,6 +260,14 @@ public class RobotContainer {
       timer.stop();
       timer.reset();
     }
+  }
+
+  public void LEDDisabledState() {
+    LED.LEDDisabledState();
+  }
+
+  public void LEDTeleopState() {
+    LED.LEDTeleopState();
   }
 
   public void sendAutonChoosers() {

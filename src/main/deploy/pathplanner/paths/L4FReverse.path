@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.36765702726783,
-        "y": 2.8384140729189427
+        "x": 5.268,
+        "y": 2.994
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.194059683228545,
-        "y": 3.139093492853999
+        "x": 5.483246463356682,
+        "y": 2.621182189316713
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.278991719900922,
-        "y": 2.992103626157578
+        "x": 5.415,
+        "y": 2.731
       },
       "prevControl": {
-        "x": 5.536874314250272,
-        "y": 2.545437870356829
+        "x": 5.2282390749721435,
+        "y": 3.0544794110168088
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,22 +33,22 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 0.5,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
+    "velocity": 0,
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "Reef Followers",
+  "folder": "'Dead Reckoning'",
   "idealStartingState": {
-    "velocity": 0.0,
+    "velocity": 0,
     "rotation": 119.99999999999999
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

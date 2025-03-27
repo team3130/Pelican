@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.1,
+        "y": 6.5
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.674672362609355,
+        "y": 6.21952613134016
+      },
+      "isLocked": false,
+      "linkedName": "Left Start"
+    },
+    {
+      "anchor": {
+        "x": 5.427,
+        "y": 5.304
+      },
+      "prevControl": {
+        "x": 5.259502308578062,
+        "y": 5.098414570150091
+      },
+      "nextControl": {
+        "x": 5.62188286417125,
+        "y": 5.543197788703259
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.271378399525682,
+        "y": 5.0467338551733265
+      },
+      "prevControl": {
+        "x": 5.392523562873577,
+        "y": 5.33079259523244
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 0.5,
+    "maxAcceleration": 1.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
+  },
+  "reversed": false,
+  "folder": "'Dead Reckoning'",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
+  },
+  "useDefaultConstraints": false
+}

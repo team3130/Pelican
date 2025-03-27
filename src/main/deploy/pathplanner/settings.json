@@ -4,6 +4,7 @@
   "holonomicMode": true,
   "pathFolders": [
     "Feeder Follower Paths",
+    "'Dead Reckoning'",
     "Reef Followers"
   ],
   "autoFolders": [],

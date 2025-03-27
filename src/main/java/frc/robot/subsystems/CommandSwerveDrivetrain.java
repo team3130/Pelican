@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
+import frc.robot.Constants;
 import frc.robot.TunerConstants.TunerSwerveDrivetrain;
 import org.json.simple.parser.ParseException;
 
@@ -186,8 +187,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                     new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                            new PIDConstants(25, 0.5, 0.04), // Translation PID constants
-                            new PIDConstants(6, 0, 0) // Rotation PID constants
+                            new PIDConstants( // Translation PID constants
+                                    Constants.Swerve.translationPID[0],
+                                    Constants.Swerve.translationPID[1],
+                                    Constants.Swerve.translationPID[2]),
+                            new PIDConstants( // Rotation PID constants
+                                    Constants.Swerve.rotationPID[0],
+                                    Constants.Swerve.rotationPID[1],
+                                    Constants.Swerve.rotationPID[2])
                     ),
                     config, //the robot configuration
                     () -> {

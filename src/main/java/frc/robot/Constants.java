@@ -18,7 +18,7 @@ import static edu.wpi.first.units.Units.*;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final boolean basicAuton = true;
+  public static final boolean basicAuton = false;
   public static final boolean debugMode = true;
   public static final boolean pitMode = false;
 
@@ -62,6 +62,8 @@ public final class Constants {
   }
 
   public static class Swerve {
+    public static double[] translationPID = {8, 0, 0.3};
+    public static double[] rotationPID = {9, 0, 0.3};
     public static double maxSpeed = 3.75; // NOT kSpeedAt12Volts
     public static double maxSpeedPartiallyExtended = 1.5;
     public static double maxSpeedFullExtended = 1;

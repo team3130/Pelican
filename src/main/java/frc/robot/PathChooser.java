@@ -208,16 +208,10 @@ public class PathChooser {
                                 new SequentialCommandGroup(
                                         new ParallelDeadlineGroup(
                                                 pathfindThenFollowPath(path, defaultConstraints),
+                                                new GoToL4(elevator, manip, LED),
                                                 new SequentialCommandGroup(
-                                                        new WaitCommand(0.75),
-                                                        new GoToL4(elevator, manip, LED).asProxy()
-                                                ),
-                                                new SequentialCommandGroup(
-                                                        new WaitCommand(0.5),
-                                                        new SequentialCommandGroup(
-                                                                new AutonLimitedManipIntake(manip, elevator, LED).asProxy(),
-                                                                new LimitedManipIntakeReverse(manip, LED).asProxy()
-                                                        )
+                                                        new AutonLimitedManipIntake(manip, elevator, LED).asProxy(),
+                                                        new LimitedManipIntakeReverse(manip, LED).asProxy()
                                                 )
                                         ),
                                         new LimitedManipOuttake(manip, elevator, LED).asProxy(),
