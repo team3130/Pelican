@@ -62,6 +62,13 @@ public class OneDimensionalTrajectoryDrive extends Command {
     /**
      * The initial subroutine of a command.  Called once when the command is initially scheduled.
      */
+
+    private double getNormalDistanceFromLine(){
+        Translation2d distance = targetPose.minus(driveTrain.getStatePose()).getTranslation();
+        double alpha = targetPose.getRotation().getRadians() - distance.getAngle().getRadians();
+        return Math.abs(Math.sin(alpha) * distance.getNorm());
+    }
+
     @Override
     public void initialize() {
         useMinLogicDistance = false;
@@ -104,6 +111,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             else {
                 targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
+            pidController.reset(this.getNormalDistanceFromLine());
             runnable = true;
         }
         logger.updateTarget(targetPose);
@@ -117,14 +125,14 @@ public class OneDimensionalTrajectoryDrive extends Command {
     @Override
     public void execute() {
         if(runnable) {
-            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
             ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
             double xAxis = chassisSpeeds.vxMetersPerSecond;
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
             double magnitude = vector.getNorm();
+            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
             Translation2d robotToTarget = new Translation2d(diffX, diffY);
             Translation2d unitTangent = new Translation2d(1, targetPose.getRotation());
             Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
