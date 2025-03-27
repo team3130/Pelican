@@ -18,8 +18,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final double minLogicDistanceTangent = 2;
-    private final double minLogicDistanceNormal = 0.8;
+    private final double minLogicDistanceTangent = 100;
+    private final double minLogicDistanceNormal = 100;
     private final double normSpeed = 2;
     private final double normAcceleration = 0.7;
     private final double tolerance = 0.02;
