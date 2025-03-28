@@ -90,7 +90,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
     //only use command below at tulsa regional, fix for second break beam not working
-    NamedCommands.registerCommand("Auton One Switch Limited Manip Intake", new AutonOneSwitchLimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Limited Manip Intake Reverse", new LimitedManipIntakeReverse(manip, LED));
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
@@ -263,13 +262,7 @@ public class RobotContainer {
     }
   }
 
-  public void LEDDisabledState() {
-    LED.LEDDisabledState();
-  }
 
-  public void LEDTeleopState() {
-    LED.LEDTeleopState();
-  }
 
   public void sendAutonChoosers() {
     SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator, LED);
