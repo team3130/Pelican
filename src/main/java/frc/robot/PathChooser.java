@@ -39,7 +39,7 @@ public class PathChooser {
     private static SendableChooser<Command> stationChooser2 = null;
     private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
-            1, 1,
+            2, 1,
             Units.degreesToRadians(180), Units.degreesToRadians(180));
 
     // For convenience a programmer could change this when going to competition.
@@ -208,10 +208,16 @@ public class PathChooser {
                                 new SequentialCommandGroup(
                                         new ParallelDeadlineGroup(
                                                 pathfindThenFollowPath(path, defaultConstraints),
-                                                new GoToL4(elevator, manip, LED),
                                                 new SequentialCommandGroup(
-                                                        new AutonLimitedManipIntake(manip, elevator, LED).asProxy(),
-                                                        new LimitedManipIntakeReverse(manip, LED).asProxy()
+                                                        new WaitCommand(2),
+                                                        new ParallelCommandGroup(
+                                                                new GoToL4(elevator, manip, LED),
+                                                                new SequentialCommandGroup(
+                                                                        new WaitCommand(0.1),
+                                                                        new AutonLimitedManipIntake(manip, elevator, LED).asProxy(),
+                                                                        new LimitedManipIntakeReverse(manip, LED).asProxy()
+                                                                )
+                                                        )
                                                 )
                                         ),
                                         new LimitedManipOuttake(manip, elevator, LED).asProxy(),

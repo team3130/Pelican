@@ -84,7 +84,7 @@ public class RobotContainer {
     coralIntake = new CoralIntake();
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
-    camera = new Camera();
+    camera = new Camera(driveTrain);
     LED = new LEDs(elevator, manip, climber, driveTrain);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
@@ -246,13 +246,13 @@ public class RobotContainer {
   public Command climberHome() {return new ZeroClimber(climber, LED);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
   public void basicVisionResetOdo() {
-    camera.getVisionOdometry(driveTrain, logger);
+    camera.getVisionOdometry(logger);
   }
   public void visionResetOdo() {
     if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
       if(timer.isRunning()) {
         if (timer.hasElapsed(0.1)) {
-          camera.getVisionOdometry(driveTrain, logger);
+          camera.getVisionOdometry(logger);
         }
       } else {
         timer.start();
@@ -261,14 +261,6 @@ public class RobotContainer {
       timer.stop();
       timer.reset();
     }
-  }
-
-  public void LEDDisabledState() {
-    LED.LEDDisabledState();
-  }
-
-  public void LEDTeleopState() {
-    LED.LEDTeleopState();
   }
 
   public void sendAutonChoosers() {
