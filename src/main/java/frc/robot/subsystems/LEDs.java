@@ -175,11 +175,12 @@ public class LEDs extends SubsystemBase{
     public void periodic() {
         LED.start();
         // This method will be called once per scheduler run
-        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 115) { //should be less than 20 logic in actual match/  or greater than 115 in practice
+        if(DriverStation.isTeleopEnabled()){
+          if(DriverStation.getMatchTime() > 115) { //should be less than 20 logic in actual match/  or greater than 115 in practice
             rainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
-        } 
-        else if(manip.getIsIntaking()) {
+          } 
+          else if(manip.getIsIntaking()) {
             timer.start();
             if(timer.hasElapsed(2.5)) {
                 manip.setIsIntaking(false);
@@ -189,8 +190,8 @@ public class LEDs extends SubsystemBase{
                 flashPurple.applyTo(LEDBuffer);
                 LED.setData(LEDBuffer);
             }
-        } 
-        else if(manip.getIsOuttaking()) {
+          } 
+          else if(manip.getIsOuttaking()) {
             timer.start();
             if(timer.hasElapsed(5)) {
                 manip.setIsOuttaking(false);
@@ -202,45 +203,59 @@ public class LEDs extends SubsystemBase{
             }
           }
           //set elevator LED logic. each is independent
-        else if(elevator.isAtL4()){
-          elevatorDeltaL4.applyTo(LEDBuffer);
-          LED.setData(LEDBuffer);
-        }
-        else if (elevator.isAtL3()){
-          setLEDsL3Delta();
-        }
-        else if (elevator.isAtL2()){
-          setLEDsL2Delta();
-        }
-        else if (elevator.isAtL1()){
-          setLEDsL1Delta();
-        }
-        else if (elevator.isAtHome()){
-          setLEDsHomeDelta();
-        }
-        else if (elevator.isAtMaxPosition()){
-          setLEDsMaxDelta();
-        }
-        else if (elevator.isAtMinPosition()){
-          setLEDsMinDelta();
-        }
-        else if (climber.getHomePos() < climber.getPosition() && climber.getPosition() < climber.getExtendedPos() &&  climber.brokeExtendedLimit()){ //if climber is not at a max position but it has hit the maximum previously, the climber is currently climbing
-          setLEDsRainbow();
-        }
-        else if (climber.brokeHomeLimit() && completeClimb){ //if climber is a min position, and was previously at full extension, climb is completed
-          setLEDsScrollingRainbow();
-        }
-        else if (climber.getHomePos() < climber.getPosition() && climber.getPosition() < climber.getExtendedPos() && !climber.brokeExtendedLimit()){ //if climber is not at either extrema and has not hit the upper limit, it is coming out of robot frame 
-          setLEDsOrange();
-        }
-        //this is placed last because it should only trigger at one particular point, and if placed earlier it would unintentionally trigger even after the desired point
-        else if (climber.brokeExtendedLimit()){//if at maximum position, climber is ready to climb
-          setLEDsRedAndBlue();
-          completeClimb = true;
-        }
-        else {
-          timeProgress.applyTo(LEDBuffer);
-          LED.setData(LEDBuffer);
-      }   
+          else if(elevator.isAtL4()){
+            elevatorDeltaL4.applyTo(LEDBuffer);
+            LED.setData(LEDBuffer);
+          }
+          else if (elevator.isAtL3()){
+            setLEDsL3Delta();
+          }
+          else if (elevator.isAtL2()){
+            setLEDsL2Delta();
+          }
+          else if (elevator.isAtL1()){
+            setLEDsL1Delta();
+          }
+          else if (elevator.isAtHome()){
+            setLEDsHomeDelta();
+          }
+          else if (elevator.isAtMaxPosition()){
+            setLEDsMaxDelta();
+          }
+          else if (elevator.isAtMinPosition()){
+            setLEDsMinDelta();
+          }
+          else if (climber.getHomePos() < climber.getPosition() && climber.getPosition() < climber.getExtendedPos() &&  climber.brokeExtendedLimit()){ //if climber is not at a max position but it has hit the maximum previously, the climber is currently climbing
+            setLEDsRainbow();
+          }
+          else if (climber.brokeHomeLimit() && completeClimb){ //if climber is a min position, and was previously at full extension, climb is completed
+            setLEDsScrollingRainbow();
+          }
+          else if (climber.getHomePos() < climber.getPosition() && climber.getPosition() < climber.getExtendedPos() && !climber.brokeExtendedLimit()){ //if climber is not at either extrema and has not hit the upper limit, it is coming out of robot frame 
+            setLEDsOrange();
+          }
+          //this is placed last because it should only trigger at one particular point, and if placed earlier it would unintentionally trigger even after the desired point
+          else if (climber.brokeExtendedLimit()){//if at maximum position, climber is ready to climb
+            setLEDsRedAndBlue();
+            completeClimb = true;
+          }
+          else {
+            timeProgress.applyTo(LEDBuffer);
+            LED.setData(LEDBuffer);
+          }
+    }
+    else if (DriverStation.isTeleopDisabled()){
+          
+    }
+    else if (DriverStation.isAutonEnabled()){
+
+    } 
+    else if (DriverStation.isAutonDisabled()){
+
+    }
+    else{
+      timeProgress.applyTo(LEDBuffer);
+      LED.setData(LEDBuffer);
+    }        
   } 
 }
