@@ -23,7 +23,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final double normSpeed = 2;
     private final double normAcceleration = 0.7;
     private final double tolerance = 0.02;
-    private final ProfiledPIDController pidController = new ProfiledPIDController(9, 0.01, 2,
+    private final ProfiledPIDController pidController = new ProfiledPIDController(8, 0, 0.03,
             new TrapezoidProfile.Constraints(normSpeed, normAcceleration));
     private final double tangentJoystickMultiplier = Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - normSpeed*normSpeed);
     private final RobotContainer robotContainer;
@@ -62,12 +62,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
     /**
      * The initial subroutine of a command.  Called once when the command is initially scheduled.
      */
-
-    private double getNormalDistanceFromLine(){
-        Translation2d distance = targetPose.minus(driveTrain.getStatePose()).getTranslation();
-        double alpha = targetPose.getRotation().getRadians() - distance.getAngle().getRadians();
-        return Math.abs(Math.sin(alpha) * distance.getNorm());
-    }
 
     @Override
     public void initialize() {
@@ -111,7 +105,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             else {
                 targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
-            pidController.reset(this.getNormalDistanceFromLine());
+            pidController.reset(0);
             runnable = true;
         }
         logger.updateTarget(targetPose);
@@ -146,7 +140,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 if (!onBlue) {
                     approach = approach.rotateBy(Rotation2d.k180deg);
                 }
-                double mag = pidController.calculate(normal.getNorm());
+                double mag = pidController.calculate(normal.getNorm(), 0);
                 if(normal.getNorm() > tolerance) {
                     approach = approach.plus(normal.times(-mag/normal.getNorm()));
                 }

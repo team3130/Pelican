@@ -262,13 +262,7 @@ public class RobotContainer {
     }
   }
 
-  public void LEDDisabledState() {
-    LED.LEDDisabledState();
-  }
 
-  public void LEDTeleopState() {
-    LED.LEDTeleopState();
-  }
 
   public void sendAutonChoosers() {
     SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator, LED);
