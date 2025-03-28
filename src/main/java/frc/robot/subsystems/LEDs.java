@@ -30,6 +30,7 @@ public class LEDs extends SubsystemBase{
   private final int LEDLength = 129; //should be the correct length as of 3/19/25
   private final int pwmPort = 2;
   private final Timer timer = new Timer();
+  private boolean completeClimb = false;
 
   //LEDs per Meter
   Distance kLedSpacing = Meters.of((double) 1 / LEDLength);
@@ -75,15 +76,42 @@ public class LEDs extends SubsystemBase{
   }
   
 
-  //public void setLEDsRed(){red.applyTo(LEDBuffer);}
-  //public void setLEDsBlue(){blue.applyTo(LEDBuffer);}
-  //public void setLEDsGreen(){green.applyTo(LEDBuffer);}
-  //public void setLEDsYellow(){yellow.applyTo(LEDBuffer);}
-  //public void setLEDsOrange(){orange.applyTo(LEDBuffer);}
-  //public void setLEDsPurple(){purple.applyTo(LEDBuffer);}
-  //public void setLEDsRainbow(){rainbow.applyTo(LEDBuffer);}
-  //public void setLEDsScrollingRainbow(){scrollingRainbow.applyTo(LEDBuffer);}
-  //public void setLEDsRedAndBlue(){redAndBlue.applyTo(LEDBuffer);}
+  public void setLEDsRed(){
+    red.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsBlue(){
+    blue.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsGreen(){
+    green.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsYellow(){
+    yellow.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsOrange(){
+    orange.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsPurple(){
+    purple.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsRainbow(){
+    rainbow.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsScrollingRainbow(){
+    scrollingRainbow.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
+  public void setLEDsRedAndBlue(){
+    redAndBlue.applyTo(LEDBuffer);
+    LED.setData(LEDBuffer);
+  }
 
   // elevator LED colors
   public void setLEDsL1Delta(){
@@ -243,15 +271,6 @@ public class LEDs extends SubsystemBase{
             timeProgress.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
           }
-    }
-    else if (DriverStation.isTeleopDisabled()){
-          
-    }
-    else if (DriverStation.isAutonEnabled()){
-
-    } 
-    else if (DriverStation.isAutonDisabled()){
-
     }
     else{
       timeProgress.applyTo(LEDBuffer);
