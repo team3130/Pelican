@@ -8,6 +8,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -26,7 +27,7 @@ import java.util.Optional;
 public class Camera implements Sendable, Subsystem {
     private final CommandSwerveDrivetrain driveTrain;
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
-    private final Transform3d robotToCamera = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(Math.PI,0,-0.005));
+    private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(Math.PI,0,-0.005));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
@@ -70,7 +71,10 @@ public class Camera implements Sendable, Subsystem {
                 }
                 //scaledVisionStdDeviations = visionStdDeviations.times(1 + distance);
             }
-            if(inRange && highestAmbiguity < 0.1) {
+            if(DriverStation.isDSAttached() && DriverStation.isDisabled()) {
+                inRange = true;
+            }
+            if(inRange && highestAmbiguity < 0.2) {
                 photonPoseEstimator.setReferencePose(driveTrain.getState().Pose);
                 Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
                 if (optionalOdoState.isPresent()) {
