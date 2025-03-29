@@ -28,7 +28,7 @@ public class Camera implements Sendable, Subsystem {
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
     private final Transform3d robotToCamera = new Transform3d(0.34925, 0.27305, 0.34290, new Rotation3d(Math.PI,0,-0.005));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
-    private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.3, 0.3, 1.0);
+    //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
     public Camera(CommandSwerveDrivetrain driveTrain) {
@@ -47,11 +47,11 @@ public class Camera implements Sendable, Subsystem {
         }
          */
         photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
-        driveTrain.setVisionMeasurementStdDevs(visionStdDeviations);
+        //driveTrain.setVisionMeasurementStdDevs(visionStdDeviations);
     }
 
     public void getVisionOdometry(Telemetry logger) {
-        Matrix<N3, N1> scaledVisionStdDeviations = visionStdDeviations;
+        //Matrix<N3, N1> scaledVisionStdDeviations = visionStdDeviations;
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         for (PhotonPipelineResult result : results) {
             boolean inRange = false;
@@ -63,12 +63,12 @@ public class Camera implements Sendable, Subsystem {
                 if(target.getPoseAmbiguity() > highestAmbiguity) {
                     highestAmbiguity = target.getPoseAmbiguity();
                 }
-                if(distance < 3){
+                if(distance < 4){
                     inRange = true;
                 } else {
                     inRange = false;
                 }
-                scaledVisionStdDeviations = visionStdDeviations.times(distance);
+                //scaledVisionStdDeviations = visionStdDeviations.times(1 + distance);
             }
             if(inRange && highestAmbiguity < 0.1) {
                 photonPoseEstimator.setReferencePose(driveTrain.getState().Pose);
@@ -79,8 +79,8 @@ public class Camera implements Sendable, Subsystem {
                     logger.updateVision(newPose);
                     driveTrain.addVisionMeasurement(
                             odoState.estimatedPose.toPose2d(),
-                            odoState.timestampSeconds,
-                            scaledVisionStdDeviations
+                            odoState.timestampSeconds
+                            //scaledVisionStdDeviations
                     );
                 }
             }
