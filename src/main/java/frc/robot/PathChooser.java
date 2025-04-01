@@ -39,7 +39,7 @@ public class PathChooser {
     private static SendableChooser<Command> stationChooser2 = null;
     private static SendableChooser<Command> stationChooser3 = null;
     private static PathConstraints defaultConstraints = new PathConstraints(
-            2, 1,
+            2, 2,
             Units.degreesToRadians(180), Units.degreesToRadians(180));
 
     // For convenience a programmer could change this when going to competition.
@@ -209,7 +209,7 @@ public class PathChooser {
                                         new ParallelDeadlineGroup(
                                                 pathfindThenFollowPath(path, defaultConstraints),
                                                 new SequentialCommandGroup(
-                                                        new WaitCommand(1.5),
+                                                        new WaitCommand(1),
                                                         new ParallelCommandGroup(
                                                                 new GoToL4(elevator, manip, LED),
                                                                 new SequentialCommandGroup(
