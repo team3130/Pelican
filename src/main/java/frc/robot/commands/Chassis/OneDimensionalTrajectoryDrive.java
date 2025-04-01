@@ -2,6 +2,8 @@ package frc.robot.commands.Chassis;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathSharedStore;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -11,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
+import frc.robot.MySlewRateLimiter;
 import frc.robot.RobotContainer;
 import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -18,12 +21,14 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
+    private double prevVal;
+    private double prevTime;
     private final double minLogicDistanceTangent = 100;
     private final double minLogicDistanceNormal = 100;
     private final double normSpeed = 2;
-    private final double normAcceleration = 0.7;
-    private final double tolerance = 0.02;
-    private final ProfiledPIDController pidController = new ProfiledPIDController(8, 0, 0.03,
+    private final double normAcceleration = 2.5;
+    private final double tolerance = 0.025;
+    private final ProfiledPIDController pidController = new ProfiledPIDController(Constants.Swerve.translationPID[0], Constants.Swerve.translationPID[1], Constants.Swerve.translationPID[2],
             new TrapezoidProfile.Constraints(normSpeed, normAcceleration));
     private final double tangentJoystickMultiplier = Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - normSpeed*normSpeed);
     private final RobotContainer robotContainer;
@@ -59,6 +64,39 @@ public class OneDimensionalTrajectoryDrive extends Command {
         turningController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
+    public Translation2d getRobotToTarget(Translation2d vector) {
+        double magnitude = vector.getNorm();
+        double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+        double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+        double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
+        return new Translation2d(diffX, diffY);
+    }
+
+    public Translation2d getUnitTangent() {
+        return new Translation2d(1, targetPose.getRotation());
+    }
+
+    public Translation2d getNormal(Translation2d vector) {
+        Translation2d robotToTarget = getRobotToTarget(vector);
+        Translation2d unitTangent = getUnitTangent();
+        Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
+        return robotToTarget.minus(tangent);
+    }
+
+    public double getNormalCurrentSpeed(Translation2d vector) {
+        Translation2d normal = getNormal(vector);
+        double normalSpeed = normal.getX()*driveTrain.getState().Speeds.vxMetersPerSecond + normal.getY()*driveTrain.getState().Speeds.vyMetersPerSecond;
+        return Math.abs(normalSpeed);
+    }
+
+    public double calculate(double input) {
+        double currentTime = MathSharedStore.getTimestamp();
+        double elapsedTime = currentTime - this.prevTime;
+        double delta = input - this.prevVal;
+        this.prevVal += MathUtil.clamp(delta, -20 * elapsedTime, 10 * elapsedTime);
+        this.prevTime = currentTime;
+        return this.prevVal;
+    }
     /**
      * The initial subroutine of a command.  Called once when the command is initially scheduled.
      */
@@ -105,11 +143,14 @@ public class OneDimensionalTrajectoryDrive extends Command {
             else {
                 targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
-            pidController.reset(0);
+            ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
+            double xAxis = chassisSpeeds.vxMetersPerSecond;
+            double yAxis = chassisSpeeds.vyMetersPerSecond;
+            Translation2d vector = new Translation2d(xAxis, yAxis);
+            pidController.reset(getNormal(vector).getNorm(), getNormalCurrentSpeed(vector));
             runnable = true;
         }
         logger.updateTarget(targetPose);
-
     }
 
     /**
@@ -123,20 +164,17 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double xAxis = chassisSpeeds.vxMetersPerSecond;
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
-            double magnitude = vector.getNorm();
-            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
-            Translation2d robotToTarget = new Translation2d(diffX, diffY);
-            Translation2d unitTangent = new Translation2d(1, targetPose.getRotation());
-            Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
-            Translation2d normal = robotToTarget.minus(tangent);
+            Translation2d unitTangent = getUnitTangent();
+            Translation2d normal = getNormal(vector);
 
             Translation2d approach;
-            if (((minLogicDistanceNormal > normal.getNorm()) && (minLogicDistanceTangent > tangent.getNorm())) || useMinLogicDistance) {
+            if (true) {
                 useMinLogicDistance = true;
                 double dotMultiplier = vector.getX()*unitTangent.getX() + vector.getY()*unitTangent.getY();
-                approach = (unitTangent.times(tangentJoystickMultiplier*dotMultiplier));
+                approach = (unitTangent.times(calculate(Math.abs(tangentJoystickMultiplier*dotMultiplier))));
+                if(tangentJoystickMultiplier*dotMultiplier < 0) {
+                    approach = approach.times(-1);
+                }
                 if (!onBlue) {
                     approach = approach.rotateBy(Rotation2d.k180deg);
                 }
@@ -146,7 +184,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
             } else {
                 approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-                approach = approach.times(magnitude);
+                approach = approach.times(vector.getNorm());
             }
             if (!onBlue) {
                 approach = approach.rotateBy(Rotation2d.k180deg);
