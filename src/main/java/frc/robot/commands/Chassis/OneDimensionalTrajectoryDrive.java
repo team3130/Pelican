@@ -35,7 +35,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
             Constants.Swerve.maxAngularRate,
-            Constants.Swerve.maxAngularRate);
+            Constants.Swerve.maxAngularRate); //todo make angular accel real because these should not be the same number
     private final ProfiledPIDController turningController = new ProfiledPIDController(12, 0, 0, rotationConstraints);
     private final Telemetry logger;
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
@@ -92,7 +92,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     public double calculate(double input) {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - this.prevTime;
-        double delta = input - this.prevVal;
+        double delta = input - this.prevVal; //input is desired speed
         this.prevVal += MathUtil.clamp(delta, -20 * elapsedTime, 10 * elapsedTime);
         this.prevTime = currentTime;
         return this.prevVal;
@@ -147,7 +147,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double xAxis = chassisSpeeds.vxMetersPerSecond;
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
-            pidController.reset(getNormal(vector).getNorm(), getNormalCurrentSpeed(vector));
+            pidController.reset(getNormal(vector).getNorm(), getNormalCurrentSpeed(vector)); //todo is it right to be getting norm on the distance getter here?
             runnable = true;
         }
         logger.updateTarget(targetPose);
@@ -191,8 +191,11 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                     targetPose.getRotation().getRadians());
-            ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
-            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
+            ChassisSpeeds desiredDrive = new ChassisSpeeds(
+                    approach.getX() * robotContainer.getElevatorRealPercent(),
+                    approach.getY() * robotContainer.getElevatorRealPercent(),
+                    rotation);
+            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive) ;
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
