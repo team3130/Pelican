@@ -27,7 +27,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final double minLogicDistanceNormal = 100;
     private final double normSpeed = 2;
     private final double normAcceleration = 2.5;
-    private final double tolerance = 0.02;
+    private final double tolerance = 0.005;
     private final ProfiledPIDController pidController = new ProfiledPIDController(Constants.Swerve.translationPID[0], Constants.Swerve.translationPID[1], Constants.Swerve.translationPID[2],
             new TrapezoidProfile.Constraints(normSpeed, normAcceleration));
     private final double tangentJoystickMultiplier = Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - normSpeed*normSpeed);
