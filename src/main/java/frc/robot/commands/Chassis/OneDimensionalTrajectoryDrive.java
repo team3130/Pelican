@@ -148,7 +148,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
             Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
-            int sign;
+            double sign;
             if(true) {
                 if((getNormal(vector).getAngle().getRadians() - normalPosDirection.getAngle().getRadians()) < 0.5) {
                     sign = 1;
@@ -178,7 +178,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d unitTangent = getUnitTangent();
             Translation2d normal = getNormal(vector);
             Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
-            int sign;
+            double sign;
             if(true) {
                 if(Math.abs((getNormal(vector)).getAngle().getRadians() - normalPosDirection.getAngle().getRadians()) < 0.5 || Math.abs(getNormal(vector).getAngle().getRadians() - normalPosDirection.getAngle().getRadians()) > 4.5) {
                     sign = 1;
