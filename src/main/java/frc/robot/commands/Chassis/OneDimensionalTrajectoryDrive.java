@@ -27,7 +27,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private final double minLogicDistanceNormal = 100;
     private final double normSpeed = 2;
     private final double normAcceleration = 2.5;
-    private final double tolerance = 0;
+    private final double tolerance = 0.02;
     private final ProfiledPIDController pidController = new ProfiledPIDController(Constants.Swerve.translationPID[0], Constants.Swerve.translationPID[1], Constants.Swerve.translationPID[2],
             new TrapezoidProfile.Constraints(normSpeed, normAcceleration));
     private final double tangentJoystickMultiplier = Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - normSpeed*normSpeed);
@@ -93,7 +93,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
         double currentTime = MathSharedStore.getTimestamp();
         double elapsedTime = currentTime - this.prevTime;
         double delta = input - this.prevVal; //input is desired speed
-        this.prevVal += MathUtil.clamp(delta, -20 * elapsedTime, 10 * elapsedTime);
+        this.prevVal += MathUtil.clamp(delta, -40 * elapsedTime, 10 * elapsedTime);
         this.prevTime = currentTime;
         return this.prevVal;
     }
@@ -149,14 +149,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d vector = new Translation2d(xAxis, yAxis);
             Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
             double sign;
-            if(true) {
-                if((getNormal(vector).getAngle().getRadians() - normalPosDirection.getAngle().getRadians()) < 0.5) {
-                    sign = 1;
-                } else {
-                    sign = -1;
-                }
+            if((getNormal(vector).getX()*normalPosDirection.getX() + getNormal(vector).getY()*normalPosDirection.getY()) > 0) {
+                sign = 1;
             } else {
-                sign = 0;
+                sign = -1;
             }
             pidController.reset(sign*getNormal(vector).getNorm()); //todo is it right to be getting norm on the distance getter here?
             runnable = true;
@@ -179,14 +175,10 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d normal = getNormal(vector);
             Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
             double sign;
-            if(true) {
-                if(Math.abs((getNormal(vector)).getAngle().getRadians() - normalPosDirection.getAngle().getRadians()) < 0.5 || Math.abs(getNormal(vector).getAngle().getRadians() - normalPosDirection.getAngle().getRadians()) > 4.5) {
-                    sign = 1;
-                } else {
-                    sign = -1;
-                }
+            if((getNormal(vector).getX()*normalPosDirection.getX() + getNormal(vector).getY()*normalPosDirection.getY()) > 0) {
+                sign = 1;
             } else {
-                sign = 0;
+                sign = -1;
             }
 
             Translation2d approach;
