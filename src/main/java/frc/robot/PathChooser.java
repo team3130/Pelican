@@ -209,7 +209,7 @@ public class PathChooser {
                                         new ParallelDeadlineGroup(
                                                 pathfindThenFollowPath(path, defaultConstraints),
                                                 new SequentialCommandGroup(
-                                                        new WaitCommand(1),
+                                                        new WaitCommand(0.75),
                                                         new ParallelCommandGroup(
                                                                 new GoToL4(elevator, manip, LED),
                                                                 new SequentialCommandGroup(
