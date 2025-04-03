@@ -48,7 +48,7 @@ public class Camera implements Sendable, Subsystem {
             System.out.println(fieldName);
         }
          */
-        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE, robotToCamera);
+        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
         //driveTrain.setVisionMeasurementStdDevs(visionStdDeviations);
     }
 
