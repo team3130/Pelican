@@ -33,7 +33,7 @@ public class GoToL1 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.updateElevatorPID();
+    //elevator.updateElevatorPID();
     if (elevator.isZeroed()) {
       elevator.goToL1();
     } else {

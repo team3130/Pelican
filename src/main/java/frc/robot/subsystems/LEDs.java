@@ -225,7 +225,7 @@ public class LEDs extends SubsystemBase{
         // This method will be called once per scheduler run
         if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) {
             //should be less than 20 logic in actual match and greater than 110 when not in match
-            rainbow.applyTo(LEDBuffer);
+            scrollingRainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
         } else if(manip.getIsIntaking()) {
             timer.start();
