@@ -1,8 +1,9 @@
 package frc.robot.commands.Chassis;
 
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathSharedStore;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.Constants;
+import frc.robot.MySlewRateLimiter;
 import frc.robot.RobotContainer;
 import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -19,19 +21,28 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class OneDimensionalTrajectoryDrive extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final double tolerance = .03;
+    private double prevVal;
+    private double prevTime;
+    private final double minLogicDistanceTangent = 100;
+    private final double minLogicDistanceNormal = 100;
+    private final double normSpeed = 2;
+    private final double normAcceleration = 2.5;
+    private final double tolerance = 0.005;
+    private final ProfiledPIDController pidController = new ProfiledPIDController(Constants.Swerve.translationPID[0], Constants.Swerve.translationPID[1], Constants.Swerve.translationPID[2],
+            new TrapezoidProfile.Constraints(normSpeed, normAcceleration));
+    private final double tangentJoystickMultiplier = Math.sqrt(Constants.Swerve.maxSpeed*Constants.Swerve.maxSpeed - normSpeed*normSpeed);
     private final RobotContainer robotContainer;
     private final CommandPS5Controller driverController;
     private final TrapezoidProfile.Constraints rotationConstraints = new TrapezoidProfile.Constraints(
             Constants.Swerve.maxAngularRate,
-            Constants.Swerve.maxAngularRate);
+            Constants.Swerve.maxAngularRate); //todo make angular accel real because these should not be the same number
     private final ProfiledPIDController turningController = new ProfiledPIDController(12, 0, 0, rotationConstraints);
     private final Telemetry logger;
     private Pose2d targetPose = new Pose2d(3, 3, Rotation2d.kZero);
     private boolean runnable = false;
     private final AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
     boolean onBlue = true;
-    boolean isAtPP = false;
+    boolean useMinLogicDistance = false;
 
     //left to right, top to bottom for blue/ red is rotated so it seems weird here
     private final Pose3d[] blueCoralTagPoses = {field.getTagPose(19).get(), field.getTagPose(20).get(),
@@ -53,12 +64,46 @@ public class OneDimensionalTrajectoryDrive extends Command {
         turningController.enableContinuousInput(-Math.PI, Math.PI);
     }
 
+    public Translation2d getRobotToTarget(Translation2d vector) {
+        double magnitude = vector.getNorm();
+        double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
+        double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
+        double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
+        return new Translation2d(diffX, diffY);
+    }
+
+    public Translation2d getUnitTangent() {
+        return new Translation2d(1, targetPose.getRotation());
+    }
+
+    public Translation2d getNormal(Translation2d vector) {
+        Translation2d robotToTarget = getRobotToTarget(vector);
+        Translation2d unitTangent = getUnitTangent();
+        Translation2d tangent = unitTangent.times((unitTangent.getX())*robotToTarget.getX() + (unitTangent.getY())*robotToTarget.getY());
+        return robotToTarget.minus(tangent);
+    }
+
+    public double getNormalCurrentSpeed(Translation2d vector) {
+        Translation2d normal = getNormal(vector);
+        double normalSpeed = normal.getX()*driveTrain.getState().Speeds.vxMetersPerSecond + normal.getY()*driveTrain.getState().Speeds.vyMetersPerSecond;
+        return Math.abs(normalSpeed);
+    }
+
+    public double calculate(double input) {
+        double currentTime = MathSharedStore.getTimestamp();
+        double elapsedTime = currentTime - this.prevTime;
+        double delta = input - this.prevVal; //input is desired speed
+        this.prevVal += MathUtil.clamp(delta, -40 * elapsedTime, 10 * elapsedTime);
+        this.prevTime = currentTime;
+        return this.prevVal;
+    }
     /**
      * The initial subroutine of a command.  Called once when the command is initially scheduled.
      */
+
     @Override
     public void initialize() {
-        isAtPP = false;
+        useMinLogicDistance = false;
         var alliance = DriverStation.getAlliance();
         alliance.ifPresent(value -> onBlue = value == DriverStation.Alliance.Blue);
         turningController.reset(driveTrain.getStatePose().getRotation().getRadians());
@@ -98,6 +143,18 @@ public class OneDimensionalTrajectoryDrive extends Command {
             else {
                 targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCCW_90deg), Rotation2d.kZero));
             }
+            ChassisSpeeds chassisSpeeds = robotContainer.getHIDspeedsMPS();
+            double xAxis = chassisSpeeds.vxMetersPerSecond;
+            double yAxis = chassisSpeeds.vyMetersPerSecond;
+            Translation2d vector = new Translation2d(xAxis, yAxis);
+            Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
+            double sign;
+            if((getNormal(vector).getX()*normalPosDirection.getX() + getNormal(vector).getY()*normalPosDirection.getY()) > 0) {
+                sign = 1;
+            } else {
+                sign = -1;
+            }
+            pidController.reset(sign*getNormal(vector).getNorm()); //todo is it right to be getting norm on the distance getter here?
             runnable = true;
         }
         logger.updateTarget(targetPose);
@@ -114,41 +171,48 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double xAxis = chassisSpeeds.vxMetersPerSecond;
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
-            double magnitude = vector.getNorm();
+            Translation2d unitTangent = getUnitTangent();
+            Translation2d normal = getNormal(vector);
+            Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
+            double sign;
+            if((getNormal(vector).getX()*normalPosDirection.getX() + getNormal(vector).getY()*normalPosDirection.getY()) > 0) {
+                sign = 1;
+            } else {
+                sign = -1;
+            }
 
             Translation2d approach;
-            if (!isAtPP) {
-                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
-                approach = approach.times(magnitude);
-            }
-            else {
-                Rotation2d angle = targetPose.getRotation();
-                Rotation2d stickAngle = vector.getAngle();
-                Rotation2d diffAngle = angle.minus(stickAngle);
-                double cos = diffAngle.getCos();
-                if (!onBlue){
-                    cos = -cos;
+            if (true) {
+                useMinLogicDistance = true;
+                double dotMultiplier = vector.getX()*unitTangent.getX() + vector.getY()*unitTangent.getY();
+                approach = (unitTangent.times(calculate(Math.abs(tangentJoystickMultiplier*dotMultiplier))));
+                if(tangentJoystickMultiplier*dotMultiplier < 0) {
+                    approach = approach.times(-1);
                 }
-                approach = new Translation2d(1, angle);
-                approach = approach.times(magnitude * cos);
+                if (!onBlue) {
+                    approach = approach.rotateBy(Rotation2d.k180deg);
+                }
+                double mag = pidController.calculate(sign*normal.getNorm(), 0);
+                if(normal.getNorm() > tolerance) {
+                    approach = approach.plus(normalPosDirection.times(-mag));
+                }
+            } else {
+                approach = driveTrain.produceOneDimensionalTrajectory(targetPose);
+                approach = approach.times(vector.getNorm());
             }
-
             if (!onBlue) {
                 approach = approach.rotateBy(Rotation2d.k180deg);
             }
             double rotation = turningController.calculate(driveTrain.getStatePose().getRotation().getRadians(),
                     targetPose.getRotation().getRadians());
-            ChassisSpeeds desiredDrive = new ChassisSpeeds(approach.getX(), approach.getY(), rotation);
-            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive);
+            ChassisSpeeds desiredDrive = new ChassisSpeeds(
+                    approach.getX() * robotContainer.getElevatorRealPercent(),
+                    approach.getY() * robotContainer.getElevatorRealPercent(),
+                    rotation);
+            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive) ;
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));
-            double diffX = targetPose.getX() - driveTrain.getStatePose().getX();
-            double diffY = targetPose.getY() - driveTrain.getStatePose().getY();
-            double distance = Math.sqrt((diffX * diffX) + (diffY * diffY));
-            if (!isAtPP) {
-                isAtPP = (tolerance >= distance); //checks if we have gotten to PP every time we're on the curve drive
-            }
         }
     }
 
