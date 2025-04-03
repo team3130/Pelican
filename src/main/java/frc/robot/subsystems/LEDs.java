@@ -23,6 +23,7 @@ public class LEDs extends SubsystemBase{
   private Elevator elevator;
   private Manipulator manip;
   private Climber climber;
+  private Camera camera;
   private CommandSwerveDrivetrain driveTrain;
   private String pathName;
   private final Pose2d[] bluePathStartingPoses;
@@ -30,10 +31,11 @@ public class LEDs extends SubsystemBase{
   private final int LEDLength = 129; //should be the correct length as of 3/19/25
   private final int pwmPort = 2;
   private final Timer timer = new Timer();
-  public LEDs(Elevator elevator, Manipulator manip, Climber climber, CommandSwerveDrivetrain driveTrain) {
+  public LEDs(Elevator elevator, Manipulator manip, Climber climber, Camera camera, CommandSwerveDrivetrain driveTrain) {
       this.elevator = elevator;
       this.manip = manip;
       this.climber = climber;
+      this.camera = camera;
       this.driveTrain = driveTrain;
       bluePathStartingPoses = new Pose2d[]{
               new Pose2d(7.1, 6.5, new Rotation2d(Math.toRadians(-146.598))), //left starting pose
@@ -72,13 +74,14 @@ public class LEDs extends SubsystemBase{
   LEDPattern orange = LEDPattern.solid(Color.kOrange);
   LEDPattern purple = LEDPattern.solid(Color.kPurple);
   LEDPattern manualYellow = LEDPattern.solid(new Color(255, 135, 0));
+  LEDPattern breathingManualYellow = manualYellow.breathe(Time.ofRelativeUnits(3, Seconds.getBaseUnit()));
   LEDPattern manualGreen = LEDPattern.solid(new Color(0, 255, 0));
   LEDPattern flashPurple = purple.blink(Time.ofRelativeUnits(0.1, Seconds.getBaseUnit()));
   LEDPattern flashGreen = manualGreen.blink(Time.ofRelativeUnits(0.1, Seconds.getBaseUnit()));
 
   //animated colors
   LEDPattern rainbow = LEDPattern.rainbow(255, 255);
-  LEDPattern scrollingRainbow = rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.25), kLedSpacing);
+  LEDPattern scrollingRainbow = rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.5), kLedSpacing);
   LEDPattern redAndBlue = LEDPattern.steps(Map.of(0, Color.kRed, 0.5, Color.kBlue));
   LEDPattern timeProgress = LEDPattern.progressMaskLayer(() -> DriverStation.getMatchTime() / 135);
   LEDPattern elevatorDeltaL1 = LEDPattern.progressMaskLayer(() -> Math.abs(elevator.getPosition() / elevator.getL1()));
@@ -219,13 +222,23 @@ public class LEDs extends SubsystemBase{
     }
 
      */
+    double startingPercent = 0;
+    double endingPercent = 0.1;
+    public LEDPattern yellowChase(double startingPercent, double endingPercent) {
+        startingPercent = startingPercent % 1;
+        endingPercent = endingPercent % 1;
+        return LEDPattern.steps(Map.of(startingPercent, new Color(255, 135, 0), endingPercent, Color.kBlack));
+    }
 
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) {
+        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 110) {
             //should be less than 20 logic in actual match and greater than 110 when not in match
             scrollingRainbow.applyTo(LEDBuffer);
+            LED.setData(LEDBuffer);
+        } else if(camera.getHasTarget()) {
+            blue.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
         } else if(manip.getIsIntaking()) {
             timer.start();
@@ -248,8 +261,15 @@ public class LEDs extends SubsystemBase{
                 LED.setData(LEDBuffer);
             }
         } else {
-            manualYellow.applyTo(LEDBuffer);
-            LED.setData(LEDBuffer);
+            if(DriverStation.isDisabled()) {
+                yellowChase(startingPercent, endingPercent).applyTo(LEDBuffer);
+                LED.setData(LEDBuffer);
+                startingPercent += 0.005;
+                endingPercent += 0.005;
+            } else {
+                manualYellow.applyTo(LEDBuffer);
+                LED.setData(LEDBuffer);
+            }
         }
     }
 }

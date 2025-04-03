@@ -12,14 +12,16 @@ import frc.robot.subsystems.CoralIntake;
 public class IntakeActuateToSetpoint extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final CoralIntake coralIntake;
+  private final double setpoint;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param coralIntake The subsystem used by this command.
    */
-  public IntakeActuateToSetpoint(CoralIntake coralIntake) {
+  public IntakeActuateToSetpoint(CoralIntake coralIntake, double setpoint) {
     this.coralIntake = coralIntake;
+    this.setpoint = setpoint;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(coralIntake);
   }
@@ -33,8 +35,8 @@ public class IntakeActuateToSetpoint extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    coralIntake.gotoSetpoint1(0);
-    coralIntake.gotoSetpoint2(0);
+    coralIntake.gotoSetpoint1(setpoint);
+    coralIntake.gotoSetpoint2(setpoint);
   }
 
   // Called once the command ends or is interrupted.

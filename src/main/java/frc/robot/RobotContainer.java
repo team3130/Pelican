@@ -85,7 +85,7 @@ public class RobotContainer {
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
     camera = new Camera(driveTrain);
-    LED = new LEDs(elevator, manip, climber, driveTrain);
+    LED = new LEDs(elevator, manip, climber, camera, driveTrain);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
@@ -189,6 +189,9 @@ public class RobotContainer {
 
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
+    if(Constants.debugMode) {
+      operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
+    }
 
 
     // Note that X is defined as forward according to WPILib convention,

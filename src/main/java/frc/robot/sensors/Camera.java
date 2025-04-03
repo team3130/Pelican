@@ -32,6 +32,7 @@ public class Camera implements Sendable, Subsystem {
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
+    private boolean updated = false;
     public Camera(CommandSwerveDrivetrain driveTrain) {
         this.driveTrain = driveTrain;
         AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
@@ -47,7 +48,7 @@ public class Camera implements Sendable, Subsystem {
             System.out.println(fieldName);
         }
          */
-        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, robotToCamera);
+        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE, robotToCamera);
         //driveTrain.setVisionMeasurementStdDevs(visionStdDeviations);
     }
 
@@ -86,9 +87,18 @@ public class Camera implements Sendable, Subsystem {
                             odoState.timestampSeconds
                             //scaledVisionStdDeviations
                     );
+                    updated = true;
+                } else {
+                    updated = false;
                 }
+            } else {
+                updated = false;
             }
         }
+    }
+
+    public boolean getHasTarget() {
+        return updated;
     }
 
     public double getXOdoState() {
@@ -134,6 +144,7 @@ public class Camera implements Sendable, Subsystem {
 
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Vision");
+        builder.addBooleanProperty("Has Target", this::getHasTarget, null);
         builder.addDoubleProperty("Odo State X", this::getXOdoState, null);
         builder.addDoubleProperty("Odo State Y", this::getYOdoState, null);
         builder.addDoubleProperty("Odo State Z", this::getZOdoState, null);
