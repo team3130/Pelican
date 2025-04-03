@@ -84,12 +84,13 @@ public class RobotContainer {
     coralIntake = new CoralIntake();
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
-    camera = new Camera();
+    camera = new Camera(driveTrain);
     LED = new LEDs(elevator, manip, climber, driveTrain);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
     //only use command below at tulsa regional, fix for second break beam not working
+    NamedCommands.registerCommand("Auton One Switch Limited Manip Intake", new AutonOneSwitchLimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Limited Manip Intake Reverse", new LimitedManipIntakeReverse(manip, LED));
     NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
@@ -245,13 +246,13 @@ public class RobotContainer {
   public Command climberHome() {return new ZeroClimber(climber, LED);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
   public void basicVisionResetOdo() {
-    camera.getVisionOdometry(driveTrain, logger);
+    camera.getVisionOdometry(logger);
   }
   public void visionResetOdo() {
     if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
       if(timer.isRunning()) {
         if (timer.hasElapsed(0.1)) {
-          camera.getVisionOdometry(driveTrain, logger);
+          camera.getVisionOdometry(logger);
         }
       } else {
         timer.start();
@@ -261,8 +262,6 @@ public class RobotContainer {
       timer.reset();
     }
   }
-
-
 
   public void sendAutonChoosers() {
     SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator, LED);

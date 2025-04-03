@@ -72,8 +72,8 @@ public class LEDs extends SubsystemBase{
   LEDPattern purple = LEDPattern.solid(Color.kPurple);
   LEDPattern manualYellow = LEDPattern.solid(new Color(255, 135, 0));
   LEDPattern manualGreen = LEDPattern.solid(new Color(0, 255, 0));
-  LEDPattern flashPurple = purple.blink(Time.ofRelativeUnits(0.25, Seconds.getBaseUnit()));
-  LEDPattern flashGreen = manualGreen.blink(Time.ofRelativeUnits(0.25, Seconds.getBaseUnit()));
+  LEDPattern flashPurple = purple.blink(Time.ofRelativeUnits(0.1, Seconds.getBaseUnit()));
+  LEDPattern flashGreen = manualGreen.blink(Time.ofRelativeUnits(0.1, Seconds.getBaseUnit()));
 
   //animated colors
   LEDPattern rainbow = LEDPattern.rainbow(255, 255);
@@ -228,7 +228,7 @@ public class LEDs extends SubsystemBase{
             LED.setData(LEDBuffer);
         } else if(manip.getIsIntaking()) {
             timer.start();
-            if(timer.hasElapsed(2.5)) {
+            if(timer.hasElapsed(1)) {
                 timer.stop();
                 timer.reset();
                 manip.setIsIntaking(false);
@@ -238,7 +238,7 @@ public class LEDs extends SubsystemBase{
             }
         } else if(manip.getIsOuttaking()) {
             timer.start();
-            if(timer.hasElapsed(2.5)) {
+            if(timer.hasElapsed(1)) {
                 timer.stop();
                 timer.reset();
                 manip.setIsOuttaking(false);
