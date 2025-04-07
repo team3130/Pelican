@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.Constants;
+import frc.robot.MySlewRateLimiter;
 import frc.robot.TunerConstants.TunerSwerveDrivetrain;
 import org.json.simple.parser.ParseException;
 
@@ -46,6 +47,11 @@ import org.json.simple.parser.ParseException;
  * Subsystem so it can easily be used in command-based projects.
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+    public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
+
+    public final MySlewRateLimiter thetaLimiter = new MySlewRateLimiter(0);
+    private boolean isAngleReal = false;
+    private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
     private RobotConfig config;
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -183,7 +189,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     () -> getState().Pose, // Robot pose supplier
                     this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
                     () -> getState().Speeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                    (speeds, feedforwards) -> setControl(m_pathApplyRobotSpeeds.withSpeeds(speeds)
+                    (speeds, feedforwards) -> setControl(m_pathApplyRobotSpeeds.withSpeeds(accelLimitVectorDrive(speeds))
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                     new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
@@ -206,6 +212,54 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     },
                     this // Reference to this subsystem to set requirements
             );
+        }
+    }
+
+    public ChassisSpeeds accelLimitVectorDrive(ChassisSpeeds desiredSpeed) {
+        double xAxis = desiredSpeed.vxMetersPerSecond;
+        double yAxis = desiredSpeed.vyMetersPerSecond;
+        double rotation = desiredSpeed.omegaRadiansPerSecond;
+        Translation2d vector = new Translation2d(xAxis, yAxis);
+        if(isAngleReal) { //if angle is real, then we were moving 20 ms ago
+            if(vector.getNorm() > 0.001){ //if the norm is significant, we continue to move
+                double delta = thetaLimiter.getDelta(vector.getAngle().getRadians());
+                double cos = Math.cos(delta);
+                if(cos > 0){ //positive cos means keep moving (turn angle is small)
+                    var mag = vector.getNorm() * cos;
+                    driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+                    mag = driveLimiter.calculate(mag);
+                    double thetaLimiterConstant = 10;
+                    double limit = thetaLimiterConstant /mag;
+                    thetaLimiter.updateValues(limit, -limit);
+                    var theta = thetaLimiter.angleCalculate(vector.getAngle().getRadians());
+                    Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
+                    return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+                }
+            }
+            //here we continue if we are decelerating, either small mag or big turn.
+            thetaLimiter.reset(thetaLimiter.lastValue());
+            driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+            var newMag = driveLimiter.calculate(0);
+            Rotation2d angle = new Rotation2d(thetaLimiter.lastValue());
+            Translation2d newVector = new Translation2d(newMag, angle);
+            if(newMag < 0.001){ // we have stopped moving
+                isAngleReal = false;
+            }
+            return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+        }
+        else { //if angle is not real, then we were standing still 20 ms ago
+            if(vector.getNorm() < 0.001){ //if the norm is still tiny, then keep idling
+                driveLimiter.reset(0);
+                return new ChassisSpeeds(0,0, rotation);
+            }
+            else { //if the norm is significant, start driving
+                isAngleReal = true;
+                thetaLimiter.reset(vector.getAngle().getRadians());
+                driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+                var mag = driveLimiter.calculate(vector.getNorm());
+                Translation2d newVector = new Translation2d(mag, vector.getAngle());
+                return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
+            }
         }
     }
 

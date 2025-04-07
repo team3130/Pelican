@@ -9,6 +9,7 @@ import java.util.Map;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -223,7 +224,7 @@ public class LEDs extends SubsystemBase{
 
      */
     double startingPercent = 0;
-    double endingPercent = 0.1;
+    double endingPercent = 0.25;
     public LEDPattern yellowChase(double startingPercent, double endingPercent) {
         startingPercent = startingPercent % 1;
         endingPercent = endingPercent % 1;
@@ -233,7 +234,7 @@ public class LEDs extends SubsystemBase{
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 110) {
+        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) {
             //should be less than 20 logic in actual match and greater than 110 when not in match
             scrollingRainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
