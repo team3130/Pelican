@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.157,
-        "y": 4.197
+        "x": 3.988,
+        "y": 2.828
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.907,
-        "y": 4.197
+        "x": 3.8631673773256026,
+        "y": 2.611397099935777
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.769140203662305,
-        "y": 4.1974141466204795
+        "x": 3.738,
+        "y": 2.396
       },
       "prevControl": {
-        "x": 6.019140203662305,
-        "y": 4.1974141466204795
+        "x": 3.9106672258591924,
+        "y": 2.695068407990092
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.5,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 59.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "'Dead Reckoning'",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 59.99999999999999
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

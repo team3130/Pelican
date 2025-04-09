@@ -1,6 +1,7 @@
 package frc.robot.commands.Chassis;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -11,11 +12,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class DriveWithRotPID extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    private final ProfiledPIDController pidController;
-    private final TrapezoidProfile.Constraints constraints;
+    private final PIDController pidController;
     private final SwerveRequest.FieldCentric drive;
-    private double maxVel = Constants.Swerve.maxAngularRate;
-    private double maxAccel = Constants.Swerve.maxAngularRate;
     private double kP = 0.01;
     private double kI = 0;
     private double kD = 0;
@@ -23,8 +21,7 @@ public class DriveWithRotPID extends Command {
     public DriveWithRotPID(CommandSwerveDrivetrain driveTrain, SwerveRequest.FieldCentric drive) {
         this.driveTrain = driveTrain;
         this.drive = drive;
-        constraints = new TrapezoidProfile.Constraints(maxVel, maxAccel);
-        pidController = new ProfiledPIDController(kP, kI, kD, constraints);
+        pidController = new PIDController(kP, kI, kD);
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveTrain);
@@ -37,7 +34,6 @@ public class DriveWithRotPID extends Command {
     @Override
     public void initialize() {
         pidController.enableContinuousInput(-Math.PI, Math.PI);
-        pidController.reset(driveTrain.getStatePose().getRotation().getRadians());
     }
 
     /**

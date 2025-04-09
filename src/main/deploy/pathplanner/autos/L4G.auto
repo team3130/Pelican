@@ -17,7 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "MiddleMoveReefG"
+                  "pathName": "L4G"
                 }
               },
               {
@@ -63,7 +63,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "MMRGReverse"
+            "pathName": "L4GReverse"
           }
         }
       ]

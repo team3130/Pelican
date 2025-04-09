@@ -34,7 +34,7 @@ public class UpdateOdoFromVision extends Command {
      */
     @Override
     public void execute() {
-        camera.getVisionOdometry(commandSwerveDrivetrain, logger);
+        camera.getVisionOdometry(logger);
     }
 
     /**

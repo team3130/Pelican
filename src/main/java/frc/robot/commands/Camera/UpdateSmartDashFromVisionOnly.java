@@ -34,7 +34,7 @@ public class UpdateSmartDashFromVisionOnly extends Command {
      */
     @Override
     public void execute() {
-        camera.getVisionOdometry(commandSwerveDrivetrain, logger);
+        camera.getVisionOdometry(logger);
     }
 
     /**

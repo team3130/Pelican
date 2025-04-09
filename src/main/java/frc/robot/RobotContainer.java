@@ -84,8 +84,8 @@ public class RobotContainer {
     coralIntake = new CoralIntake();
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
-    camera = new Camera();
-    LED = new LEDs(elevator, manip, climber);
+    camera = new Camera(driveTrain);
+    LED = new LEDs(elevator, manip, climber, camera, driveTrain);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
@@ -144,6 +144,7 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.R3().whileTrue(new GoUp(elevator, LED));
+    //driverController.L1().whileTrue(new GoDown(elevator));
     driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
     driverController.square().onTrue(new GoToL3(elevator, manip, LED));
@@ -188,11 +189,8 @@ public class RobotContainer {
 
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
-
     if(Constants.debugMode) {
-      operatorController.b().onTrue(new IntakeActuateToSetpoint(coralIntake));
-      operatorController.rightBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
-      operatorController.leftBumper().whileTrue(new DriveWithRotPID(driveTrain, drive));
+      operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
     }
 
 
@@ -245,13 +243,13 @@ public class RobotContainer {
   public Command climberHome() {return new ZeroClimber(climber, LED);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
   public void basicVisionResetOdo() {
-    camera.getVisionOdometry(driveTrain, logger);
+    camera.getVisionOdometry(logger);
   }
   public void visionResetOdo() {
     if(driveTrain.getState().Speeds.vxMetersPerSecond < 0.05 && driveTrain.getState().Speeds.vyMetersPerSecond < 0.05) {
       if(timer.isRunning()) {
         if (timer.hasElapsed(0.1)) {
-          camera.getVisionOdometry(driveTrain, logger);
+          camera.getVisionOdometry(logger);
         }
       } else {
         timer.start();
