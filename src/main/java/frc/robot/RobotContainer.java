@@ -72,6 +72,7 @@ public class RobotContainer {
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
 
   private final SendableChooser<Command> autoChooser;
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     manip = new Manipulator();
@@ -186,6 +187,7 @@ public class RobotContainer {
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
     if(Constants.debugMode) {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
+      operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     }
 
 
@@ -272,6 +274,13 @@ public class RobotContainer {
 
   public SequentialCommandGroup configureAuton() {
     return PathChooser.buildAutoCommand(elevator, LED);
+  }
+  public Command configureWeirdAuton() {
+      try {
+          return PathChooser.buildWeirdAuton(elevator, manip, LED);
+      } catch (IOException | ParseException e) {
+          throw new RuntimeException(e);
+      }
   }
 
   public double getModularSpeed() {

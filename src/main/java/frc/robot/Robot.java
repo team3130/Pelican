@@ -63,8 +63,10 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     robotContainer.setElevatorZeroed(false);
     CommandScheduler.getInstance().cancelAll();
-    if(Constants.basicAuton) {
+    if(Constants.makeItBasic) {
       autonomousCommand = robotContainer.pick();
+    } else if(Constants.makeItWeird) {
+      autonomousCommand = robotContainer.configureWeirdAuton();
     } else {
       autonomousCommand = robotContainer.configureAuton();
     }

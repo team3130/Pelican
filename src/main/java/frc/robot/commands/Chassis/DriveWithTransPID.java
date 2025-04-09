@@ -15,9 +15,9 @@ public class DriveWithTransPID extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     private final PIDController pidController;
     private final SwerveRequest.FieldCentric drive;
-    private double kP = 1;
+    private double kP = 8;
     private double kI = 0;
-    private double kD = 0;
+    private double kD = 0.3;
     private double setpoint;
 
     public DriveWithTransPID(CommandSwerveDrivetrain driveTrain, SwerveRequest.FieldCentric drive) {
@@ -50,7 +50,7 @@ public class DriveWithTransPID extends Command {
      */
     @Override
     public void execute() {
-      double value = -pidController.calculate(driveTrain.getStatePose().getX(), setpoint);
+      double value = -pidController.calculate(driveTrain.getStatePose().getX(), driveTrain.getStatePose().getX()+3);
       driveTrain.setControl(drive
               .withVelocityX(value)
               .withVelocityY(0)

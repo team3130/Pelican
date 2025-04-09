@@ -18,7 +18,8 @@ import static edu.wpi.first.units.Units.*;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final boolean basicAuton = false;
+  public static final boolean makeItWeird = true;
+  public static final boolean makeItBasic = false;
   public static final boolean debugMode = true;
   public static final boolean pitMode = false;
 
