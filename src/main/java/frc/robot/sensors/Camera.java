@@ -27,7 +27,7 @@ import java.util.Optional;
 public class Camera implements Sendable, Subsystem {
     private final CommandSwerveDrivetrain driveTrain;
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
-    private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(Math.PI,0,-0.005));
+    private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(2.926,0.208,-0.2814));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
@@ -65,7 +65,7 @@ public class Camera implements Sendable, Subsystem {
                 if(target.getPoseAmbiguity() > highestAmbiguity) {
                     highestAmbiguity = target.getPoseAmbiguity();
                 }
-                if(distance < 4){
+                if(distance < 2){
                     inRange = true;
                 } else {
                     inRange = false;
@@ -75,11 +75,13 @@ public class Camera implements Sendable, Subsystem {
             if(DriverStation.isDSAttached() && DriverStation.isDisabled()) {
                 inRange = true;
             }
-            if(inRange && highestAmbiguity < 0.2) {
-                photonPoseEstimator.setReferencePose(driveTrain.getState().Pose);
-                Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
-                if (optionalOdoState.isPresent()) {
-                    odoState = optionalOdoState.get();
+
+            Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
+            if (optionalOdoState.isPresent()) {
+                odoState = optionalOdoState.get();
+
+                if (odoState.strategy == PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+                    photonPoseEstimator.setReferencePose(driveTrain.getState().Pose);
                     var newPose = odoState.estimatedPose.toPose2d();
                     logger.updateVision(newPose);
                     driveTrain.addVisionMeasurement(
@@ -88,8 +90,21 @@ public class Camera implements Sendable, Subsystem {
                             //scaledVisionStdDeviations
                     );
                     updated = true;
+
                 } else {
-                    updated = false;
+                    if (inRange && highestAmbiguity < 0.2) {
+                        photonPoseEstimator.setReferencePose(driveTrain.getState().Pose);
+                        var newPose = odoState.estimatedPose.toPose2d();
+                        logger.updateVision(newPose);
+                        driveTrain.addVisionMeasurement(
+                                odoState.estimatedPose.toPose2d(),
+                                odoState.timestampSeconds
+                                //scaledVisionStdDeviations
+                        );
+                        updated = true;
+                    } else {
+                        updated = false;
+                    }
                 }
             } else {
                 updated = false;

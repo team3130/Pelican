@@ -295,12 +295,14 @@ public class RobotContainer {
   }
 
   public double getElevatorPercentSpeed() {
-    double maxSpeed = Constants.Swerve.maxSpeed;
-    double minSpeed = 1;
-    double range = maxSpeed - minSpeed;
-    double untranslatedSpeed = (elevator.getPosition() / elevator.getMaxPosition()) * range;
-    double realSpeed = maxSpeed - untranslatedSpeed;
-    return realSpeed;
+    if(elevator.getPosition() < elevator.getMinPosition()) {
+      return Constants.Swerve.maxSpeed;
+    } else {
+      double maxSpeed = Constants.Swerve.maxSpeed;
+      double minSpeed = 1;
+      double slope = (minSpeed - maxSpeed) / (elevator.getMaxPosition() - elevator.getMinPosition());
+      return (elevator.getPosition() - elevator.getMinPosition()) * slope + maxSpeed;
+    }
   }
 
   /**

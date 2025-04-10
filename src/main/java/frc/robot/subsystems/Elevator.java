@@ -27,12 +27,12 @@ public class Elevator extends SubsystemBase {
   private double targetAcceleration = 130;
 
   private double home = 0;
-  private double minPosition = 7;
-  private double L1 = 14.3;
-  private double L2 = 18.3;
-  private double L3 = 28.6;
-  private double L4 = 44.3;
-  private double maxPosition = 45.3;
+  private double minPosition = 8;
+  private double L1 = 15.3;
+  private double L2 = 19.3;
+  private double L3 = 29.6;
+  private double L4 = 45.3;
+  private double maxPosition = 46.3;
 
   private final MotionMagicDutyCycle voltRequest0;
   private TalonFXConfiguration config;
@@ -286,7 +286,7 @@ public class Elevator extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if(brokeBottomLimitSwitch()) {
+    if(brokeBottomLimitSwitch() && getPosition() != 0) {
       setPosition(0);
     }
   }
