@@ -323,6 +323,6 @@ public class PathChooser {
                         )
                 )
         );
-        return new SequentialCommandGroup(placeH, middlePath, placeG);
+        return middlePath;
     }
 }
