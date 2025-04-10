@@ -268,7 +268,12 @@ public class LEDs extends SubsystemBase{
             scrollingRainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
         } else if(camera.getHasTarget()) {
-            blue.applyTo(LEDBuffer);
+            if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue){
+              blue.applyTo(LEDBuffer);
+            }
+            else {
+              red.applyTo(LEDBuffer);
+            }
             LED.setData(LEDBuffer);
         } else if(manip.getIsIntaking()) {
             timer.start();
@@ -299,11 +304,6 @@ public class LEDs extends SubsystemBase{
                 manualYellow.applyTo(LEDBuffer);
                 LED.setData(LEDBuffer);
             }
-        }
-    }
-    else{
-      timeProgress.applyTo(LEDBuffer);
-      LED.setData(LEDBuffer);
-    }        
+        }      
   } 
 }
