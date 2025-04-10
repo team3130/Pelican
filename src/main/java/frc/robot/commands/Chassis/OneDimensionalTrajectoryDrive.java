@@ -209,7 +209,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
                     approach.getX() * robotContainer.getElevatorRealPercent(),
                     approach.getY() * robotContainer.getElevatorRealPercent(),
                     rotation);
-            ChassisSpeeds limitedDesiredDrive = robotContainer.accelLimitVectorDrive(desiredDrive) ;
+            ChassisSpeeds limitedDesiredDrive = driveTrain.accelLimitVectorDrive(desiredDrive) ;
             driveTrain.setControl(robotContainer.drive.withVelocityX(limitedDesiredDrive.vxMetersPerSecond).
                     withVelocityY(limitedDesiredDrive.vyMetersPerSecond).
                     withRotationalRate(limitedDesiredDrive.omegaRadiansPerSecond));

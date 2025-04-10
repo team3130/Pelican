@@ -3,16 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.772,
-        "y": 4.191
+        "x": 1.558,
+        "y": 0.686
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.062926081860942,
-        "y": 4.191
+        "x": 2.5773565573770494,
+        "y": 1.6094774590163934
       },
       "isLocked": false,
-      "linkedName": "H"
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.993852459016393,
+        "y": 1.1059938524590154
+      },
+      "prevControl": {
+        "x": 5.2930688168380975,
+        "y": 0.30787914886706536
+      },
+      "nextControl": {
+        "x": 6.856967213114753,
+        "y": 2.088985655737705
+      },
+      "isLocked": false,
+      "linkedName": null
     },
     {
       "anchor": {
@@ -20,8 +36,8 @@
         "y": 4.191
       },
       "prevControl": {
-        "x": 6.522,
-        "y": 4.191
+        "x": 6.772,
+        "y": 3.3525342485824345
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,8 +63,8 @@
   "reversed": false,
   "folder": "'Dead Reckoning'",
   "idealStartingState": {
-    "velocity": 0.0,
-    "rotation": 180.0
+    "velocity": 0,
+    "rotation": 53.130102354155945
   },
   "useDefaultConstraints": true
 }

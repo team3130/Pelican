@@ -5,8 +5,11 @@ import com.pathplanner.lib.auto.CommandUtil;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.Elevator.GoToHome;
 import frc.robot.commands.Elevator.GoToL4;
@@ -224,7 +227,7 @@ public class PathChooser {
                                         new ParallelCommandGroup(
                                                 AutoBuilder.followPath(PathPlannerPath.fromPathFile("Reverse" + path.name)),
                                                 new SequentialCommandGroup(
-                                                        new WaitCommand(0.5),
+                                                        new WaitCommand(2),
                                                         new GoToMinPosition(elevator, LED).asProxy()
                                                 )
                                         )
@@ -268,5 +271,58 @@ public class PathChooser {
                 stationChoice2,
                 coral3Choice);
         //return new SequentialCommandGroup(coral1Choice, coral2Choice, coral3Choice);
+    }
+
+    public static Command buildWeirdAuton(Elevator elevator, Manipulator manip, LEDs LED) throws IOException, ParseException {
+        Command middlePath = AutoBuilder.buildAuto("WeirdMiddle");
+        Command placeH = new SequentialCommandGroup(
+                new ParallelDeadlineGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("FollowL4H"), defaultConstraints),
+                        new SequentialCommandGroup(
+                                new WaitCommand(0.2),
+                                new ParallelCommandGroup(
+                                        new GoToL4(elevator, manip, LED),
+                                        new SequentialCommandGroup(
+                                                new WaitCommand(0.1),
+                                                new AutonLimitedManipIntake(manip, elevator, LED).asProxy(),
+                                                new LimitedManipIntakeReverse(manip, LED).asProxy()
+                                        )
+                                )
+                        )
+                ),
+                new LimitedManipOuttake(manip, elevator, LED).asProxy(),
+                new ParallelCommandGroup(
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("ReverseFollowL4H")),
+                        new SequentialCommandGroup(
+                                new WaitCommand(2),
+                                new GoToMinPosition(elevator, LED).asProxy()
+                        )
+                )
+        );
+        Command placeG = new SequentialCommandGroup(
+                new ParallelDeadlineGroup(
+                        pathfindThenFollowPath(PathPlannerPath.fromPathFile("FollowL4G"), defaultConstraints),
+                        new SequentialCommandGroup(
+                                new WaitCommand(0.2),
+                                new ParallelCommandGroup(
+                                        new GoToL4(elevator, manip, LED),
+                                        new SequentialCommandGroup(
+                                                new WaitCommand(0.1),
+                                                new AutonLimitedManipIntake(manip, elevator, LED).asProxy(),
+                                                new LimitedManipIntakeReverse(manip, LED).asProxy()
+                                        )
+                                )
+                        )
+                ),
+                new LimitedManipOuttake(manip, elevator, LED).asProxy(),
+                new ParallelCommandGroup(
+                        AutoBuilder.followPath(PathPlannerPath.fromPathFile("ReverseFollowL4G")),
+                        new SequentialCommandGroup(
+                                new WaitCommand(2),
+                                new GoToMinPosition(elevator, LED).asProxy()
+                        )
+                )
+        );
+        return middlePath;
     }
 }

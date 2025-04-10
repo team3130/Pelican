@@ -46,10 +46,6 @@ import java.util.function.BooleanSupplier;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Timer timer = new Timer();
-  public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
-
-  public final MySlewRateLimiter thetaLimiter;
-  private boolean isAngleReal = false;
   private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Manipulator manip;
@@ -76,9 +72,9 @@ public class RobotContainer {
   private final CommandPS5Controller driverController = new CommandPS5Controller(0);
 
   private final SendableChooser<Command> autoChooser;
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    thetaLimiter = new MySlewRateLimiter(0);
     manip = new Manipulator();
     elevator = new Elevator();
     coralIntake = new CoralIntake();
@@ -191,6 +187,7 @@ public class RobotContainer {
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
     if(Constants.debugMode) {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
+      operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     }
 
 
@@ -199,7 +196,7 @@ public class RobotContainer {
     driveTrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             driveTrain.applyRequest(() -> {
-              ChassisSpeeds chassisSpeed = accelLimitVectorDrive(getHIDspeedsMPS());
+              ChassisSpeeds chassisSpeed = driveTrain.accelLimitVectorDrive(getHIDspeedsMPS());
               return drive.withVelocityX(chassisSpeed.vxMetersPerSecond)
                       .withVelocityY(chassisSpeed.vyMetersPerSecond)
                       .withRotationalRate(chassisSpeed.omegaRadiansPerSecond);
@@ -227,7 +224,6 @@ public class RobotContainer {
     SmartDashboard.putData(algaeIntake);
     SmartDashboard.putData(elevator);
     SmartDashboard.putData(climber);
-    SmartDashboard.putData(thetaLimiter);
     SmartDashboard.putData(camera);
 
     SmartDashboard.putData(logger.getField());
@@ -278,6 +274,13 @@ public class RobotContainer {
 
   public SequentialCommandGroup configureAuton() {
     return PathChooser.buildAutoCommand(elevator, LED);
+  }
+  public Command configureWeirdAuton() {
+      try {
+          return PathChooser.buildWeirdAuton(elevator, manip, LED);
+      } catch (IOException | ParseException e) {
+          throw new RuntimeException(e);
+      }
   }
 
   public double getModularSpeed() {
@@ -338,53 +341,5 @@ public class RobotContainer {
     yAxis *= Math.abs(yAxis) * Constants.Swerve.maxSpeed * getElevatorRealPercent();
     rotation *= Math.abs(rotation) * Constants.Swerve.maxAngularRate * getElevatorRealPercent();
     return new ChassisSpeeds(xAxis, yAxis, rotation);
-  }
-
-  public ChassisSpeeds accelLimitVectorDrive(ChassisSpeeds desiredSpeed) {
-    double xAxis = desiredSpeed.vxMetersPerSecond;
-    double yAxis = desiredSpeed.vyMetersPerSecond;
-    double rotation = desiredSpeed.omegaRadiansPerSecond;
-    Translation2d vector = new Translation2d(xAxis, yAxis);
-    if(isAngleReal) { //if angle is real, then we were moving 20 ms ago
-      if(vector.getNorm() > 0.001){ //if the norm is significant, we continue to move
-        double delta = thetaLimiter.getDelta(vector.getAngle().getRadians());
-        double cos = Math.cos(delta);
-         if(cos > 0){ //positive cos means keep moving (turn angle is small)
-           var mag = vector.getNorm() * cos;
-           driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
-           mag = driveLimiter.calculate(mag);
-           double thetaLimiterConstant = 10;
-           double limit = thetaLimiterConstant /mag;
-           thetaLimiter.updateValues(limit, -limit);
-           var theta = thetaLimiter.angleCalculate(vector.getAngle().getRadians());
-           Translation2d newVector = new Translation2d(mag, new Rotation2d(theta));
-           return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
-         }
-      }
-      //here we continue if we are decelerating, either small mag or big turn.
-      thetaLimiter.reset(thetaLimiter.lastValue());
-      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
-      var newMag = driveLimiter.calculate(0);
-      Rotation2d angle = new Rotation2d(thetaLimiter.lastValue());
-      Translation2d newVector = new Translation2d(newMag, angle);
-      if(newMag < 0.001){ // we have stopped moving
-        isAngleReal = false;
-      }
-      return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
-    }
-    else { //if angle is not real, then we were standing still 20 ms ago
-      if(vector.getNorm() < 0.001){ //if the norm is still tiny, then keep idling
-        driveLimiter.reset(0);
-        return new ChassisSpeeds(0,0, rotation);
-      }
-      else { //if the norm is significant, start driving
-        isAngleReal = true;
-        thetaLimiter.reset(vector.getAngle().getRadians());
-        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
-        var mag = driveLimiter.calculate(vector.getNorm());
-        Translation2d newVector = new Translation2d(mag, vector.getAngle());
-        return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
-      }
-    }
   }
 }
