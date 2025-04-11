@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.558,
-        "y": 0.686
+        "x": 1.798155737704918,
+        "y": 0.6504610655737701
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5773565573770494,
-        "y": 1.6094774590163934
+        "x": 3.341581091600035,
+        "y": 0.9226085981749901
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "WeirdStation"
     },
     {
       "anchor": {
@@ -32,12 +32,12 @@
     },
     {
       "anchor": {
-        "x": 6.772,
-        "y": 4.191
+        "x": 6.272,
+        "y": 4.214
       },
       "prevControl": {
-        "x": 6.772,
-        "y": 3.3525342485824345
+        "x": 6.272,
+        "y": 3.375534248582435
       },
       "nextControl": null,
       "isLocked": false,
@@ -49,8 +49,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
@@ -64,7 +64,7 @@
   "folder": "'Dead Reckoning'",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 53.130102354155945
+    "rotation": 76.6754687381092
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

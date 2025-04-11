@@ -65,7 +65,7 @@ public class Camera implements Sendable, Subsystem {
                 if(target.getPoseAmbiguity() > highestAmbiguity) {
                     highestAmbiguity = target.getPoseAmbiguity();
                 }
-                if(distance < 2){
+                if(distance < 2) {
                     inRange = true;
                 } else {
                     inRange = false;

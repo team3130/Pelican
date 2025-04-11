@@ -189,14 +189,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     () -> getState().Pose, // Robot pose supplier
                     this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
                     () -> getState().Speeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                    (speeds, feedforwards) -> setControl(m_pathApplyRobotSpeeds.withSpeeds(accelLimitVectorDrive(speeds))
+                    (speeds, feedforwards) -> setControl(m_pathApplyRobotSpeeds.withSpeeds(speeds)
                             .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                             .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                     new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your Constants class
                             new PIDConstants( // Translation PID constants
-                                    Constants.Swerve.translationPID[0],
-                                    Constants.Swerve.translationPID[1],
-                                    Constants.Swerve.translationPID[2]),
+                                    5,
+                                    0,
+                                    0),
                             new PIDConstants( // Rotation PID constants
                                     Constants.Swerve.rotationPID[0],
                                     Constants.Swerve.rotationPID[1],
