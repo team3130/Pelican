@@ -23,8 +23,8 @@ public class Elevator extends SubsystemBase {
   private final TalonFX rightMotor;
   private final DigitalInput bottomLimitSwitch;
   private final DigitalInput topLimitSwitch;
-  private double targetVelocity = 70;
-  private double targetAcceleration = 130;
+  private double targetVelocity = 100;
+  private double targetAcceleration = 170;
 
   private double home = 0;
   private double minPosition = 7.5;
