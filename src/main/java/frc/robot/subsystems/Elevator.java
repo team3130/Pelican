@@ -163,6 +163,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public double getPosition() {return leftMotor.getPosition().getValueAsDouble();}
+  public double getHeightInMeters() {return getPosition()*0.037037;}
   public void setPosition(double value) {leftMotor.setPosition(value);}
 
   public boolean brokeBottomLimitSwitch() {return !bottomLimitSwitch.get();}

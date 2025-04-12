@@ -47,6 +47,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Timer timer = new Timer();
   public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
+  private final double posRateLimitSlope = -(Constants.Swerve.maxAccelerationFromRest / TunerConstants.kSpeedAt12Volts.magnitude());
+  private final double posRateLimitYIntersect = Constants.Swerve.maxAccelerationFromRest;
 
   public final MySlewRateLimiter thetaLimiter;
   private boolean isAngleReal = false;
@@ -338,6 +340,14 @@ public class RobotContainer {
     return new ChassisSpeeds(xAxis, yAxis, rotation);
   }
 
+  public double getLinearPositiveRateLimit(double norm){
+    double C0 = 26;
+    double C1 = 15;
+    double height = elevator.getHeightInMeters();
+    double elevatorAccelLimit = 4/(C0+C1*height);
+    return Math.min(norm * posRateLimitSlope + posRateLimitYIntersect, elevatorAccelLimit);
+  }
+
   public ChassisSpeeds accelLimitVectorDrive(ChassisSpeeds desiredSpeed) {
     double xAxis = desiredSpeed.vxMetersPerSecond;
     double yAxis = desiredSpeed.vyMetersPerSecond;
@@ -349,7 +359,7 @@ public class RobotContainer {
         double cos = Math.cos(delta);
          if(cos > 0){ //positive cos means keep moving (turn angle is small)
            var mag = vector.getNorm() * cos;
-           driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+           driveLimiter.setPositiveRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
            mag = driveLimiter.calculate(mag);
            double thetaLimiterConstant = 10;
            double limit = thetaLimiterConstant /mag;
@@ -361,7 +371,7 @@ public class RobotContainer {
       }
       //here we continue if we are decelerating, either small mag or big turn.
       thetaLimiter.reset(thetaLimiter.lastValue());
-      driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+      driveLimiter.setPositiveRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
       var newMag = driveLimiter.calculate(0);
       Rotation2d angle = new Rotation2d(thetaLimiter.lastValue());
       Translation2d newVector = new Translation2d(newMag, angle);
@@ -378,7 +388,7 @@ public class RobotContainer {
       else { //if the norm is significant, start driving
         isAngleReal = true;
         thetaLimiter.reset(vector.getAngle().getRadians());
-        driveLimiter.setPositiveRateLimit(driveLimiter.getLinearPositiveRateLimit(driveLimiter.lastValue()));
+        driveLimiter.setPositiveRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
         var mag = driveLimiter.calculate(vector.getNorm());
         Translation2d newVector = new Translation2d(mag, vector.getAngle());
         return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
