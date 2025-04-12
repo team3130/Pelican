@@ -235,6 +235,7 @@ public class RobotContainer {
 
   public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
   public Command elevatorHome() {return new GoToHome(elevator, LED);}
+  public void elevatorStop() {elevator.stop();}
   public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber, LED);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}

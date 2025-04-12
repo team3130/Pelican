@@ -52,7 +52,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    robotContainer.elevatorStop();
+  }
 
   @Override
   public void disabledPeriodic() {
@@ -64,8 +66,8 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     robotContainer.setElevatorZeroed(false);
     CommandScheduler.getInstance().cancelAll();
-    //autonomousCommand = robotContainer.pick();
-    autonomousCommand = AutoBuilder.buildAuto("WeirdMiddleRight");
+    autonomousCommand = robotContainer.pick();
+    //autonomousCommand = AutoBuilder.buildAuto("WeirdMiddleRight");
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
