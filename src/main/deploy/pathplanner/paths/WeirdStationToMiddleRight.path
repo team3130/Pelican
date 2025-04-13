@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.3655565014361004,
-        "y": 0.9585717129290883
+        "x": 3.164754098360655,
+        "y": 1.4056864754098353
       },
       "isLocked": false,
       "linkedName": "WeirdStationRight"
     },
     {
       "anchor": {
-        "x": 5.993852459016393,
-        "y": 1.1059938524590154
+        "x": 5.909938524590164,
+        "y": 1.3217725409836065
       },
       "prevControl": {
-        "x": 5.4304303278688515,
-        "y": 0.65046106557377
+        "x": 5.346516393442622,
+        "y": 0.8662397540983612
       },
       "nextControl": {
-        "x": 7.011104286885271,
-        "y": 1.9284527771189568
+        "x": 6.927190352459041,
+        "y": 2.1442314656435473
       },
       "isLocked": false,
       "linkedName": null
@@ -49,8 +49,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,

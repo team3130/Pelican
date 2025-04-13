@@ -21,7 +21,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.75
+                        "waitTime": 0.5
                       }
                     },
                     {
@@ -93,7 +93,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "L4FReverse"
+                  "pathName": "ReturnF"
                 }
               },
               {
@@ -103,7 +103,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.5
+                        "waitTime": 0.25
                       }
                     },
                     {
@@ -113,25 +113,6 @@
                       }
                     }
                   ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "ReturnF"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Go Min Position"
                 }
               }
             ]
@@ -198,7 +179,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.75
+                        "waitTime": 0.25
                       }
                     },
                     {
@@ -226,7 +207,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "L4CReverse"
+                  "pathName": "ReturnC"
                 }
               },
               {
@@ -246,25 +227,6 @@
                       }
                     }
                   ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "ReturnC"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Go Min Position"
                 }
               }
             ]
@@ -331,7 +293,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.0
+                        "waitTime": 0.5
                       }
                     },
                     {

@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.8820696721311476,
-        "y": 7.351588114754097
+        "x": 1.8580942622950818,
+        "y": 7.339600409836065
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.996926229502523,
-        "y": 7.051895491801392
+        "x": 3.1168032786885242,
+        "y": 6.536424180327868
       },
       "isLocked": false,
       "linkedName": "WeirdStationLeft"
     },
     {
       "anchor": {
-        "x": 5.969877049180327,
-        "y": 7.01593237704918
+        "x": 5.849999999999999,
+        "y": 6.80015368852459
       },
       "prevControl": {
-        "x": 5.148374248858418,
-        "y": 7.454067203887532
+        "x": 5.02849719967809,
+        "y": 7.238288515362942
       },
       "nextControl": {
-        "x": 7.228586065573769,
-        "y": 6.344620901639344
+        "x": 7.1087090163934405,
+        "y": 6.128842213114754
       },
       "isLocked": false,
       "linkedName": null
@@ -46,11 +46,22 @@
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 5.5,
+        "y": 3.0
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.2382154882154883,
+      "maxWaypointRelativePos": 1.5984848484848402,
+      "name": "Point Towards Zone"
+    }
+  ],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.5,
-    "maxAcceleration": 4.5,
+    "maxVelocity": 3.6,
+    "maxAcceleration": 5.0,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
