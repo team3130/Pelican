@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.8221311475409834,
-        "y": 0.6864241803278684
+        "x": 6.272,
+        "y": 3.861
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.3655565014361004,
-        "y": 0.9585717129290884
+        "x": 6.278659836065573,
+        "y": 4.9889856557377055
       },
       "isLocked": false,
-      "linkedName": "WeirdStation"
+      "linkedName": "CloseG"
     },
     {
       "anchor": {
-        "x": 5.993852459016393,
-        "y": 1.1059938524590154
+        "x": 6.305532786885245,
+        "y": 6.944006147540984
       },
       "prevControl": {
-        "x": 5.2930688168380975,
-        "y": 0.30787914886706536
+        "x": 6.952686665918247,
+        "y": 6.408081841466779
       },
       "nextControl": {
-        "x": 6.856967213114753,
-        "y": 2.088985655737705
+        "x": 5.5383196721311485,
+        "y": 7.579354508196721
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.272,
-        "y": 4.214
+        "x": 1.8820696721311476,
+        "y": 7.351588114754097
       },
       "prevControl": {
-        "x": 6.272,
-        "y": 3.375534248582435
+        "x": 2.9969262295081966,
+        "y": 6.80015368852459
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "TranslatedH"
+      "linkedName": "WeirdStationLeft"
     }
   ],
   "rotationTargets": [],
@@ -49,8 +49,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.5,
+    "maxAcceleration": 4.5,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,
@@ -58,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -76.68
   },
   "reversed": false,
   "folder": "'Dead Reckoning'",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 76.6754687381092
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }
