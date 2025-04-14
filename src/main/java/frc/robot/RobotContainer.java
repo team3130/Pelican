@@ -341,10 +341,10 @@ public class RobotContainer {
   }
 
   public double getLinearPositiveRateLimit(double norm){
-    double C0 = 26;
-    double C1 = 15;
-    double height = elevator.getHeightInMeters();
-    double elevatorAccelLimit = 4/(C0+C1*height);
+    double C0 = 0.3;
+    double C1 = 0.3;
+    double height = elevator.getHeightInMeters()/3 + 0.6;
+    double elevatorAccelLimit = 3/(C0+C1*height);
     return Math.min(norm * posRateLimitSlope + posRateLimitYIntersect, elevatorAccelLimit);
   }
 
