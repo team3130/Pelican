@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
@@ -219,6 +220,7 @@ public class RobotContainer {
   }
 
   public void exportSmartDashboardData() {
+    SmartDashboard.putData(driveTrain);
     SmartDashboard.putData(manip);
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
@@ -232,6 +234,7 @@ public class RobotContainer {
   public Command pick() {
     return autoChooser.getSelected();
   }
+  public Command getAutonWaitCommand() {return new WaitCommand(driveTrain.getAutonWaitVal());}
 
   public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
   public Command elevatorHome() {return new GoToHome(elevator, LED);}
