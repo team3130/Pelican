@@ -64,6 +64,10 @@ public class MySlewRateLimiter implements Sendable {
         this.positiveRateLimit = positiveRateLimit;
     }
     public double getPositiveRateLimit() {return positiveRateLimit;}
+    public void setNegativeRateLimit(double negativeRateLimit) {
+        this.negativeRateLimit = negativeRateLimit;
+    }
+    public double getNegativeRateLimit() {return negativeRateLimit;}
 
     public double getElapsedTime() {
         return MathSharedStore.getTimestamp() - prevTime;

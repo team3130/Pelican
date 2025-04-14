@@ -348,6 +348,14 @@ public class RobotContainer {
     return Math.min(norm * posRateLimitSlope + posRateLimitYIntersect, elevatorAccelLimit);
   }
 
+  public double getLinearNegativeRateLimit(double norm) {
+    double C0 = 0.3;
+    double C1 = 0.3;
+    double height = elevator.getHeightInMeters()/3 + 0.6;
+    double elevatorAccelLimit = 3/(C0+C1*height);
+    return Math.min(driveLimiter.getNegativeRateLimit(), elevatorAccelLimit);
+  }
+
   public ChassisSpeeds accelLimitVectorDrive(ChassisSpeeds desiredSpeed) {
     double xAxis = desiredSpeed.vxMetersPerSecond;
     double yAxis = desiredSpeed.vyMetersPerSecond;
@@ -360,6 +368,7 @@ public class RobotContainer {
          if(cos > 0){ //positive cos means keep moving (turn angle is small)
            var mag = vector.getNorm() * cos;
            driveLimiter.setPositiveRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
+           driveLimiter.setNegativeRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
            mag = driveLimiter.calculate(mag);
            double thetaLimiterConstant = 10;
            double limit = thetaLimiterConstant /mag;
@@ -372,6 +381,7 @@ public class RobotContainer {
       //here we continue if we are decelerating, either small mag or big turn.
       thetaLimiter.reset(thetaLimiter.lastValue());
       driveLimiter.setPositiveRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
+      driveLimiter.setNegativeRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
       var newMag = driveLimiter.calculate(0);
       Rotation2d angle = new Rotation2d(thetaLimiter.lastValue());
       Translation2d newVector = new Translation2d(newMag, angle);
@@ -389,6 +399,7 @@ public class RobotContainer {
         isAngleReal = true;
         thetaLimiter.reset(vector.getAngle().getRadians());
         driveLimiter.setPositiveRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
+        driveLimiter.setNegativeRateLimit(getLinearPositiveRateLimit(driveLimiter.lastValue()));
         var mag = driveLimiter.calculate(vector.getNorm());
         Translation2d newVector = new Translation2d(mag, vector.getAngle());
         return new ChassisSpeeds(newVector.getX(), newVector.getY(), rotation);
