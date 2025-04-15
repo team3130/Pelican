@@ -157,9 +157,9 @@ public class OneDimensionalTrajectoryDrive extends Command {
             }
             double velocitySign;
             if((getNormal(currentVelocity).getX()*normalPosDirection.getX() + getNormal(currentVelocity).getY()*normalPosDirection.getY()) > 0) {
-                velocitySign = 1;
-            } else {
                 velocitySign = -1;
+            } else {
+                velocitySign = 1;
             }
             pidController.reset(sign*getNormal(vector).getNorm(), velocitySign*getNormal(currentVelocity).getNorm()); //todo is it right to be getting norm on the distance getter here?
             runnable = true;
