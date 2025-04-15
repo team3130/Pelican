@@ -25,8 +25,8 @@ public class OneDimensionalTrajectoryDrive extends Command {
     private double prevTime;
     private final double minLogicDistanceTangent = 100;
     private final double minLogicDistanceNormal = 100;
-    private final double normSpeed = 2;
-    private final double normAcceleration = 2.5;
+    private final double normSpeed = 3.5;
+    private final double normAcceleration = 5;
     private final double tolerance = 0.005;
     private final ProfiledPIDController pidController = new ProfiledPIDController(Constants.Swerve.translationPID[0], Constants.Swerve.translationPID[1], Constants.Swerve.translationPID[2],
             new TrapezoidProfile.Constraints(normSpeed, normAcceleration));

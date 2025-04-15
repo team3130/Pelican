@@ -137,18 +137,6 @@
                       "data": {
                         "name": "Limited Manip Intake Reverse"
                       }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Auton Limited Manip Intake"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Limited Manip Intake Reverse"
-                      }
                     }
                   ]
                 }
@@ -186,6 +174,25 @@
                       "type": "named",
                       "data": {
                         "name": "Go L4"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Auton Limited Manip Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Limited Manip Intake Reverse"
                       }
                     }
                   ]
@@ -251,18 +258,6 @@
                       "data": {
                         "name": "Limited Manip Intake Reverse"
                       }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Auton Limited Manip Intake"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Limited Manip Intake Reverse"
-                      }
                     }
                   ]
                 }
@@ -300,6 +295,25 @@
                       "type": "named",
                       "data": {
                         "name": "Go L4"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Auton Limited Manip Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Limited Manip Intake Reverse"
                       }
                     }
                   ]

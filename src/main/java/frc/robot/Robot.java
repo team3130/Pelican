@@ -4,14 +4,8 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
+import edu.wpi.first.wpilibj2.command.*;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -20,6 +14,7 @@ import java.io.IOException;
  */
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
+  private Command waitCommand;
 
   private final RobotContainer robotContainer;
 
@@ -67,7 +62,9 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     robotContainer.setElevatorZeroed(false);
     CommandScheduler.getInstance().cancelAll();
-    autonomousCommand = new SequentialCommandGroup(robotContainer.getAutonWaitCommand(), robotContainer.pick());
+    waitCommand = new WaitCommand(robotContainer.getAutonDelay());
+    autonomousCommand = robotContainer.pick();
+    //autonomousCommand = new SequentialCommandGroup(waitCommand, autonomousCommand);
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       autonomousCommand.schedule();

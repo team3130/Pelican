@@ -9,7 +9,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.PS5Controller;
@@ -22,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.button.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
-import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.*;
 import frc.robot.commands.CoralIntake.*;
@@ -220,7 +218,7 @@ public class RobotContainer {
   }
 
   public void exportSmartDashboardData() {
-    SmartDashboard.putData(driveTrain);
+    SmartDashboard.putNumber("Auton Delay", 0);
     SmartDashboard.putData(manip);
     SmartDashboard.putData(coralIntake);
     SmartDashboard.putData(algaeIntake);
@@ -234,7 +232,7 @@ public class RobotContainer {
   public Command pick() {
     return autoChooser.getSelected();
   }
-  public Command getAutonWaitCommand() {return new WaitCommand(driveTrain.getAutonWaitVal());}
+  public double getAutonDelay() {return SmartDashboard.getNumber("Auton Delay", 0);}
 
   public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
   public Command elevatorHome() {return new GoToHome(elevator, LED);}

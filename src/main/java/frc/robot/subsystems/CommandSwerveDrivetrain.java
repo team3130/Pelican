@@ -49,13 +49,12 @@ import org.json.simple.parser.ParseException;
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
  * Subsystem so it can easily be used in command-based projects.
  */
-public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem, Sendable {
+public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
     public final MySlewRateLimiter driveLimiter = new MySlewRateLimiter(2, -5, 0);
 
     public final MySlewRateLimiter thetaLimiter = new MySlewRateLimiter(0);
     private boolean isAngleReal = false;
     private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
-    private double autonWaitVal = 0;
     private RobotConfig config;
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
     private static final double kSimLoopPeriod = 0.005; // 5 ms
@@ -462,14 +461,5 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.getKinematics().toChassisSpeeds(this.getState().ModuleStates);
-    }
-
-    public double getAutonWaitVal() {return autonWaitVal;}
-    public void setAutonWaitVal(double value) {autonWaitVal = value;}
-
-    public void initSendable(SendableBuilder builder) {
-        builder.setSmartDashboardType("Auton");
-
-        builder.addDoubleProperty("Auton Wait Value", this::getAutonWaitVal, this::setAutonWaitVal);
     }
 }
