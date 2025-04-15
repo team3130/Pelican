@@ -147,6 +147,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             double xAxis = chassisSpeeds.vxMetersPerSecond;
             double yAxis = chassisSpeeds.vyMetersPerSecond;
             Translation2d vector = new Translation2d(xAxis, yAxis);
+            Translation2d currentVelocity = new Translation2d(driveTrain.getRobotRelativeSpeeds().vxMetersPerSecond, driveTrain.getRobotRelativeSpeeds().vyMetersPerSecond);
             Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
             double sign;
             if((getNormal(vector).getX()*normalPosDirection.getX() + getNormal(vector).getY()*normalPosDirection.getY()) > 0) {
@@ -154,7 +155,13 @@ public class OneDimensionalTrajectoryDrive extends Command {
             } else {
                 sign = -1;
             }
-            pidController.reset(sign*getNormal(vector).getNorm()); //todo is it right to be getting norm on the distance getter here?
+            double velocitySign;
+            if((getNormal(currentVelocity).getX()*normalPosDirection.getX() + getNormal(currentVelocity).getY()*normalPosDirection.getY()) > 0) {
+                velocitySign = 1;
+            } else {
+                velocitySign = -1;
+            }
+            pidController.reset(sign*getNormal(vector).getNorm(), velocitySign*getNormal(currentVelocity).getNorm()); //todo is it right to be getting norm on the distance getter here?
             runnable = true;
         }
         logger.updateTarget(targetPose);
@@ -173,6 +180,7 @@ public class OneDimensionalTrajectoryDrive extends Command {
             Translation2d vector = new Translation2d(xAxis, yAxis);
             Translation2d unitTangent = getUnitTangent();
             Translation2d normal = getNormal(vector);
+            Translation2d currentVelocity = new Translation2d(driveTrain.getRobotRelativeSpeeds().vxMetersPerSecond, driveTrain.getRobotRelativeSpeeds().vyMetersPerSecond);
             Translation2d normalPosDirection = new Translation2d(-getUnitTangent().getY(), getUnitTangent().getX());
             double sign;
             if((getNormal(vector).getX()*normalPosDirection.getX() + getNormal(vector).getY()*normalPosDirection.getY()) > 0) {
@@ -180,7 +188,12 @@ public class OneDimensionalTrajectoryDrive extends Command {
             } else {
                 sign = -1;
             }
-
+            double velocitySign;
+            if((getNormal(currentVelocity).getX()*normalPosDirection.getX() + getNormal(currentVelocity).getY()*normalPosDirection.getY()) > 0) {
+                velocitySign = 1;
+            } else {
+                velocitySign = -1;
+            }
             Translation2d approach;
             if (true) {
                 useMinLogicDistance = true;
