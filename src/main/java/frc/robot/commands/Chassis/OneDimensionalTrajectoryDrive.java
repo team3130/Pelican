@@ -188,12 +188,6 @@ public class OneDimensionalTrajectoryDrive extends Command {
             } else {
                 sign = -1;
             }
-            double velocitySign;
-            if((getNormal(currentVelocity).getX()*normalPosDirection.getX() + getNormal(currentVelocity).getY()*normalPosDirection.getY()) > 0) {
-                velocitySign = 1;
-            } else {
-                velocitySign = -1;
-            }
             Translation2d approach;
             if (true) {
                 useMinLogicDistance = true;
