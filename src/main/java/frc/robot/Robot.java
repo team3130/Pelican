@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     robotContainer.setElevatorZeroed(false);
     CommandScheduler.getInstance().cancelAll();
-    waitCommand = new WaitCommand(robotContainer.getAutonDelay());
+    //waitCommand = new WaitCommand(robotContainer.getAutonDelay());
     autonomousCommand = robotContainer.pick();
     //autonomousCommand = new SequentialCommandGroup(waitCommand, autonomousCommand);
     // schedule the autonomous command (example)

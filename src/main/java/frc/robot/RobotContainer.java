@@ -170,6 +170,7 @@ public class RobotContainer {
 
     driverController.triangle().whileTrue(new BasicClimberDown(climber, LED));
     driverController.povRight().whileTrue(new BasicClimberUp(climber, LED));
+    driverController.povDown().whileTrue(new IntakeActuate(coralIntake));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -304,7 +305,7 @@ public class RobotContainer {
       return Constants.Swerve.maxSpeed;
     } else {
       double maxSpeed = Constants.Swerve.maxSpeed;
-      double minSpeed = 1;
+      double minSpeed = 2;
       double slope = (minSpeed - maxSpeed) / (elevator.getMaxPosition() - elevator.getMinPosition());
       return (elevator.getPosition() - elevator.getMinPosition()) * slope + maxSpeed;
     }
