@@ -170,7 +170,7 @@ public class RobotContainer {
 
     driverController.triangle().whileTrue(new BasicClimberDown(climber, LED));
     driverController.povRight().whileTrue(new BasicClimberUp(climber, LED));
-    driverController.povDown().whileTrue(new IntakeActuate(coralIntake));
+    driverController.options().whileTrue(new IntakeActuate(coralIntake));
 
     //operatorController.a().whileTrue(new GoToHome(elevator));
     //operatorController.b().whileTrue(new GoToL2Basic(elevator));
@@ -187,7 +187,7 @@ public class RobotContainer {
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
     if(Constants.debugMode) {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
-      operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
+      //operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     }
 
 

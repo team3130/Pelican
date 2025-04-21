@@ -5,13 +5,45 @@
     "data": {
       "commands": [
         {
-          "type": "deadline",
+          "type": "sequential",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "L4I"
+                  "pathName": "WeirderBApproachRight"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.4
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "L4B"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Go L4"
                 }
               },
               {
@@ -21,57 +53,31 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.5
+                        "waitTime": 0.1
                       }
                     },
                     {
-                      "type": "parallel",
+                      "type": "named",
                       "data": {
-                        "commands": [
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "Go L4"
-                            }
-                          },
-                          {
-                            "type": "sequential",
-                            "data": {
-                              "commands": [
-                                {
-                                  "type": "wait",
-                                  "data": {
-                                    "waitTime": 0.1
-                                  }
-                                },
-                                {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Auton Limited Manip Intake"
-                                  }
-                                },
-                                {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Limited Manip Intake Reverse"
-                                  }
-                                },
-                                {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Auton Limited Manip Intake"
-                                  }
-                                },
-                                {
-                                  "type": "named",
-                                  "data": {
-                                    "name": "Limited Manip Intake Reverse"
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        ]
+                        "name": "Auton Limited Manip Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Limited Manip Intake Reverse"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Auton Limited Manip Intake"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Limited Manip Intake Reverse"
                       }
                     }
                   ]
@@ -87,13 +93,13 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "sequential",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "ReturnI"
+                  "pathName": "L4BReverse"
                 }
               },
               {
@@ -103,7 +109,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.25
+                        "waitTime": 0.3
                       }
                     },
                     {
@@ -113,6 +119,25 @@
                       }
                     }
                   ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "ReturnB"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Go Min Position"
                 }
               }
             ]
@@ -157,26 +182,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "L4L"
+                  "pathName": "WeirderAApproachRight"
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.5
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Go L4"
-                      }
-                    }
-                  ]
+                  "name": "Go Min Position"
                 }
               },
               {
@@ -202,19 +214,51 @@
           }
         },
         {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.4
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "L4A"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Go L4"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Limited Manip Outtake"
           }
         },
         {
-          "type": "deadline",
+          "type": "sequential",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "ReturnL"
+                  "pathName": "L4AReverse"
                 }
               },
               {
@@ -224,7 +268,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.25
+                        "waitTime": 0.3
                       }
                     },
                     {
@@ -234,6 +278,25 @@
                       }
                     }
                   ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "ReturnA"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Go Min Position"
                 }
               }
             ]
@@ -266,95 +329,6 @@
                 "type": "named",
                 "data": {
                   "name": "Go Min Position"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "L4K"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.9
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Go L4"
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Auton Limited Manip Intake"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Limited Manip Intake Reverse"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Limited Manip Outtake"
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "L4KReverse"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 0.5
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Go Min Position"
-                      }
-                    }
-                  ]
                 }
               }
             ]

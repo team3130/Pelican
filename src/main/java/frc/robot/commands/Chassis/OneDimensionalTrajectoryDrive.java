@@ -133,13 +133,13 @@ public class OneDimensionalTrajectoryDrive extends Command {
                 }
             }
         }
-        leftReefFace = ((onBlue && targetPose.getRotation().getDegrees() > 30)
-            || (!onBlue && targetPose.getRotation().getDegrees() < 30));
+        leftReefFace = ((onBlue && targetPose.getRotation().getDegrees() > -30 && targetPose.getRotation().getDegrees() < 150)
+            || (!onBlue && (targetPose.getRotation().getDegrees() < -30 || targetPose.getRotation().getDegrees() > 150) ));
         targetPose = targetPose.plus(new Transform2d(new Translation2d(.8, Rotation2d.kZero), Rotation2d.k180deg)); //.8 is in meters
         double deadband = 0.7;
         double joystickChoice = -driverController.getRightY();
         if(joystickChoice > deadband || joystickChoice < -deadband) {
-            if ((joystickChoice > 0 && leftReefFace) || (joystickChoice < 0 && !leftReefFace)) {
+            if ((joystickChoice < 0 && leftReefFace) || (joystickChoice > 0 && !leftReefFace)) {
                 //0.1651 is in meters and is equivalent to 6.5 inches
                 targetPose = targetPose.plus(new Transform2d(new Translation2d(0.1651, Rotation2d.kCW_90deg), Rotation2d.kZero));
 
