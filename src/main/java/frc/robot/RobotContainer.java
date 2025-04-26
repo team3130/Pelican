@@ -19,8 +19,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
+import frc.robot.commands.AlgaeManipulator.*;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.*;
 import frc.robot.commands.CoralIntake.*;
@@ -50,7 +50,7 @@ public class RobotContainer {
   private final Manipulator manip;
   private final Elevator elevator;
   private final CoralIntake coralIntake;
-  private final AlgaeIntake algaeIntake;
+  private final AlgaeManipulator algaeManipulator;
   private final Climber climber;
   private final LEDs LED;
   public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -77,7 +77,7 @@ public class RobotContainer {
     manip = new Manipulator();
     elevator = new Elevator();
     coralIntake = new CoralIntake();
-    algaeIntake = new AlgaeIntake();
+    algaeManipulator = new AlgaeManipulator();
     climber = new Climber();
     camera = new Camera(driveTrain);
     LED = new LEDs(elevator, manip, climber, camera, driveTrain);
@@ -100,9 +100,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator, LED));
     NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator, LED));
 
-    NamedCommands.registerCommand("Toggle Algae Intake", new ActuateAlgaeIntake(algaeIntake));
-    NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
-    NamedCommands.registerCommand("Run Algae Outtake", new RunAlgaeOuttake(algaeIntake));
+    
+    NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeManipulator));
+    NamedCommands.registerCommand("Run Algae Outtake", new RunAlgaeOuttake(algaeManipulator));
 
     NamedCommands.registerCommand("Limited Coral Intake", new LimitedCoralIntake(coralIntake, manip));
     NamedCommands.registerCommand("UnLimited Coral Outtake", new UnlimitedCoralOuttake(coralIntake));
@@ -179,9 +179,9 @@ public class RobotContainer {
     //operatorController.povDown().whileTrue(new GoToL1Basic(elevator));
 
     //operatorController.rightBumper().whileTrue(new ActuateAlgaeIntake(algaeIntake));
-    //operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
+    operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeManipulator));
     //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
-    //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
+    operatorController.leftBumper().whileTrue(new RunAlgaeOuttake(algaeManipulator));
 
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
@@ -222,7 +222,7 @@ public class RobotContainer {
     SmartDashboard.putNumber("Auton Delay", 0);
     SmartDashboard.putData(manip);
     SmartDashboard.putData(coralIntake);
-    SmartDashboard.putData(algaeIntake);
+    SmartDashboard.putData(algaeManipulator);
     SmartDashboard.putData(elevator);
     SmartDashboard.putData(climber);
     SmartDashboard.putData(camera);
@@ -238,7 +238,6 @@ public class RobotContainer {
   public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
   public Command elevatorHome() {return new GoToHome(elevator, LED);}
   public void elevatorStop() {elevator.stop();}
-  public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber, LED);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
   public void basicVisionResetOdo() {
