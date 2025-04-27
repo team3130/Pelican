@@ -100,7 +100,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator, LED));
     NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator, LED));
 
-    NamedCommands.registerCommand("Toggle Algae Intake", new ActuateAlgaeIntake(algaeIntake));
     NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
     NamedCommands.registerCommand("Run Algae Outtake", new RunAlgaeOuttake(algaeIntake));
 
@@ -238,7 +237,6 @@ public class RobotContainer {
   public void setElevatorZeroed(boolean value) {elevator.setZeroed(value);}
   public Command elevatorHome() {return new GoToHome(elevator, LED);}
   public void elevatorStop() {elevator.stop();}
-  public Command algaeActuationHome() {return new AlgaeActuationGoHome(algaeIntake);}
   public Command climberHome() {return new ZeroClimber(climber, LED);}
   public Command intakeDeactuate() {return new IntakeDeactuate(coralIntake);}
   public void basicVisionResetOdo() {
