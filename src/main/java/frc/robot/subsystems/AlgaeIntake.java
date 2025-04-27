@@ -8,6 +8,10 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -17,64 +21,27 @@ import frc.robot.Constants;
 
 public class AlgaeIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  private final TalonSRX intake;
-  private final TalonSRX actuation;
-  private final DigitalInput limitSwitch;
-
+  private final TalonFX intake;
   private double intakeSpeed = 0.5;
-  private double actuationSpeed = 0.2;
-  private double setpoint = 180;
-
-  private boolean actuated = false;
   public AlgaeIntake() {
-    intake = new TalonSRX(Constants.CAN.AlgaeIntake);
-    actuation = new TalonSRX(Constants.CAN.AlgaeIntakeActuation);
-    limitSwitch = new DigitalInput(Constants.IDs.AlgaeIntakeLimitSwitch);
+    intake = new TalonFX(Constants.CAN.AlgaeIntake);
 
-    intake.configFactoryDefault();
-    intake.setInverted(false);
-
-    actuation.configFactoryDefault();
-    actuation.setInverted(false);
-    actuation.setNeutralMode(NeutralMode.Brake);
-    actuation.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
-    //actuation.configVoltageCompSaturation(6);
+    intake.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+    intake.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true).withSupplyCurrentLimit(40));
   }
 
   public void runIntake() {
-    intake.set(ControlMode.PercentOutput, intakeSpeed);
+    intake.set(intakeSpeed);
   }
   public void runOuttake() {
-    intake.set(ControlMode.PercentOutput, -intakeSpeed);
+    intake.set(-intakeSpeed);
   }
   public void stopIntake() {
-    intake.set(ControlMode.PercentOutput, 0);
+    intake.set(0);
   }
-
-  public void actuateIntake() {
-    actuation.set(ControlMode.PercentOutput, actuationSpeed);
-  }
-  public void deactuateIntake() {
-    actuation.set(ControlMode.PercentOutput, -actuationSpeed);
-  }
-  public void stopActuation() {actuation.set(ControlMode.PercentOutput, 0);}
 
   public double getIntakeSpeed() {return intakeSpeed;}
   public void setIntakeSpeed(double value) {intakeSpeed = value;}
-
-  public double getActuationSpeed() {return actuationSpeed;}
-  public void setActuationSpeed(double value) {actuationSpeed = value;}
-
-  public double getActuationPosition() {return actuation.getSelectedSensorPosition(0);}
-  public void setActuationPosition(double value) {actuation.setSelectedSensorPosition(0);}
-
-  public double getSetpoint() {return setpoint;}
-  public void setSetpoint(double value) {setpoint = value;}
-
-  public boolean getActuated() {return actuated;}
-  public void setActuated(boolean value) {actuated = value;}
-
-  public boolean getSwitch() {return !limitSwitch.get();}
 
   /**
    * Initializes the data we send on shuffleboard
@@ -86,12 +53,6 @@ public class AlgaeIntake extends SubsystemBase {
       builder.setSmartDashboardType("Algae Intake");
 
       builder.addDoubleProperty("Intake Speed", this::getIntakeSpeed, this::setIntakeSpeed);
-      builder.addDoubleProperty("Actuation Speed", this::getActuationSpeed, this::setActuationSpeed);
-      builder.addDoubleProperty("Actuation Position", this::getActuationPosition, this::setActuationPosition);
-      builder.addDoubleProperty("Actuation Setpoint", this::getSetpoint, this::setSetpoint);
-
-      builder.addBooleanProperty("Actuated", this::getActuated, this::setActuated);
-      builder.addBooleanProperty("Limit Switch", this::getSwitch, null);
     }
   }
 
