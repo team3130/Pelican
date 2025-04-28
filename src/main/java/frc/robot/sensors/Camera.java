@@ -32,7 +32,8 @@ public class Camera implements Sendable, Subsystem {
     private final PhotonPoseEstimator photonPoseEstimatorRight;
     private EstimatedRobotPose odoStateLeft;
     private EstimatedRobotPose odoStateRight;
-    private boolean updated = false;
+    private boolean updatedLeft = false;
+    private boolean updatedRight = false;
     public Camera(CommandSwerveDrivetrain driveTrain) {
         this.driveTrain = driveTrain;
         AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
@@ -94,7 +95,7 @@ public class Camera implements Sendable, Subsystem {
                             odoStateLeft.timestampSeconds
                             //scaledVisionStdDeviations
                     );
-                    updated = true;
+                    updatedLeft = true;
 
                 } else {
                     if (inRange && highestAmbiguity < 0.2) {
@@ -106,13 +107,13 @@ public class Camera implements Sendable, Subsystem {
                                 odoStateLeft.timestampSeconds
                                 //scaledVisionStdDeviations
                         );
-                        updated = true;
+                        updatedLeft = true;
                     } else {
-                        updated = false;
+                        updatedLeft = false;
                     }
                 }
             } else {
-                updated = false;
+                updatedLeft = false;
             }
         }
     }
@@ -154,7 +155,7 @@ public class Camera implements Sendable, Subsystem {
                             odoStateRight.timestampSeconds
                             //scaledVisionStdDeviations
                     );
-                    updated = true;
+                    updatedRight = true;
 
                 } else {
                     if (inRange && highestAmbiguity < 0.2) {
@@ -166,19 +167,19 @@ public class Camera implements Sendable, Subsystem {
                                 odoStateLeft.timestampSeconds
                                 //scaledVisionStdDeviations
                         );
-                        updated = true;
+                        updatedRight = true;
                     } else {
-                        updated = false;
+                        updatedRight = false;
                     }
                 }
             } else {
-                updated = false;
+                updatedRight = false;
             }
         }
     }
 
     public boolean getHasTarget() {
-        return updated;
+        return updatedLeft || updatedRight;
     }
 
     public double getXOdoState() {
