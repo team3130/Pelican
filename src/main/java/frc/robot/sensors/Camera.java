@@ -4,17 +4,13 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.*;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Telemetry;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import org.ejml.simple.SimpleMatrix;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -26,12 +22,16 @@ import java.util.Optional;
 
 public class Camera implements Sendable, Subsystem {
     private final CommandSwerveDrivetrain driveTrain;
-    private final PhotonCamera camera = new PhotonCamera("3130Camera");
-    private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(2.926,0.208,-0.2814+0.0268));
+    private final PhotonCamera cameraLeft = new PhotonCamera("3130Camera");
+    private final PhotonCamera cameraRight = new PhotonCamera("3130CameraRight");
+    private final Transform3d robotToCameraLeft = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(2.926,0.208,-0.2814+0.0268));
+    private final Transform3d robotToCameraRight = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
     private final String fieldName = Filesystem.getDeployDirectory().getPath() + "/2025-ERRshop-field.json";
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
-    private final PhotonPoseEstimator photonPoseEstimator;
-    private EstimatedRobotPose odoState;
+    private final PhotonPoseEstimator photonPoseEstimatorLeft;
+    private final PhotonPoseEstimator photonPoseEstimatorRight;
+    private EstimatedRobotPose odoStateLeft;
+    private EstimatedRobotPose odoStateRight;
     private boolean updated = false;
     public Camera(CommandSwerveDrivetrain driveTrain) {
         this.driveTrain = driveTrain;
@@ -48,13 +48,18 @@ public class Camera implements Sendable, Subsystem {
             System.out.println(fieldName);
         }
          */
-        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
+        photonPoseEstimatorLeft = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCameraLeft);
+        photonPoseEstimatorRight = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCameraRight);
         //driveTrain.setVisionMeasurementStdDevs(visionStdDeviations);
     }
-
     public void getVisionOdometry(Telemetry logger) {
+        getVisionOdometryLeft(logger);
+        getVisionOdometryRight(logger);
+    }
+
+    public void getVisionOdometryLeft(Telemetry logger) {
         //Matrix<N3, N1> scaledVisionStdDeviations = visionStdDeviations;
-        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        List<PhotonPipelineResult> results = cameraLeft.getAllUnreadResults();
         for (PhotonPipelineResult result : results) {
             boolean inRange = false;
             double highestAmbiguity = 0;
@@ -76,29 +81,89 @@ public class Camera implements Sendable, Subsystem {
                 inRange = true;
             }
 
-            Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(result);
+            Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimatorLeft.update(result);
             if (optionalOdoState.isPresent()) {
-                odoState = optionalOdoState.get();
+                odoStateLeft = optionalOdoState.get();
 
-                if (odoState.strategy == PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
-                    photonPoseEstimator.setReferencePose(driveTrain.getState().Pose);
-                    var newPose = odoState.estimatedPose.toPose2d();
+                if (odoStateLeft.strategy == PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+                    photonPoseEstimatorLeft.setReferencePose(driveTrain.getState().Pose);
+                    var newPose = odoStateLeft.estimatedPose.toPose2d();
                     logger.updateVision(newPose);
                     driveTrain.addVisionMeasurement(
-                            odoState.estimatedPose.toPose2d(),
-                            odoState.timestampSeconds
+                            odoStateLeft.estimatedPose.toPose2d(),
+                            odoStateLeft.timestampSeconds
                             //scaledVisionStdDeviations
                     );
                     updated = true;
 
                 } else {
                     if (inRange && highestAmbiguity < 0.2) {
-                        photonPoseEstimator.setReferencePose(driveTrain.getState().Pose);
-                        var newPose = odoState.estimatedPose.toPose2d();
+                        photonPoseEstimatorLeft.setReferencePose(driveTrain.getState().Pose);
+                        var newPose = odoStateLeft.estimatedPose.toPose2d();
                         logger.updateVision(newPose);
                         driveTrain.addVisionMeasurement(
-                                odoState.estimatedPose.toPose2d(),
-                                odoState.timestampSeconds
+                                odoStateLeft.estimatedPose.toPose2d(),
+                                odoStateLeft.timestampSeconds
+                                //scaledVisionStdDeviations
+                        );
+                        updated = true;
+                    } else {
+                        updated = false;
+                    }
+                }
+            } else {
+                updated = false;
+            }
+        }
+    }
+
+    public void getVisionOdometryRight(Telemetry logger) {
+        //Matrix<N3, N1> scaledVisionStdDeviations = visionStdDeviations;
+        List<PhotonPipelineResult> results = cameraRight.getAllUnreadResults();
+        for (PhotonPipelineResult result : results) {
+            boolean inRange = false;
+            double highestAmbiguity = 0;
+            for (PhotonTrackedTarget target: result.getTargets()) {
+                double xSquared = target.getBestCameraToTarget().getX() * target.getBestCameraToTarget().getX();
+                double ySquared = target.getBestCameraToTarget().getY() * target.getBestCameraToTarget().getY();
+                double distance = Math.sqrt(xSquared + ySquared);
+                if(target.getPoseAmbiguity() > highestAmbiguity) {
+                    highestAmbiguity = target.getPoseAmbiguity();
+                }
+                if(distance < 2) {
+                    inRange = true;
+                } else {
+                    inRange = false;
+                }
+                //scaledVisionStdDeviations = visionStdDeviations.times(1 + distance);
+            }
+            if(DriverStation.isDSAttached() && DriverStation.isDisabled()) {
+                inRange = true;
+            }
+
+            Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimatorRight.update(result);
+            if (optionalOdoState.isPresent()) {
+                odoStateRight = optionalOdoState.get();
+
+                if (odoStateRight.strategy == PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+                    photonPoseEstimatorRight.setReferencePose(driveTrain.getState().Pose);
+                    var newPose = odoStateRight.estimatedPose.toPose2d();
+                    logger.updateVision(newPose);
+                    driveTrain.addVisionMeasurement(
+                            odoStateRight.estimatedPose.toPose2d(),
+                            odoStateRight.timestampSeconds
+                            //scaledVisionStdDeviations
+                    );
+                    updated = true;
+
+                } else {
+                    if (inRange && highestAmbiguity < 0.2) {
+                        photonPoseEstimatorLeft.setReferencePose(driveTrain.getState().Pose);
+                        var newPose = odoStateLeft.estimatedPose.toPose2d();
+                        logger.updateVision(newPose);
+                        driveTrain.addVisionMeasurement(
+                                odoStateLeft.estimatedPose.toPose2d(),
+                                odoStateLeft.timestampSeconds
                                 //scaledVisionStdDeviations
                         );
                         updated = true;
@@ -117,36 +182,36 @@ public class Camera implements Sendable, Subsystem {
     }
 
     public double getXOdoState() {
-        if(odoState != null) {
-            return odoState.estimatedPose.getX();
+        if(odoStateLeft != null) {
+            return odoStateLeft.estimatedPose.getX();
         } else {
             return 0;
         }
     }
     public double getYOdoState() {
-        if(odoState != null) {
-            return odoState.estimatedPose.getY();
+        if(odoStateLeft != null) {
+            return odoStateLeft.estimatedPose.getY();
         } else {
             return 0;
         }
     }
     public double getZOdoState() {
-        if(odoState != null) {
-            return odoState.estimatedPose.getZ();
+        if(odoStateLeft != null) {
+            return odoStateLeft.estimatedPose.getZ();
         } else {
             return 0;
         }
     }
     public double getRotationDegreesOdoState() {
-        if(odoState != null) {
-            return odoState.estimatedPose.getRotation().toRotation2d().getDegrees();
+        if(odoStateLeft != null) {
+            return odoStateLeft.estimatedPose.getRotation().toRotation2d().getDegrees();
         } else {
             return 0;
         }
     }
     public String getOdoStateQuaternion() {
-        if(odoState != null) {
-            return odoState.estimatedPose.getRotation().getQuaternion().toString();
+        if(odoStateLeft != null) {
+            return odoStateLeft.estimatedPose.getRotation().getQuaternion().toString();
         } else {
             return "null";
         }
