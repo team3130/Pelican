@@ -103,6 +103,7 @@ public class Elevator extends SubsystemBase {
     setAtL2(false);
     setAtL3(false);
     setAtL4(false);
+    setAtMaxPosition(false);
   }
   public void goToHomeSetpoint() {
     goToSetpoint(home);
@@ -112,6 +113,7 @@ public class Elevator extends SubsystemBase {
     setAtL2(false);
     setAtL3(false);
     setAtL4(false);
+    setAtMaxPosition(false);
   }
 
   public void goToMinPosition() {
@@ -122,6 +124,7 @@ public class Elevator extends SubsystemBase {
     setAtL2(false);
     setAtL3(false);
     setAtL4(false);
+    setAtMaxPosition(false);
   }
 
 
@@ -133,6 +136,7 @@ public class Elevator extends SubsystemBase {
     setAtL2(false);
     setAtL3(false);
     setAtL4(false);
+    setAtMaxPosition(false);
   }
   public void goToL2() {
     goToSetpoint(L2);
@@ -142,6 +146,7 @@ public class Elevator extends SubsystemBase {
     setAtL2(true);
     setAtL3(false);
     setAtL4(false);
+    setAtMaxPosition(false);
   }
   public void goToL3() {
     goToSetpoint(L3);
@@ -151,6 +156,7 @@ public class Elevator extends SubsystemBase {
     setAtL2(false);
     setAtL3(true);
     setAtL4(false);
+    setAtMaxPosition(false);
   }
   public void goToL4() {
     goToSetpoint(L4);
@@ -160,6 +166,17 @@ public class Elevator extends SubsystemBase {
     setAtL2(false);
     setAtL3(false);
     setAtL4(true);
+    setAtMaxPosition(false);
+  }
+  public void goToMaxPosition() {
+    goToSetpoint(maxPosition);
+    setAtHome(false);
+    setAtMinPosition(false);
+    setAtL1(false);
+    setAtL2(false);
+    setAtL3(false);
+    setAtL4(false);
+    setAtMaxPosition(true);
   }
 
   public double getPosition() {return leftMotor.getPosition().getValueAsDouble();}

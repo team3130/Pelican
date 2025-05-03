@@ -9,7 +9,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
-public class GoToL4Basic extends Command {
+public class GoToMaxPositionBasic extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
   private final LEDs LED;
@@ -19,7 +19,7 @@ public class GoToL4Basic extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL4Basic(Elevator elevator, LEDs LED) {
+  public GoToMaxPositionBasic(Elevator elevator, LEDs LED) {
     this.elevator = elevator;
     this.LED = LED;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -35,9 +35,9 @@ public class GoToL4Basic extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(elevator.getPosition() > elevator.getL4()) {
+    if(elevator.getPosition() > elevator.getMaxPosition() - 0.2) {
       elevator.goDown();
-    }else if(elevator.getPosition() < elevator.getL4()) {
+    }else if(elevator.getPosition() < elevator.getMaxPosition() + 0.2) {
       elevator.goUp();
     }
     //LED.setLEDstateElevator();
@@ -52,6 +52,6 @@ public class GoToL4Basic extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      return elevator.getPosition() < elevator.getL4() + 1 && elevator.getPosition() > elevator.getL4() - 1;
+      return false;
   }
 }

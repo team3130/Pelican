@@ -6,12 +6,11 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.LEDs;
+import frc.robot.subsystems.Manipulator;
 
 /** An example command that uses an example subsystem. */
-public class GoToL4 extends Command {
+public class GoToMaxPosition extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
   private final Manipulator manip;
@@ -23,7 +22,7 @@ public class GoToL4 extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL4(Elevator elevator, Manipulator manip, LEDs LED) {
+  public GoToMaxPosition(Elevator elevator, Manipulator manip, LEDs LED) {
     this.elevator = elevator;
     this.manip = manip;
     this.LED = LED;
@@ -36,10 +35,10 @@ public class GoToL4 extends Command {
   public void initialize() {
     //elevator.updateElevatorPID();
     if (elevator.isZeroed()) {
-      elevator.goToL4();
+      elevator.goToMaxPosition();
     } else {
       elevator.goToHome();
-      elevator.goToL4();
+      elevator.goToMaxPosition();
     }
   }
 
