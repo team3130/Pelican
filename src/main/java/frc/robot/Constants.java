@@ -35,7 +35,7 @@ public final class Constants {
     public static final int CoralIntake = 14;
     public static final int CoralIntakePivot = -1;
 
-    public static final int AlgaeIntake = 16;
+    public static final int AlgaeIntake = 21;
     public static final int AlgaeIntakeActuation = 15;
 
     public static final int Manipulator = 13;

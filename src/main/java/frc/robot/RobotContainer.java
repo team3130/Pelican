@@ -188,6 +188,8 @@ public class RobotContainer {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
       //operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     }
+    operatorController.povRight().whileTrue(new RunAlgaeIntake(algaeIntake));
+    operatorController.povDown().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
 
     // Note that X is defined as forward according to WPILib convention,
