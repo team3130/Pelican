@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -25,8 +26,7 @@ public class AlgaeIntake extends SubsystemBase {
   private double intakeSpeed = 0.75;
   public AlgaeIntake() {
     intake = new TalonFX(Constants.CAN.AlgaeIntake);
-
-    intake.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+    intake.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
     intake.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true).withSupplyCurrentLimit(40));
   }
 
@@ -43,6 +43,8 @@ public class AlgaeIntake extends SubsystemBase {
   public double getIntakeSpeed() {return intakeSpeed;}
   public void setIntakeSpeed(double value) {intakeSpeed = value;}
 
+  public double getPosition() {return intake.getPosition().getValueAsDouble();}
+
   /**
    * Initializes the data we send on shuffleboard
    * Calls the default init sendable for Subsystem Bases
@@ -53,6 +55,7 @@ public class AlgaeIntake extends SubsystemBase {
       builder.setSmartDashboardType("Algae Intake");
 
       builder.addDoubleProperty("Intake Speed", this::getIntakeSpeed, this::setIntakeSpeed);
+      builder.addDoubleProperty("Algae Position", this::getPosition, null);
     }
   }
 
