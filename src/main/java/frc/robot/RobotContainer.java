@@ -27,6 +27,7 @@ import frc.robot.commands.CoralIntake.*;
 import frc.robot.commands.Elevator.*;
 import frc.robot.commands.Elevator.GoToHome;
 import frc.robot.commands.Manipulator.*;
+import frc.robot.commands.ToggleAlgaeMode;
 import frc.robot.sensors.Camera;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.LEDs;
@@ -44,6 +45,7 @@ import java.util.function.BooleanSupplier;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+  public static boolean algaeMode = false;
   private final Timer timer = new Timer();
   private final double deadband = 0.05 * Constants.Swerve.maxSpeed;
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
@@ -82,19 +84,19 @@ public class RobotContainer {
     camera = new Camera(driveTrain);
     LED = new LEDs(elevator, manip, climber, camera, driveTrain);
 
-    NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED));
+    NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED, this, algaeIntake, driverController));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
     //only use command below at tulsa regional, fix for second break beam not working
     NamedCommands.registerCommand("Auton One Switch Limited Manip Intake", new AutonOneSwitchLimitedManipIntake(manip, elevator, LED));
-    NamedCommands.registerCommand("Limited Manip Intake Reverse", new LimitedManipIntakeReverse(manip, LED));
-    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED));
+    NamedCommands.registerCommand("Limited Manip Intake Reverse", new LimitedManipIntakeReverse(manip, LED, this));
+    NamedCommands.registerCommand("Limited Manip Outtake", new LimitedManipOuttake(manip, elevator, LED, this, algaeIntake));
     NamedCommands.registerCommand("Unlimited Run Manip", new UnlimitedRunManip(manip, elevator));
 
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
-    NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator, LED));
-    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip, LED));
+    NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator, LED, this));
+    NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip, LED, this));
     NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip, LED));
-    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip, LED));
+    NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip, LED, this));
     NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip, LED));
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator, LED));
@@ -112,8 +114,6 @@ public class RobotContainer {
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
-
-    sendAutonChoosers();
   }
 
   /**
@@ -130,21 +130,24 @@ public class RobotContainer {
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
     driverController.L2().onTrue(new SequentialCommandGroup(
-            new LimitedManipIntake(manip, elevator, LED),
-            new LimitedManipIntakeReverse(manip, LED)
+            new LimitedManipIntake(manip, elevator, LED, this, algaeIntake, driverController),
+            new LimitedManipIntakeReverse(manip, LED, this)
     ));
-    driverController.R2().whileTrue(new LimitedManipIntakeOuttake(manip, elevator, LED));
+    driverController.R2().whileTrue(new LimitedManipOuttake(manip, elevator, LED, this, algaeIntake));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
     driverController.R3().whileTrue(new GoUp(elevator, LED));
     //driverController.L1().whileTrue(new GoDown(elevator));
-    driverController.L1().onTrue(new GoToMinPosition(elevator, LED)); //loading position
-    driverController.R1().onTrue(new GoToL4(elevator, manip, LED));
+    driverController.L1().onTrue(new GoToMinPosition(elevator, LED, this)); //loading position
+    driverController.R1().onTrue(new GoToL4(elevator, manip, LED, this));
     driverController.square().onTrue(new GoToL3(elevator, manip, LED));
-    driverController.cross().onTrue(new GoToL2(elevator, manip, LED));
+    driverController.cross().onTrue(new GoToL2(elevator, manip, LED, this));
     //driverController.triangle().onTrue(new GoToL1(elevator, manip, LED));
     driverController.povDown().onTrue(new GoToHome(elevator, LED));
+
+    driverController.circle().onTrue(new ToggleAlgaeMode(this));
+
 
     //driverController.square().whileTrue(new BasicClimberUp(climber));
     //driverController.triangle().whileTrue(new BasicClimberDown(climber));
@@ -188,8 +191,6 @@ public class RobotContainer {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
       //operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     }
-    operatorController.leftBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
-    operatorController.rightBumper().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
 
     // Note that X is defined as forward according to WPILib convention,
@@ -231,6 +232,8 @@ public class RobotContainer {
     SmartDashboard.putData(logger.getField());
   }
 
+  public boolean getAlgaeMode() {return algaeMode;}
+  public void setAlgaeMode(boolean value) {algaeMode = value;}
   public Command pick() {
     return autoChooser.getSelected();
   }
@@ -257,33 +260,6 @@ public class RobotContainer {
       timer.stop();
       timer.reset();
     }
-  }
-
-  public void sendAutonChoosers() {
-    SendableChooser<Command> pathChooser1 = PathChooser.buildAndSendCoralChooser("Coral 1", manip, elevator, LED);
-    SendableChooser<Command> pathChooser2 = PathChooser.buildAndSendCoralChooser("Coral 2", manip, elevator, LED);
-    SendableChooser<Command> pathChooser3 = PathChooser.buildAndSendCoralChooser("Coral 3", manip, elevator, LED);
-    SendableChooser<Command> stationChooser1 = PathChooser.buildAndSendStationChooser("Station 1", manip, elevator, LED);
-    SendableChooser<Command> stationChooser2 = PathChooser.buildAndSendStationChooser("Station 2", manip, elevator, LED);
-    SendableChooser<Command> stationChooser3 = PathChooser.buildAndSendStationChooser("Station 3", manip, elevator, LED);
-
-    SmartDashboard.putData("Coral 1 Path", pathChooser1);
-    SmartDashboard.putData("Coral 2 Path", pathChooser2);
-    SmartDashboard.putData("Coral 3 Path", pathChooser3);
-    SmartDashboard.putData("Station 1 Path", stationChooser1);
-    SmartDashboard.putData("Station 2 Path", stationChooser2);
-    SmartDashboard.putData("Station 3 Path", stationChooser3);
-  }
-
-  public SequentialCommandGroup configureAuton() {
-    return PathChooser.buildAutoCommand(elevator, LED);
-  }
-  public Command configureWeirdAuton() {
-      try {
-          return PathChooser.buildWeirdAuton(elevator, manip, LED);
-      } catch (IOException | ParseException e) {
-          throw new RuntimeException(e);
-      }
   }
 
   public double getModularSpeed() {

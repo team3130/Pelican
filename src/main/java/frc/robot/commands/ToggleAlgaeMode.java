@@ -2,62 +2,46 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.Elevator;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.Manipulator;
-import frc.robot.subsystems.LEDs;
 
 /** An example command that uses an example subsystem. */
-public class GoToL2 extends Command {
+public class ToggleAlgaeMode extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final Elevator elevator;
-  private final Manipulator manip;
-  private final LEDs LED;
   private final RobotContainer robotContainer;
 
   /**
    * Creates a new ExampleCommand.
    *
-   * @param elevator The subsystem used by this command.
+   * @param robotContainer The subsystem used by this command.
    */
-  public GoToL2(Elevator elevator, Manipulator manip, LEDs LED, RobotContainer robotContainer) {
-    this.elevator = elevator;
-    this.LED = LED;
-    this.manip = manip;
+  public ToggleAlgaeMode(RobotContainer robotContainer) {
     this.robotContainer = robotContainer;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(elevator);
+    addRequirements();
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(robotContainer.getAlgaeMode()) {
-      elevator.goToSetpoint(elevator.getL2()+2);
-    } else {
-      elevator.goToL2();
-    }
+    robotContainer.setAlgaeMode(!robotContainer.getAlgaeMode());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    //LED.setLEDstateElevator();
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    elevator.stop();
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return elevator.brokeTopLimitSwitch();
+    return true;
   }
 }

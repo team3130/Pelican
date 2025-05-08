@@ -5,6 +5,7 @@
 package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Manipulator;
@@ -16,6 +17,7 @@ public class GoToL4 extends Command {
   private final Elevator elevator;
   private final Manipulator manip;
   private final LEDs LED;
+  private final RobotContainer robotContainer;
   private boolean runnable;
 
   /**
@@ -23,10 +25,11 @@ public class GoToL4 extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL4(Elevator elevator, Manipulator manip, LEDs LED) {
+  public GoToL4(Elevator elevator, Manipulator manip, LEDs LED, RobotContainer robotContainer) {
     this.elevator = elevator;
     this.manip = manip;
     this.LED = LED;
+    this.robotContainer = robotContainer;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -34,11 +37,9 @@ public class GoToL4 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //elevator.updateElevatorPID();
-    if (elevator.isZeroed()) {
-      elevator.goToL4();
+    if(robotContainer.getAlgaeMode()) {
+      elevator.goToMaxPosition();
     } else {
-      elevator.goToHome();
       elevator.goToL4();
     }
   }

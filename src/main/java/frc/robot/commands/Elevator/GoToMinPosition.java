@@ -5,6 +5,7 @@
 package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LEDs;
 
@@ -12,6 +13,7 @@ import frc.robot.subsystems.LEDs;
 public class GoToMinPosition extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Elevator elevator;
+  private final RobotContainer robotContainer;
   private final LEDs LED;
 
   /**
@@ -19,9 +21,10 @@ public class GoToMinPosition extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToMinPosition(Elevator elevator, LEDs LED) {
+  public GoToMinPosition(Elevator elevator, LEDs LED, RobotContainer robotContainer) {
     this.elevator = elevator;
     this.LED = LED;
+    this.robotContainer = robotContainer;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -29,7 +32,11 @@ public class GoToMinPosition extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    elevator.goToMinPosition();
+    if(robotContainer.getAlgaeMode()) {
+      elevator.goToSetpoint(elevator.getMinPosition() + 2);
+    } else {
+      elevator.goToMinPosition();
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

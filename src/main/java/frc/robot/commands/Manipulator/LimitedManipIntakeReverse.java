@@ -5,6 +5,7 @@
 package frc.robot.commands.Manipulator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
@@ -13,6 +14,7 @@ import frc.robot.subsystems.Manipulator;
 public class LimitedManipIntakeReverse extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
+  private final RobotContainer robotContainer;
   private final LEDs LED;
 
   /**
@@ -20,9 +22,10 @@ public class LimitedManipIntakeReverse extends Command {
    *
    * @param manip The subsystem used by this command.
    */
-  public LimitedManipIntakeReverse(Manipulator manip, LEDs LED) {
+  public LimitedManipIntakeReverse(Manipulator manip, LEDs LED, RobotContainer robotContainer) {
     this.manip = manip;
     this.LED = LED;
+    this.robotContainer = robotContainer;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip);
   }
@@ -36,20 +39,27 @@ public class LimitedManipIntakeReverse extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    manip.manipAtSpeed(-0.3);
-    //LED.setLEDstateManipulator();
+    if(!robotContainer.getAlgaeMode()) {
+      manip.manipAtSpeed(-0.3);
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    manip.stopManip();
-    manip.setIsIntaking(true);
+    if(!robotContainer.getAlgaeMode()) {
+      manip.stopManip();
+      manip.setIsIntaking(true);
+    }
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return !manip.getFirstBeam();
+    if (!robotContainer.getAlgaeMode()) {
+      return !manip.getFirstBeam();
+    } else {
+      return true;
+    }
   }
 }
