@@ -32,7 +32,7 @@ public class Elevator extends SubsystemBase {
   private double L2 = 18.8;
   private double L3 = 29.1;
   private double L4 = 45.3;
-  private double maxPosition = 45.8;
+  private double maxPosition = 47.8;
 
   private final MotionMagicDutyCycle voltRequest0;
   private TalonFXConfiguration config;
@@ -68,7 +68,7 @@ public class Elevator extends SubsystemBase {
 
     config = new TalonFXConfiguration();
     config.MotionMagic.withMotionMagicCruiseVelocity(targetVelocity).withMotionMagicAcceleration(targetAcceleration);
-    config.CurrentLimits.withStatorCurrentLimitEnable(true).withStatorCurrentLimit(40);
+    config.CurrentLimits.withStatorCurrentLimitEnable(true).withStatorCurrentLimit(50);
     config.Slot0 = slot0Configs;
     config.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive).withNeutralMode(NeutralModeValue.Brake);
 
@@ -305,6 +305,9 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
     if(brokeBottomLimitSwitch() && getPosition() != 0) {
       setPosition(0);
+    }
+    if(brokeTopLimitSwitch()) {
+      stop();
     }
   }
 }

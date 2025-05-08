@@ -82,7 +82,7 @@ public class RobotContainer {
     algaeIntake = new AlgaeIntake();
     climber = new Climber();
     camera = new Camera(driveTrain);
-    LED = new LEDs(elevator, manip, climber, camera, driveTrain);
+    LED = new LEDs(elevator, manip, climber, camera, driveTrain, this);
 
     NamedCommands.registerCommand("Limited Manip Intake", new LimitedManipIntake(manip, elevator, LED, this, algaeIntake, driverController));
     NamedCommands.registerCommand("Auton Limited Manip Intake", new AutonLimitedManipIntake(manip, elevator, LED));
@@ -95,7 +95,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
     NamedCommands.registerCommand("Go Min Position", new GoToMinPosition(elevator, LED, this));
     NamedCommands.registerCommand("Go L4", new GoToL4(elevator, manip, LED, this));
-    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip, LED));
+    NamedCommands.registerCommand("Go L3", new GoToL3(elevator, manip, LED, this));
     NamedCommands.registerCommand("Go L2", new GoToL2(elevator, manip, LED, this));
     NamedCommands.registerCommand("Go L1", new GoToL1(elevator, manip, LED));
     NamedCommands.registerCommand("Go Home", new GoToHome(elevator, LED));
@@ -141,7 +141,7 @@ public class RobotContainer {
     //driverController.L1().whileTrue(new GoDown(elevator));
     driverController.L1().onTrue(new GoToMinPosition(elevator, LED, this)); //loading position
     driverController.R1().onTrue(new GoToL4(elevator, manip, LED, this));
-    driverController.square().onTrue(new GoToL3(elevator, manip, LED));
+    driverController.square().onTrue(new GoToL3(elevator, manip, LED, this));
     driverController.cross().onTrue(new GoToL2(elevator, manip, LED, this));
     //driverController.triangle().onTrue(new GoToL1(elevator, manip, LED));
     driverController.povDown().onTrue(new GoToHome(elevator, LED));

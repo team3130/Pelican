@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.util.Color;
+import frc.robot.RobotContainer;
 import frc.robot.sensors.Camera;
 
 import static edu.wpi.first.units.Units.*;
@@ -26,18 +27,20 @@ public class LEDs extends SubsystemBase{
   private Climber climber;
   private Camera camera;
   private CommandSwerveDrivetrain driveTrain;
+  private RobotContainer robotContainer;
   private String pathName;
   private final Pose2d[] bluePathStartingPoses;
   private final Pose2d[] redPathStartingPoses;
   private final int LEDLength = 129; //should be the correct length as of 3/19/25
   private final int pwmPort = 2;
   private final Timer timer = new Timer();
-  public LEDs(Elevator elevator, Manipulator manip, Climber climber, Camera camera, CommandSwerveDrivetrain driveTrain) {
+  public LEDs(Elevator elevator, Manipulator manip, Climber climber, Camera camera, CommandSwerveDrivetrain driveTrain, RobotContainer robotContainer) {
       this.elevator = elevator;
       this.manip = manip;
       this.climber = climber;
       this.camera = camera;
       this.driveTrain = driveTrain;
+      this.robotContainer = robotContainer;
       bluePathStartingPoses = new Pose2d[]{
               new Pose2d(7.1, 6.5, new Rotation2d(Math.toRadians(-146.598))), //left starting pose
               new Pose2d(7.157, 4.197, Rotation2d.k180deg), //left middle starting pose
@@ -75,6 +78,7 @@ public class LEDs extends SubsystemBase{
   LEDPattern orange = LEDPattern.solid(Color.kOrange);
   LEDPattern purple = LEDPattern.solid(Color.kPurple);
   LEDPattern manualYellow = LEDPattern.solid(new Color(255, 135, 0));
+  LEDPattern manualCyan = LEDPattern.solid(new Color(0, 255, 225));
   LEDPattern breathingManualYellow = manualYellow.breathe(Time.ofRelativeUnits(3, Seconds.getBaseUnit()));
   LEDPattern manualGreen = LEDPattern.solid(new Color(0, 255, 0));
   LEDPattern flashPurple = purple.blink(Time.ofRelativeUnits(0.1, Seconds.getBaseUnit()));
@@ -234,7 +238,7 @@ public class LEDs extends SubsystemBase{
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
-        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() < 20) {
+        if(DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 110) {
             //should be less than 20 logic in actual match and greater than 110 when not in match
             scrollingRainbow.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
@@ -245,6 +249,9 @@ public class LEDs extends SubsystemBase{
             else {
                 red.applyTo(LEDBuffer);
             }
+            LED.setData(LEDBuffer);
+        } else if(robotContainer.getAlgaeMode()) {
+            manualCyan.applyTo(LEDBuffer);
             LED.setData(LEDBuffer);
         } else if(manip.getIsIntaking()) {
             timer.start();

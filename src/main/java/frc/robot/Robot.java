@@ -50,6 +50,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     robotContainer.elevatorStop();
+    robotContainer.setAlgaeMode(false);
   }
 
   @Override

@@ -5,6 +5,7 @@
 package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Manipulator;
@@ -16,6 +17,7 @@ public class GoToL3 extends Command {
   private final Elevator elevator;
   private final LEDs LED;
   private final Manipulator manip;
+  private final RobotContainer robotContainer;
   private boolean runnable;
 
   /**
@@ -23,10 +25,11 @@ public class GoToL3 extends Command {
    *
    * @param elevator The subsystem used by this command.
    */
-  public GoToL3(Elevator elevator, Manipulator manip, LEDs LED) {
+  public GoToL3(Elevator elevator, Manipulator manip, LEDs LED, RobotContainer robotContainer) {
     this.elevator = elevator;
     this.manip = manip;
     this.LED = LED;
+    this.robotContainer = robotContainer;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(elevator);
   }
@@ -34,12 +37,10 @@ public class GoToL3 extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //elevator.updateElevatorPID();
-    if (elevator.isZeroed()) {
+    if(!robotContainer.getAlgaeMode()) {
       elevator.goToL3();
     } else {
       elevator.goToHome();
-      elevator.goToL3();
     }
   }
 
@@ -52,12 +53,18 @@ public class GoToL3 extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    elevator.stop();
+    if(robotContainer.getAlgaeMode()) {
+      elevator.stop();
+    }
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return elevator.brokeTopLimitSwitch();
+    if(!robotContainer.getAlgaeMode()) {
+      return true;
+    } else {
+      return elevator.brokeBottomLimitSwitch() || elevator.brokeTopLimitSwitch();
+    }
   }
 }
