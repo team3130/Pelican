@@ -5,22 +5,21 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.AlgaeIntake;
 
 /** An example command that uses an example subsystem. */
 public class ToggleAlgaeMode extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final RobotContainer robotContainer;
+  private final AlgaeIntake algaeIntake;
 
   /**
    * Creates a new ExampleCommand.
    *
-   * @param robotContainer The subsystem used by this command.
+   * @param algaeIntake The subsystem used by this command.
    */
-  public ToggleAlgaeMode(RobotContainer robotContainer) {
-    this.robotContainer = robotContainer;
+  public ToggleAlgaeMode(AlgaeIntake algaeIntake) {
+    this.algaeIntake = algaeIntake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements();
   }
@@ -28,7 +27,7 @@ public class ToggleAlgaeMode extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    robotContainer.setAlgaeMode(!robotContainer.getAlgaeMode());
+    algaeIntake.setAlgaeMode(!algaeIntake.getAlgaeMode());
   }
 
   // Called every time the scheduler runs while the command is scheduled.

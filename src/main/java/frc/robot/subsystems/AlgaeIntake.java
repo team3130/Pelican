@@ -24,6 +24,7 @@ public class AlgaeIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final TalonFX intake;
   private double intakeSpeed = 0.75;
+  private boolean algaeMode = false;
   public AlgaeIntake() {
     intake = new TalonFX(Constants.CAN.AlgaeIntake);
     intake.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
@@ -45,6 +46,9 @@ public class AlgaeIntake extends SubsystemBase {
 
   public double getPosition() {return intake.getPosition().getValueAsDouble();}
 
+  public boolean getAlgaeMode() {return algaeMode;}
+  public void setAlgaeMode(boolean value) {algaeMode = value;}
+
   /**
    * Initializes the data we send on shuffleboard
    * Calls the default init sendable for Subsystem Bases
@@ -56,6 +60,7 @@ public class AlgaeIntake extends SubsystemBase {
 
       builder.addDoubleProperty("Intake Speed", this::getIntakeSpeed, this::setIntakeSpeed);
       builder.addDoubleProperty("Algae Position", this::getPosition, null);
+      builder.addBooleanProperty("Algae Mode", this::getAlgaeMode, this::setAlgaeMode);
     }
   }
 

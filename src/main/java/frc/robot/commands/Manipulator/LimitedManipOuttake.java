@@ -20,7 +20,6 @@ public class LimitedManipOuttake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
   private final Elevator elevator;
-  private final RobotContainer robotContainer;
   private final AlgaeIntake algaeIntake;
   private final LEDs LED;
   private final Timer timer = new Timer();
@@ -30,11 +29,10 @@ public class LimitedManipOuttake extends Command {
    *
    * @param manip The subsystem used by this command.
    */
-  public LimitedManipOuttake(Manipulator manip, Elevator elevator, LEDs LED, RobotContainer robotContainer, AlgaeIntake algaeIntake) {
+  public LimitedManipOuttake(Manipulator manip, Elevator elevator, LEDs LED, AlgaeIntake algaeIntake) {
     this.manip = manip;
     this.elevator = elevator;
     this.LED = LED;
-    this.robotContainer = robotContainer;
     this.algaeIntake = algaeIntake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip, algaeIntake);
@@ -43,7 +41,7 @@ public class LimitedManipOuttake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(!robotContainer.getAlgaeMode()) {
+    if(!algaeIntake.getAlgaeMode()) {
       timer.restart();
     }
   }
@@ -51,7 +49,7 @@ public class LimitedManipOuttake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!robotContainer.getAlgaeMode()) {
+    if(!algaeIntake.getAlgaeMode()) {
       if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
         manip.runManip();
       }
@@ -63,7 +61,7 @@ public class LimitedManipOuttake extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if(!robotContainer.getAlgaeMode()) {
+    if(!algaeIntake.getAlgaeMode()) {
       manip.stopManip();
       timer.stop();
       manip.setIsOuttaking(true);
@@ -75,7 +73,7 @@ public class LimitedManipOuttake extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (!robotContainer.getAlgaeMode()) {
+    if (!algaeIntake.getAlgaeMode()) {
       return (manip.getSecondBeam() && manip.getFirstBeam()) || timer.hasElapsed(0.5);
     } else {
       return false;

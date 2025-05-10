@@ -4,9 +4,10 @@
 
 package frc.robot.commands.Manipulator;
 
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 
@@ -14,7 +15,7 @@ import frc.robot.subsystems.Manipulator;
 public class LimitedManipIntakeReverse extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Manipulator manip;
-  private final RobotContainer robotContainer;
+  private final AlgaeIntake algaeIntake;
   private final LEDs LED;
 
   /**
@@ -22,10 +23,10 @@ public class LimitedManipIntakeReverse extends Command {
    *
    * @param manip The subsystem used by this command.
    */
-  public LimitedManipIntakeReverse(Manipulator manip, LEDs LED, RobotContainer robotContainer) {
+  public LimitedManipIntakeReverse(Manipulator manip, LEDs LED, AlgaeIntake algaeIntake) {
     this.manip = manip;
     this.LED = LED;
-    this.robotContainer = robotContainer;
+    this.algaeIntake = algaeIntake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(manip);
   }
@@ -39,7 +40,7 @@ public class LimitedManipIntakeReverse extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!robotContainer.getAlgaeMode()) {
+    if(!algaeIntake.getAlgaeMode()) {
       manip.manipAtSpeed(-0.3);
     }
   }
@@ -47,7 +48,7 @@ public class LimitedManipIntakeReverse extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if(!robotContainer.getAlgaeMode()) {
+    if(!algaeIntake.getAlgaeMode()) {
       manip.stopManip();
       manip.setIsIntaking(true);
     }
@@ -56,7 +57,7 @@ public class LimitedManipIntakeReverse extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (!robotContainer.getAlgaeMode()) {
+    if (!algaeIntake.getAlgaeMode()) {
       return !manip.getFirstBeam();
     } else {
       return true;
