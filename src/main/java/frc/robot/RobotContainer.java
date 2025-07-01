@@ -184,11 +184,11 @@ public class RobotContainer {
     //operatorController.leftBumper().whileTrue(new DeactuateAlgaeIntake(algaeIntake));
     //operatorController.povLeft().whileTrue(new RunAlgaeOuttake(algaeIntake));
 
-    operatorController.a().whileTrue(new IntakeActuate(coralIntake));
-    operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
-    operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
+    //operatorController.a().whileTrue(new IntakeActuate(coralIntake));
+    //operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
+    //operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
     if(Constants.debugMode) {
-      operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
+      //operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
       //operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     }
 
@@ -309,9 +309,9 @@ public class RobotContainer {
   }
 
   public ChassisSpeeds getHIDspeedsMPS() {
-    double xAxis = -driverController.getLeftY();
-    double yAxis = -driverController.getLeftX();
-    double rotation = -driverController.getRightX();
+    double xAxis = -operatorController.getLeftY();
+    double yAxis = -operatorController.getLeftX();
+    double rotation = -operatorController.getRightX();
     xAxis = MathUtil.applyDeadband(xAxis, Constants.Swerve.kDeadband);
     yAxis = MathUtil.applyDeadband(yAxis, Constants.Swerve.kDeadband);
     rotation = MathUtil.applyDeadband(rotation, Constants.Swerve.kDeadband);
