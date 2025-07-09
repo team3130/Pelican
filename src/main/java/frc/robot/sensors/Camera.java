@@ -20,7 +20,11 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
+import org.opencv.calib3d.Calib3d;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Core;
+import org.opencv.core.Point;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,6 +114,24 @@ public class Camera implements Sendable, Subsystem {
                 updated = false;
             }
         }
+    }
+
+    public static Mat homographyMatrix(MatOfPoint2f imagePoints, MatOfPoint2f worldPoints, double threshold) {
+        return Calib3d.findHomography(imagePoints, worldPoints, Calib3d.RANSAC, threshold, null, 10000, 0.995);
+    }
+
+    public static Translation2d[] computeHomography(MatOfPoint2f imagePoints, Mat homography) {
+        MatOfPoint2f worldPoints = new MatOfPoint2f();
+        Core.perspectiveTransform(imagePoints, worldPoints, homography);
+        Translation2d[] points = new Translation2d[worldPoints.rows()];
+
+        int i = 0;
+        for(Point p: worldPoints.toList()) {
+            points[i] = new Translation2d(p.x, p.y);
+            i++;
+        }
+
+        return points;
     }
 
     public boolean getHasTarget() {
