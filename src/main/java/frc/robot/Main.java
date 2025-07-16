@@ -5,6 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.sensors.Camera;
+import org.opencv.core.Point;
+import org.opencv.core.Mat;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what

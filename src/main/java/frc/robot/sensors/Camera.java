@@ -116,9 +116,13 @@ public class Camera implements Sendable, Subsystem {
         }
     }
 
-    public static Mat homographyMatrix(MatOfPoint2f imagePoints, MatOfPoint2f worldPoints, double threshold) {
-        return Calib3d.findHomography(imagePoints, worldPoints, Calib3d.RANSAC, threshold, null, 10000, 0.995);
+    public static Mat homographyMatrix(Point[] imagePointArray, Point[] worldPointArray, double threshold) {
+        MatOfPoint2f imagePoints = new MatOfPoint2f(imagePointArray);
+        MatOfPoint2f worldPoints = new MatOfPoint2f(worldPointArray);
+
+        return Calib3d.findHomography(imagePoints, worldPoints, Calib3d.RANSAC, threshold);
     }
+
 
     public static Translation2d[] computeHomography(MatOfPoint2f imagePoints, Mat homography) {
         MatOfPoint2f worldPoints = new MatOfPoint2f();
