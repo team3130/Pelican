@@ -27,6 +27,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Point;
 import java.util.List;
 import java.util.Optional;
+import org.opencv.core.CvType;
 
 public class Camera implements Sendable, Subsystem {
     private final CommandSwerveDrivetrain driveTrain;
@@ -36,6 +37,12 @@ public class Camera implements Sendable, Subsystem {
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
+    MatOfPoint2f image = new MatOfPoint2f(new Point(571, 261.1), new Point(261.8, 240.1),
+            new Point(764, 461), new Point(194, 342.5), new Point(138.9, 233.3), new Point(329.9, 336.7));
+    MatOfPoint2f world = new MatOfPoint2f(new Point(0.57, -0.18), new Point(0.65, -0.51), new Point(4, 0.88),
+            new Point(4, -2.86), new Point(1, -1), new Point(2, -1));
+
+    private final Mat homographyMat = homographyMatrix(image, world, 3);
     private boolean updated = false;
     public Camera(CommandSwerveDrivetrain driveTrain) {
         this.driveTrain = driveTrain;
@@ -116,10 +123,7 @@ public class Camera implements Sendable, Subsystem {
         }
     }
 
-    public static Mat homographyMatrix(Point[] imagePointArray, Point[] worldPointArray, double threshold) {
-        MatOfPoint2f imagePoints = new MatOfPoint2f(imagePointArray);
-        MatOfPoint2f worldPoints = new MatOfPoint2f(worldPointArray);
-
+    public static Mat homographyMatrix(MatOfPoint2f imagePoints, MatOfPoint2f worldPoints, double threshold) {
         return Calib3d.findHomography(imagePoints, worldPoints, Calib3d.RANSAC, threshold);
     }
 
