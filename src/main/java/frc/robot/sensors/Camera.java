@@ -138,6 +138,21 @@ public class Camera implements Sendable, Subsystem {
         return points;
     }
 
+    public MatOfPoint2f getObjectData() {
+        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        double xTotal = 0;
+        double yTotal = 0;
+        double index = 0;
+        for (PhotonPipelineResult result : results) {
+            for (PhotonTrackedTarget target: result.getTargets()) {
+                xTotal += target.getBestCameraToTarget().getX();
+                yTotal += target.getBestCameraToTarget().getY();
+                index++;
+            }
+        }
+        return new MatOfPoint2f(new Point(xTotal / index, yTotal / index)); //average of all points
+    }
+
     public boolean getHasTarget() {
         return updated;
     }

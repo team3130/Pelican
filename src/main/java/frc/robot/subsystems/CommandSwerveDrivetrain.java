@@ -43,6 +43,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.MySlewRateLimiter;
 import frc.robot.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.sensors.Camera;
 import org.json.simple.parser.ParseException;
 
 /**
