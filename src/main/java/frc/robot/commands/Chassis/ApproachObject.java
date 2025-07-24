@@ -34,7 +34,7 @@ public class ApproachObject extends Command {
     @Override
     public void initialize(){
        driveTrain.applyRequest(() -> {
-           Translation2d[] vectors = Camera.computeHomography(camera.getObjectData(), new Mat());
+           Translation2d[] vectors = camera.computeHomography(camera.getObjectData());
            ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX(), vectors[0].getY(), vectors[0].getAngle().getRadians()));
            return drive.withVelocityX(speeds.vxMetersPerSecond)
                   .withVelocityY(speeds.vyMetersPerSecond)

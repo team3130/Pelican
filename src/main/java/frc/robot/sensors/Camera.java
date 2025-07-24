@@ -2,6 +2,7 @@ package frc.robot.sensors;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.cscore.OpenCvLoader;
 import edu.wpi.first.math.*;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
@@ -37,7 +38,7 @@ public class Camera implements Sendable, Subsystem {
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
-    Mat matrix = new Mat(3, 3, org.opencv.core.CvType.CV_64F);
+    private final Mat matrix;
     double[] values = {-0.0001270542819333261, 0.0008182770377802222, 0.1862827299336119,
         0.0006939972013693427, 0.0001741107045706584, -0.5076447771203513,
         0.0006253018433804395, -0.002952410871268828, 1};
@@ -45,6 +46,8 @@ public class Camera implements Sendable, Subsystem {
     public Camera(CommandSwerveDrivetrain driveTrain) {
         this.driveTrain = driveTrain;
         AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+        OpenCvLoader.forceStaticLoad();
+        matrix = new Mat(3, 3, CvType.CV_64F);
         for(int i = 0; i < 3; i++) {
             for(int j = 0; j < 3; j++){
                 matrix.put(i, j, values[3 * i + j]);
@@ -126,9 +129,9 @@ public class Camera implements Sendable, Subsystem {
         }
     }
 
-    public static Translation2d[] computeHomography(MatOfPoint2f imagePoints, Mat homography) {
+    public Translation2d[] computeHomography(MatOfPoint2f imagePoints) {
         MatOfPoint2f worldPoints = new MatOfPoint2f();
-        Core.perspectiveTransform(imagePoints, worldPoints, homography);
+        Core.perspectiveTransform(imagePoints, worldPoints, matrix);
         Translation2d[] points = new Translation2d[worldPoints.rows()];
 
         int i = 0;
