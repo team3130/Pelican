@@ -189,6 +189,7 @@ public class RobotContainer {
     operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
     if(Constants.debugMode) {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
+      operatorController.leftBumper().whileTrue(new ApproachObject(driveTrain, camera));
       //operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
     }
 

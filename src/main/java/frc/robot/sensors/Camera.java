@@ -25,8 +25,11 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import edu.wpi.first.cscore.OpenCvLoader;
 import org.opencv.core.CvType;
 
 public class Camera implements Sendable, Subsystem {
@@ -37,14 +40,19 @@ public class Camera implements Sendable, Subsystem {
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
-    MatOfPoint2f image = new MatOfPoint2f(new Point(571, 261.1), new Point(261.8, 240.1),
+    private MatOfPoint2f image = new MatOfPoint2f(new Point(571, 261.1), new Point(261.8, 240.1),
             new Point(764, 461), new Point(194, 342.5), new Point(138.9, 233.3), new Point(329.9, 336.7));
-    MatOfPoint2f world = new MatOfPoint2f(new Point(0.57, -0.18), new Point(0.65, -0.51), new Point(4, 0.88),
+    private MatOfPoint2f world = new MatOfPoint2f(new Point(0.57, -0.18), new Point(0.65, -0.51), new Point(4, 0.88),
             new Point(4, -2.86), new Point(1, -1), new Point(2, -1));
 
     private final Mat homographyMat = homographyMatrix(image, world, 3);
     private boolean updated = false;
     public Camera(CommandSwerveDrivetrain driveTrain) {
+        try {
+            OpenCvLoader.forceLoad();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         this.driveTrain = driveTrain;
         AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         /*
@@ -143,18 +151,11 @@ public class Camera implements Sendable, Subsystem {
     }
 
     public MatOfPoint2f getObjectData() {
+        camera.setPipelineIndex(1);
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-        double xTotal = 0;
-        double yTotal = 0;
-        double index = 0;
-        for (PhotonPipelineResult result : results) {
-            for (PhotonTrackedTarget target: result.getTargets()) {
-                xTotal += target.getBestCameraToTarget().getX();
-                yTotal += target.getBestCameraToTarget().getY();
-                index++;
-            }
-        }
-        return new MatOfPoint2f(new Point(xTotal / index, yTotal / index)); //average of all points
+        double x = results.getFirst().getBestTarget().getBestCameraToTarget().getX();
+        double y = results.getFirst().getBestTarget().getBestCameraToTarget().getY();
+        return new MatOfPoint2f(new Point(x, y)); //average of all points
     }
 
     public boolean getHasTarget() {

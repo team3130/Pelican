@@ -14,9 +14,8 @@ import org.opencv.core.MatOfPoint2f;
 
 public class ApproachObject extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    public final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
            .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
-
            .withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
     private final Camera camera;
 
@@ -33,13 +32,12 @@ public class ApproachObject extends Command {
      */
     @Override
     public void initialize(){
-       driveTrain.applyRequest(() -> {
-           Translation2d[] vectors = Camera.computeHomography(camera.getObjectData(), new Mat());
-           ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX(), vectors[0].getY(), vectors[0].getAngle().getRadians()));
-           return drive.withVelocityX(speeds.vxMetersPerSecond)
-                  .withVelocityY(speeds.vyMetersPerSecond)
-                  .withRotationalRate(speeds.omegaRadiansPerSecond);
-       });
+        Translation2d[] vectors = Camera.computeHomography(camera.getObjectData(), new Mat());
+        ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX() / 10, vectors[0].getY() / 10, 0));
+       driveTrain.applyRequest(() -> drive.withVelocityX(speeds.vxMetersPerSecond)
+               .withVelocityY(speeds.vyMetersPerSecond)
+               .withRotationalRate(speeds.omegaRadiansPerSecond)
+       );
     }
 
     /**
