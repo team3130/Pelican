@@ -10,15 +10,18 @@ import frc.robot.sensors.Camera;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+
+import java.util.Arrays;
 
 
 public class ApproachObject extends Command {
     private final CommandSwerveDrivetrain driveTrain;
     public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
            .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
-
            .withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
     private final Camera camera;
+    private Translation2d[] vectors;
 
     public ApproachObject(CommandSwerveDrivetrain driveTrain, Camera camera) {
         this.driveTrain = driveTrain;
@@ -33,13 +36,13 @@ public class ApproachObject extends Command {
      */
     @Override
     public void initialize(){
-       driveTrain.applyRequest(() -> {
-           Translation2d[] vectors = camera.computeHomography(camera.getObjectData());
-           ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX(), vectors[0].getY(), vectors[0].getAngle().getRadians()));
-           return drive.withVelocityX(speeds.vxMetersPerSecond)
-                  .withVelocityY(speeds.vyMetersPerSecond)
-                  .withRotationalRate(speeds.omegaRadiansPerSecond);
-       });
+        vectors = camera.computeHomography(camera.getObjectData());
+        System.out.println("Get Object Data: ");
+        System.out.println(camera.getObjectData());
+        System.out.println("Compute Homography Test With [400, 600]: ");
+        System.out.println(camera.computeHomography(new MatOfPoint2f(new Point(400, 600)))[0]);
+        System.out.println("Vectors: ");
+        System.out.println(vectors[0]);
     }
 
     /**
@@ -48,7 +51,12 @@ public class ApproachObject extends Command {
      */
     @Override
     public void execute() {
-
+        driveTrain.applyRequest(() -> {
+            ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX(), vectors[0].getY(), vectors[0].getAngle().getRadians()));
+            return drive.withVelocityX(speeds.vxMetersPerSecond)
+                    .withVelocityY(speeds.vyMetersPerSecond)
+                    .withRotationalRate(speeds.omegaRadiansPerSecond);
+        });
     }
 
     /**
