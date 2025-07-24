@@ -37,16 +37,19 @@ public class Camera implements Sendable, Subsystem {
     //private final Vector<N3> visionStdDeviations = VecBuilder.fill(0.25, 0.25, 1);
     private final PhotonPoseEstimator photonPoseEstimator;
     private EstimatedRobotPose odoState;
-    MatOfPoint2f image = new MatOfPoint2f(new Point(571, 261.1), new Point(261.8, 240.1),
-            new Point(764, 461), new Point(194, 342.5), new Point(138.9, 233.3), new Point(329.9, 336.7));
-    MatOfPoint2f world = new MatOfPoint2f(new Point(0.57, -0.18), new Point(0.65, -0.51), new Point(4, 0.88),
-            new Point(4, -2.86), new Point(1, -1), new Point(2, -1));
-
-    private final Mat homographyMat = homographyMatrix(image, world, 3);
+    Mat matrix = new Mat(3, 3, org.opencv.core.CvType.CV_64F);
+    double[] values = {-0.0001270542819333261, 0.0008182770377802222, 0.1862827299336119,
+        0.0006939972013693427, 0.0001741107045706584, -0.5076447771203513,
+        0.0006253018433804395, -0.002952410871268828, 1};
     private boolean updated = false;
     public Camera(CommandSwerveDrivetrain driveTrain) {
         this.driveTrain = driveTrain;
         AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++){
+                matrix.put(i, j, values[3 * i + j]);
+            }
+        }
         /*
         try{
             aprilTagFieldLayout = new AprilTagFieldLayout(fieldName);
@@ -69,21 +72,21 @@ public class Camera implements Sendable, Subsystem {
         for (PhotonPipelineResult result : results) {
             boolean inRange = false;
             double highestAmbiguity = 0;
-            for (PhotonTrackedTarget target: result.getTargets()) {
+            for (PhotonTrackedTarget target : result.getTargets()) {
                 double xSquared = target.getBestCameraToTarget().getX() * target.getBestCameraToTarget().getX();
                 double ySquared = target.getBestCameraToTarget().getY() * target.getBestCameraToTarget().getY();
                 double distance = Math.sqrt(xSquared + ySquared);
-                if(target.getPoseAmbiguity() > highestAmbiguity) {
+                if (target.getPoseAmbiguity() > highestAmbiguity) {
                     highestAmbiguity = target.getPoseAmbiguity();
                 }
-                if(distance < 2) {
+                if (distance < 2) {
                     inRange = true;
                 } else {
                     inRange = false;
                 }
                 //scaledVisionStdDeviations = visionStdDeviations.times(1 + distance);
             }
-            if(DriverStation.isDSAttached() && DriverStation.isDisabled()) {
+            if (DriverStation.isDSAttached() && DriverStation.isDisabled()) {
                 inRange = true;
             }
 
@@ -122,11 +125,6 @@ public class Camera implements Sendable, Subsystem {
             }
         }
     }
-
-    public static Mat homographyMatrix(MatOfPoint2f imagePoints, MatOfPoint2f worldPoints, double threshold) {
-        return Calib3d.findHomography(imagePoints, worldPoints, Calib3d.RANSAC, threshold);
-    }
-
 
     public static Translation2d[] computeHomography(MatOfPoint2f imagePoints, Mat homography) {
         MatOfPoint2f worldPoints = new MatOfPoint2f();
