@@ -29,6 +29,7 @@ import org.opencv.core.Point;
 import java.util.List;
 import java.util.Optional;
 import org.opencv.core.CvType;
+import org.photonvision.targeting.TargetCorner;
 
 public class Camera implements Sendable, Subsystem {
     private final CommandSwerveDrivetrain driveTrain;
@@ -145,16 +146,28 @@ public class Camera implements Sendable, Subsystem {
 
     public MatOfPoint2f getObjectData() {
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        if (results == null) return new MatOfPoint2f();
         double xTotal = 0;
         double yTotal = 0;
         double index = 0;
         for (PhotonPipelineResult result : results) {
             for (PhotonTrackedTarget target: result.getTargets()) {
-                xTotal += target.getBestCameraToTarget().getX();
-                yTotal += target.getBestCameraToTarget().getY();
+                List<TargetCorner> corners = target.getDetectedCorners();
+                double xSum = 0.0;
+                double ySum = 0.0;
+
+                for (TargetCorner corner : corners) {
+                    xSum += corner.x;
+                    ySum += corner.y;
+                }
+
+                xTotal += xSum / corners.size();
+                yTotal += ySum / corners.size();
+
                 index++;
             }
         }
+        if (index == 0) return new MatOfPoint2f();
         return new MatOfPoint2f(new Point(xTotal / index, yTotal / index)); //average of all points
     }
 
