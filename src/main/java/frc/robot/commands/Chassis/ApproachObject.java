@@ -38,7 +38,7 @@ public class ApproachObject extends Command {
     public void initialize(){
         vectors = camera.computeHomography(camera.getObjectData());
         System.out.println("Get Object Data: ");
-        System.out.println(camera.getObjectData());
+        System.out.println(camera.getObjectData().toList());
         System.out.println("Compute Homography Test With [400, 600]: ");
         System.out.println(camera.computeHomography(new MatOfPoint2f(new Point(400, 600)))[0]);
         System.out.println("Vectors: ");

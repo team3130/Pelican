@@ -132,6 +132,11 @@ public class Camera implements Sendable, Subsystem {
 
     public Translation2d[] computeHomography(MatOfPoint2f imagePoints) {
         MatOfPoint2f worldPoints = new MatOfPoint2f();
+        if(imagePoints.empty()) {
+            Translation2d[] empty = new Translation2d[1];
+            empty[0] = new Translation2d(0, 0);
+            return empty;
+        }
         Core.perspectiveTransform(imagePoints, worldPoints, matrix);
         Translation2d[] points = new Translation2d[worldPoints.rows()];
 
