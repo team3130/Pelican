@@ -49,11 +49,7 @@ public class Camera implements Sendable, Subsystem {
         AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         OpenCvLoader.forceStaticLoad();
         matrix = new Mat(3, 3, CvType.CV_64F);
-        for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < 3; j++){
-                matrix.put(i, j, values[3 * i + j]);
-            }
-        }
+        matrix.put(0, 0, values);
         /*
         try{
             aprilTagFieldLayout = new AprilTagFieldLayout(fieldName);
@@ -155,8 +151,11 @@ public class Camera implements Sendable, Subsystem {
         double xTotal = 0;
         double yTotal = 0;
         double index = 0;
+        System.out.println(results.size());
         for (PhotonPipelineResult result : results) {
+            System.out.println("Entered Loop 1");
             for (PhotonTrackedTarget target: result.getTargets()) {
+                System.out.println("Entered Loop 2");
                 List<TargetCorner> corners = target.getDetectedCorners();
                 double xSum = 0.0;
                 double ySum = 0.0;
@@ -172,7 +171,10 @@ public class Camera implements Sendable, Subsystem {
                 index++;
             }
         }
-        if (index == 0) return new MatOfPoint2f();
+        if (index == 0) {
+            System.out.println("edge case");
+            return new MatOfPoint2f();
+        }
         return new MatOfPoint2f(new Point(xTotal / index, yTotal / index)); //average of all points
     }
 

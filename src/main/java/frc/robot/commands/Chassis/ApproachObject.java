@@ -17,7 +17,7 @@ import java.util.Arrays;
 
 public class ApproachObject extends Command {
     private final CommandSwerveDrivetrain driveTrain;
-    public final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    public final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
            .withDeadband(Constants.Swerve.maxSpeed * 0.05).withRotationalDeadband(Constants.Swerve.maxAngularRate * 0.09) // Add a 10% deadband
            .withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
     private final Camera camera;
@@ -36,13 +36,7 @@ public class ApproachObject extends Command {
      */
     @Override
     public void initialize(){
-        vectors = camera.computeHomography(camera.getObjectData());
-        System.out.println("Get Object Data: ");
-        System.out.println(camera.getObjectData().toList());
-        System.out.println("Compute Homography Test With [400, 600]: ");
-        System.out.println(camera.computeHomography(new MatOfPoint2f(new Point(400, 600)))[0]);
-        System.out.println("Vectors: ");
-        System.out.println(vectors[0]);
+
     }
 
     /**
@@ -51,8 +45,16 @@ public class ApproachObject extends Command {
      */
     @Override
     public void execute() {
+        MatOfPoint2f objectData = camera.getObjectData();
+        vectors = camera.computeHomography(objectData);
+        System.out.println("Get Object Data: ");
+        System.out.println(objectData.dump());
+        System.out.println("Compute Homography Test With [400, 600]: ");
+        System.out.println(camera.computeHomography(new MatOfPoint2f(new Point(400, 600)))[0]);
+        System.out.println("Vectors: ");
+        System.out.println(vectors[0]);
         driveTrain.applyRequest(() -> {
-            ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX(), vectors[0].getY(), vectors[0].getAngle().getRadians()));
+            ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX(), vectors[0].getY(), 0));
             return drive.withVelocityX(speeds.vxMetersPerSecond)
                     .withVelocityY(speeds.vyMetersPerSecond)
                     .withRotationalRate(speeds.omegaRadiansPerSecond);
@@ -89,6 +91,10 @@ public class ApproachObject extends Command {
      */
     @Override
     public void end(boolean interrupted) {
-
+        driveTrain.applyRequest(() -> {
+            return drive.withVelocityX(0)
+                    .withVelocityY(0)
+                    .withRotationalRate(0);
+        });
     }
 }
