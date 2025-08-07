@@ -146,17 +146,15 @@ public class Camera implements Sendable, Subsystem {
     }
 
     public MatOfPoint2f getObjectData() {
+        camera.setPipelineIndex(1);
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         if (results == null) return new MatOfPoint2f();
         double xTotal = 0;
         double yTotal = 0;
         double index = 0;
-        System.out.println(results.size());
         for (PhotonPipelineResult result : results) {
-            System.out.println("Entered Loop 1");
             for (PhotonTrackedTarget target: result.getTargets()) {
-                System.out.println("Entered Loop 2");
-                List<TargetCorner> corners = target.getDetectedCorners();
+                List<TargetCorner> corners = target.getMinAreaRectCorners();
                 double xSum = 0.0;
                 double ySum = 0.0;
 
@@ -171,9 +169,8 @@ public class Camera implements Sendable, Subsystem {
                 index++;
             }
         }
-        if (index == 0) {
-            System.out.println("edge case");
-            return new MatOfPoint2f();
+        if(index == 0) {
+            return null;
         }
         return new MatOfPoint2f(new Point(xTotal / index, yTotal / index)); //average of all points
     }

@@ -46,19 +46,13 @@ public class ApproachObject extends Command {
     @Override
     public void execute() {
         MatOfPoint2f objectData = camera.getObjectData();
-        vectors = camera.computeHomography(objectData);
-        System.out.println("Get Object Data: ");
-        System.out.println(objectData.dump());
-        System.out.println("Compute Homography Test With [400, 600]: ");
-        System.out.println(camera.computeHomography(new MatOfPoint2f(new Point(400, 600)))[0]);
-        System.out.println("Vectors: ");
-        System.out.println(vectors[0]);
-        driveTrain.applyRequest(() -> {
-            ChassisSpeeds speeds = driveTrain.accelLimitVectorDrive(new ChassisSpeeds(vectors[0].getX(), vectors[0].getY(), 0));
-            return drive.withVelocityX(speeds.vxMetersPerSecond)
+        if(objectData != null) {
+            vectors = camera.computeHomography(objectData);
+            ChassisSpeeds speeds = new ChassisSpeeds(vectors[0].getX() / 4, vectors[0].getY() / 4, 0);
+            driveTrain.setControl(drive.withVelocityX(speeds.vxMetersPerSecond)
                     .withVelocityY(speeds.vyMetersPerSecond)
-                    .withRotationalRate(speeds.omegaRadiansPerSecond);
-        });
+                    .withRotationalRate(speeds.omegaRadiansPerSecond));
+        }
     }
 
     /**
@@ -91,10 +85,8 @@ public class ApproachObject extends Command {
      */
     @Override
     public void end(boolean interrupted) {
-        driveTrain.applyRequest(() -> {
-            return drive.withVelocityX(0)
-                    .withVelocityY(0)
-                    .withRotationalRate(0);
-        });
+        driveTrain.setControl(drive.withVelocityX(0)
+                .withVelocityY(0)
+                .withRotationalRate(0));
     }
 }

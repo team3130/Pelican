@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    robotContainer.basicVisionResetOdo();
+    //robotContainer.basicVisionResetOdo();
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
@@ -75,7 +75,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    robotContainer.basicVisionResetOdo();
+    //robotContainer.basicVisionResetOdo();
   }
 
   @Override
@@ -95,7 +95,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    robotContainer.basicVisionResetOdo();
+    //robotContainer.basicVisionResetOdo();
   }
 
   @Override
