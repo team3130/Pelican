@@ -66,10 +66,11 @@ public final class Constants {
     public static double[] translationPID = {8, 0, 0.3};
     public static double[] rotationPID = {9, 0, 0.3};
     public static double maxSpeed = 1; // NOT kSpeedAt12Volts
+    public static double minSpeed = 0.5;
     public static double maxSpeedPartiallyExtended = 1.5;
     public static double maxSpeedFullExtended = 1;
     public static double maxAccelerationFromRest = 7.875; //in m/s^2 gotten from assumed mass of 70 kg
-    public static double maxAngularRate = RotationsPerSecond.of(0.6).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
+    public static double maxAngularRate = RotationsPerSecond.of(0.2).in(RadiansPerSecond); // 1/10 of a rotation per second max angular velocity
     public static double maxSteerVoltage = 4d;
     public static double maxDriveVoltage = 10d;
 

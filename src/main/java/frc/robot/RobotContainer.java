@@ -280,7 +280,7 @@ public class RobotContainer {
       return Constants.Swerve.maxSpeed;
     } else {
       double maxSpeed = Constants.Swerve.maxSpeed;
-      double minSpeed = 2;
+      double minSpeed = Constants.Swerve.minSpeed;
       double slope = (minSpeed - maxSpeed) / (elevator.getMaxPosition() - elevator.getMinPosition());
       return (elevator.getPosition() - elevator.getMinPosition()) * slope + maxSpeed;
     }
