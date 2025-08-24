@@ -65,7 +65,7 @@ public final class Constants {
   public static class Swerve {
     public static double[] translationPID = {8, 0, 0.3};
     public static double[] rotationPID = {9, 0, 0.3};
-    public static double maxSpeed = 1; // NOT kSpeedAt12Volts
+    public static double maxSpeed = 3; // NOT kSpeedAt12Volts
     public static double minSpeed = 0.5;
     public static double maxSpeedPartiallyExtended = 1.5;
     public static double maxSpeedFullExtended = 1;
