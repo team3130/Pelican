@@ -166,10 +166,12 @@ public class Camera implements Sendable, Subsystem {
             List<PhotonPipelineResult> results = camera.getAllUnreadResults();
             for (PhotonPipelineResult result : results) {
                 for (PhotonTrackedTarget target : result.getTargets()) {
-                    double x = target.getBestCameraToTarget().getX();
-                    double y = target.getBestCameraToTarget().getY();
-                    eTgTranslations[hTeCalibrationIndex] = (new Translation3d(x, y, 0));
-                    eTgRotations[hTeCalibrationIndex] = target.getBestCameraToTarget().getRotation();
+                    Transform3d camToTarget = target.getBestCameraToTarget();
+                    double x = camToTarget.getX();
+                    double z = camToTarget.getZ();
+                    double y = camToTarget.getY();
+                    eTgTranslations[hTeCalibrationIndex] = (new Translation3d(x, y, z));
+                    eTgRotations[hTeCalibrationIndex] = camToTarget.getRotation();
                 }
             }
             gTrTranslations[hTeCalibrationIndex] = new Translation3d(getXOdoState(), getYOdoState(), 0);
