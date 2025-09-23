@@ -26,6 +26,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
+
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import org.opencv.core.CvType;
@@ -36,10 +39,12 @@ public class Camera implements Sendable, Subsystem {
     private double[] xOdo = new double[100];
     private double[] yOdo = new double[100];
     private double timeOfPrevMeasurement = 0;
-    private Translation3d[] eTgTranslations = {};
-    private Translation3d[] gTrTranslations = {};
-    private Rotation3d[] eTgRotations = {};
-    private Rotation3d[] gTrRotations = {};
+    private ArrayList<Mat> tTcTranslations = {};
+    private ArrayList<Mat> gTbTranslations = {};
+    private Mat hTeTranslation;
+    private ArrayList<Mat> tTcRotations = {};
+    private ArrayList<Mat> gTbRotations = {};
+    private Mat hTeRotation;
     private final CommandSwerveDrivetrain driveTrain;
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
     private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(3.0042,0.2186,-0.2814+0.0268-0.0642));
@@ -153,7 +158,7 @@ public class Camera implements Sendable, Subsystem {
         return points;
     }
 
-    public void robotToCamera() {
+    public void handEyeMeasurements() {
         for(int i = 98; i >= 0; i--) {
             xOdo[i + 1] = xOdo[i];
             yOdo[i + 1] = yOdo[i];
@@ -167,17 +172,36 @@ public class Camera implements Sendable, Subsystem {
             for (PhotonPipelineResult result : results) {
                 for (PhotonTrackedTarget target : result.getTargets()) {
                     Transform3d camToTarget = target.getBestCameraToTarget();
-                    double x = camToTarget.getX();
-                    double z = camToTarget.getZ();
-                    double y = camToTarget.getY();
-                    eTgTranslations[hTeCalibrationIndex] = (new Translation3d(x, y, z));
-                    eTgRotations[hTeCalibrationIndex] = camToTarget.getRotation();
+                    Mat vec1 = new Mat(3, 1, CvType.CV_64F);
+                    vec1.put(0, 0, -camToTarget.getX(), -camToTarget.getY(), -camToTarget.getZ());
+                    tTcTranslations.add(vec1);
+                    Mat mat1 = new Mat(3, 3, CvType.CV_64F);
+                    Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix();
+                    for (int row = 0; row < 3; row++) {
+                        for (int col = 0; col < 3; col++) {
+                            mat1.put(row, col, mat.get(row, col));
+                        }
+                    }
+                    tTcRotations.add(mat1);
                 }
             }
-            gTrTranslations[hTeCalibrationIndex] = new Translation3d(getXOdoState(), getYOdoState(), 0);
-            gTrRotations[hTeCalibrationIndex] = new Rotation3d(new Rotation2d(getRotationDegreesOdoState()));
+            Mat vec2 = new Mat(3, 1, CvType.CV_64F);
+            vec2.put(0, 0, -getXOdoState(), -getYOdoState(), 0);
+            gTbTranslations.add(vec2);
+            Mat mat2 = new Mat(3, 3, CvType.CV_64F);
+            Matrix<N3, N3> mat = (new Rotation3d(new Rotation2d(getRotationDegreesOdoState()))).toMatrix();
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    mat2.put(row, col, mat.get(row, col));
+                }
+            }
+            gTbRotations.add(mat2);
             hTeCalibrationIndex++;
         }
+    }
+
+    public void handEyeCalibration() {
+        Calib3d.calibrateHandEye(gTbRotations, gTbTranslations, tTcRotations, tTcTranslations, hTeRotation, hTeTranslation);
     }
 
     public MatOfPoint2f getObjectData() {
