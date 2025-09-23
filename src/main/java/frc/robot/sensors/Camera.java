@@ -32,6 +32,14 @@ import org.opencv.core.CvType;
 import org.photonvision.targeting.TargetCorner;
 
 public class Camera implements Sendable, Subsystem {
+    int hTeCalibrationIndex = 0;
+    private double[] xOdo = new double[100];
+    private double[] yOdo = new double[100];
+    private double timeOfPrevMeasurement = 0;
+    private Translation3d[] eTgTranslations = {};
+    private Translation3d[] gTrTranslations = {};
+    private Rotation3d[] eTgRotations = {};
+    private Rotation3d[] gTrRotations = {};
     private final CommandSwerveDrivetrain driveTrain;
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
     private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(3.0042,0.2186,-0.2814+0.0268-0.0642));
@@ -143,6 +151,31 @@ public class Camera implements Sendable, Subsystem {
         }
 
         return points;
+    }
+
+    public void robotToCamera() {
+        for(int i = 98; i >= 0; i--) {
+            xOdo[i + 1] = xOdo[i];
+            yOdo[i + 1] = yOdo[i];
+        }
+        xOdo[0] = getXOdoState();
+        yOdo[0] = getYOdoState();
+
+        if((Math.hypot(xOdo[0] - xOdo[99], yOdo[0] - yOdo[99]) <= 0.01) && (MathSharedStore.getTimestamp() - timeOfPrevMeasurement > 5000)) {
+            timeOfPrevMeasurement = MathSharedStore.getTimestamp();
+            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+            for (PhotonPipelineResult result : results) {
+                for (PhotonTrackedTarget target : result.getTargets()) {
+                    double x = target.getBestCameraToTarget().getX();
+                    double y = target.getBestCameraToTarget().getY();
+                    eTgTranslations[hTeCalibrationIndex] = (new Translation3d(x, y, 0));
+                    eTgRotations[hTeCalibrationIndex] = target.getBestCameraToTarget().getRotation();
+                }
+            }
+            gTrTranslations[hTeCalibrationIndex] = new Translation3d(getXOdoState(), getYOdoState(), 0);
+            gTrRotations[hTeCalibrationIndex] = new Rotation3d(new Rotation2d(getRotationDegreesOdoState()));
+            hTeCalibrationIndex++;
+        }
     }
 
     public MatOfPoint2f getObjectData() {
