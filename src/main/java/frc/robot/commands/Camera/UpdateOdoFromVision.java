@@ -7,12 +7,10 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 
 public class UpdateOdoFromVision extends Command {
-    private final CommandSwerveDrivetrain commandSwerveDrivetrain;
     private final Telemetry logger;
     private final Camera camera;
 
-    public UpdateOdoFromVision(CommandSwerveDrivetrain commandSwerveDrivetrain, Camera camera, Telemetry logger) {
-        this.commandSwerveDrivetrain = commandSwerveDrivetrain;
+    public UpdateOdoFromVision( Camera camera, Telemetry logger) {
         this.camera = camera;
         this.logger = logger;
         // each subsystem used by the command must be passed into the

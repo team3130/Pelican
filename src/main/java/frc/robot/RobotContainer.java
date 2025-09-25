@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.*;
 import frc.robot.commands.CoralIntake.*;
@@ -204,8 +205,12 @@ public class RobotContainer {
               return drive.withVelocityX(chassisSpeed.vxMetersPerSecond)
                       .withVelocityY(chassisSpeed.vyMetersPerSecond)
                       .withRotationalRate(chassisSpeed.omegaRadiansPerSecond);
-            }));
+            })
+    );
 
+    camera.setDefaultCommand(
+            new UpdateOdoFromVision(camera, logger)
+    );
 
             //driveTrain.applyRequest(this::accelLimitVectorDrive)
 
