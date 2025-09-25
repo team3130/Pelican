@@ -157,6 +157,26 @@ public class Camera implements Sendable, Subsystem {
         return points;
     }
 
+    public List<PhotonPipelineResult> getResults() {
+        return camera.getAllUnreadResults();
+    }
+
+    public void addPhotonTranslation(Mat translation) {
+        tTcTranslations.add(translation);
+    }
+
+    public void addPhotonRotation(Mat rotation) {
+        tTcRotations.add(rotation);
+    }
+
+    public void addOdometryTranslation(Mat translation) {
+        gTbTranslations.add(translation);
+    }
+
+    public void addOdometryRotation(Mat rotation) {
+        gTbRotations.add(rotation);
+    }
+
     public void handEyeMeasurements() {
         for(int i = 98; i >= 0; i--) {
             xOdo[i + 1] = xOdo[i];
