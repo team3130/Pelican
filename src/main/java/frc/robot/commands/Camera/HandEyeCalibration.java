@@ -10,6 +10,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.sensors.Camera;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -25,6 +26,12 @@ public  class HandEyeCalibration extends Command
     private final double[] xOdo = new double[100];
     private final double[] yOdo = new double[100];
     private double timeOfPrevMeasurement = 0;
+    private ArrayList<Mat> tTcTranslations;
+    private ArrayList<Mat> gTbTranslations;
+    private Mat hTeTranslation;
+    private ArrayList<Mat> tTcRotations;
+    private ArrayList<Mat> gTbRotations;
+    private Mat hTeRotation;
 
  public HandEyeCalibration(Camera camera, CommandSwerveDrivetrain commandSwerveDrivetrain)
     {
@@ -67,7 +74,7 @@ public  class HandEyeCalibration extends Command
     @Override
     public void end(boolean interrupted)
     {
-        
+        Calib3d.calibrateHandEye(gTbRotations, gTbTranslations, tTcRotations, tTcTranslations, hTeRotation, hTeTranslation);
     }
 
     public double timeSincePrevMeasurement() {
@@ -84,7 +91,7 @@ public  class HandEyeCalibration extends Command
             Transform3d camToTarget = target.getBestCameraToTarget();
             Mat vec1 = new Mat(3, 1, CvType.CV_64F);
             vec1.put(0, 0, -camToTarget.getX(), -camToTarget.getY(), -camToTarget.getZ());
-            camera.addPhotonTranslation(vec1);
+            tTcTranslations.add(vec1);
             Mat mat1 = new Mat(3, 3, CvType.CV_64F);
             Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix().inv();
             for (int row = 0; row < 3; row++) {
@@ -92,14 +99,14 @@ public  class HandEyeCalibration extends Command
                     mat1.put(row, col, mat.get(row, col));
                 }
             }
-            camera.addPhotonRotation(mat1);
+            tTcRotations.add(mat1);
         }
     }
 
     public void odometryMeasurement() {
         Mat vec2 = new Mat(3, 1, CvType.CV_64F);
         vec2.put(0, 0, -camera.getXOdoState(), -camera.getYOdoState(), 0);
-        camera.addOdometryTranslation(vec2);
+        gTbTranslations.add(vec2);
         Mat mat2 = new Mat(3, 3, CvType.CV_64F);
         Matrix<N3, N3> mat = (new Rotation3d(new Rotation2d(camera.getRotationDegreesOdoState()))).toMatrix().inv();
         for (int row = 0; row < 3; row++) {
@@ -107,6 +114,6 @@ public  class HandEyeCalibration extends Command
                 mat2.put(row, col, mat.get(row, col));
             }
         }
-        camera.addOdometryTranslation(mat2);
+        gTbRotations.add(mat2);
     }
 }

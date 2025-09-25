@@ -35,15 +35,6 @@ import org.opencv.core.CvType;
 import org.photonvision.targeting.TargetCorner;
 
 public class Camera implements Sendable, Subsystem {
-    private double[] xOdo = new double[100];
-    private double[] yOdo = new double[100];
-    private double timeOfPrevMeasurement = 0;
-    private ArrayList<Mat> tTcTranslations;
-    private ArrayList<Mat> gTbTranslations;
-    private Mat hTeTranslation;
-    private ArrayList<Mat> tTcRotations;
-    private ArrayList<Mat> gTbRotations;
-    private Mat hTeRotation;
     private final CommandSwerveDrivetrain driveTrain;
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
     private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(3.0042,0.2186,-0.2814+0.0268-0.0642));
@@ -159,65 +150,6 @@ public class Camera implements Sendable, Subsystem {
 
     public List<PhotonPipelineResult> getResults() {
         return camera.getAllUnreadResults();
-    }
-
-    public void addPhotonTranslation(Mat translation) {
-        tTcTranslations.add(translation);
-    }
-
-    public void addPhotonRotation(Mat rotation) {
-        tTcRotations.add(rotation);
-    }
-
-    public void addOdometryTranslation(Mat translation) {
-        gTbTranslations.add(translation);
-    }
-
-    public void addOdometryRotation(Mat rotation) {
-        gTbRotations.add(rotation);
-    }
-
-    public void handEyeMeasurements() {
-        for(int i = 98; i >= 0; i--) {
-            xOdo[i + 1] = xOdo[i];
-            yOdo[i + 1] = yOdo[i];
-        }
-        xOdo[0] = getXOdoState();
-        yOdo[0] = getYOdoState();
-
-        if((Math.hypot(xOdo[0] - xOdo[99], yOdo[0] - yOdo[99]) <= 0.01) && (MathSharedStore.getTimestamp() - timeOfPrevMeasurement > 5000)) {
-            timeOfPrevMeasurement = MathSharedStore.getTimestamp();
-            List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-            for (PhotonTrackedTarget target : results.get(results.size() - 1).getTargets()) {
-                Transform3d camToTarget = target.getBestCameraToTarget();
-                Mat vec1 = new Mat(3, 1, CvType.CV_64F);
-                vec1.put(0, 0, -camToTarget.getX(), -camToTarget.getY(), -camToTarget.getZ());
-                tTcTranslations.add(vec1);
-                Mat mat1 = new Mat(3, 3, CvType.CV_64F);
-                Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix().inv();
-                for (int row = 0; row < 3; row++) {
-                    for (int col = 0; col < 3; col++) {
-                        mat1.put(row, col, mat.get(row, col));
-                    }
-                }
-                tTcRotations.add(mat1);
-            }
-            Mat vec2 = new Mat(3, 1, CvType.CV_64F);
-            vec2.put(0, 0, -getXOdoState(), -getYOdoState(), 0);
-            gTbTranslations.add(vec2);
-            Mat mat2 = new Mat(3, 3, CvType.CV_64F);
-            Matrix<N3, N3> mat = (new Rotation3d(new Rotation2d(getRotationDegreesOdoState()))).toMatrix().inv();
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    mat2.put(row, col, mat.get(row, col));
-                }
-            }
-            gTbRotations.add(mat2);
-        }
-    }
-
-    public void handEyeCalibration() {
-        Calib3d.calibrateHandEye(gTbRotations, gTbTranslations, tTcRotations, tTcTranslations, hTeRotation, hTeTranslation);
     }
 
     public MatOfPoint2f getObjectData() {
