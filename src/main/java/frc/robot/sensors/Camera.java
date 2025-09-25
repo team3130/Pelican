@@ -35,15 +35,14 @@ import org.opencv.core.CvType;
 import org.photonvision.targeting.TargetCorner;
 
 public class Camera implements Sendable, Subsystem {
-    int hTeCalibrationIndex = 0;
     private double[] xOdo = new double[100];
     private double[] yOdo = new double[100];
     private double timeOfPrevMeasurement = 0;
-    private ArrayList<Mat> tTcTranslations = {};
-    private ArrayList<Mat> gTbTranslations = {};
+    private ArrayList<Mat> tTcTranslations;
+    private ArrayList<Mat> gTbTranslations;
     private Mat hTeTranslation;
-    private ArrayList<Mat> tTcRotations = {};
-    private ArrayList<Mat> gTbRotations = {};
+    private ArrayList<Mat> tTcRotations;
+    private ArrayList<Mat> gTbRotations;
     private Mat hTeRotation;
     private final CommandSwerveDrivetrain driveTrain;
     private final PhotonCamera camera = new PhotonCamera("3130Camera");
@@ -176,7 +175,7 @@ public class Camera implements Sendable, Subsystem {
                     vec1.put(0, 0, -camToTarget.getX(), -camToTarget.getY(), -camToTarget.getZ());
                     tTcTranslations.add(vec1);
                     Mat mat1 = new Mat(3, 3, CvType.CV_64F);
-                    Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix();
+                    Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix().inv();
                     for (int row = 0; row < 3; row++) {
                         for (int col = 0; col < 3; col++) {
                             mat1.put(row, col, mat.get(row, col));
@@ -189,14 +188,13 @@ public class Camera implements Sendable, Subsystem {
             vec2.put(0, 0, -getXOdoState(), -getYOdoState(), 0);
             gTbTranslations.add(vec2);
             Mat mat2 = new Mat(3, 3, CvType.CV_64F);
-            Matrix<N3, N3> mat = (new Rotation3d(new Rotation2d(getRotationDegreesOdoState()))).toMatrix();
+            Matrix<N3, N3> mat = (new Rotation3d(new Rotation2d(getRotationDegreesOdoState()))).toMatrix().inv();
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 3; col++) {
                     mat2.put(row, col, mat.get(row, col));
                 }
             }
             gTbRotations.add(mat2);
-            hTeCalibrationIndex++;
         }
     }
 
