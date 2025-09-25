@@ -22,7 +22,6 @@ import java.util.List;
 public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
-    private final CommandSwerveDrivetrain commandSwerveDrivetrain;
     private final double[] xOdo = new double[100];
     private final double[] yOdo = new double[100];
     private double timeOfPrevMeasurement = 0;
@@ -30,10 +29,9 @@ public  class HandEyeCalibration extends Command
  public HandEyeCalibration(Camera camera, CommandSwerveDrivetrain commandSwerveDrivetrain)
     {
           this.camera = camera;
-          this.commandSwerveDrivetrain = commandSwerveDrivetrain;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
-        addRequirements(this.camera, this.commandSwerveDrivetrain);
+        addRequirements(this.camera);
     }
 
     @Override
