@@ -168,21 +168,19 @@ public class Camera implements Sendable, Subsystem {
         if((Math.hypot(xOdo[0] - xOdo[99], yOdo[0] - yOdo[99]) <= 0.01) && (MathSharedStore.getTimestamp() - timeOfPrevMeasurement > 5000)) {
             timeOfPrevMeasurement = MathSharedStore.getTimestamp();
             List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-            for (PhotonPipelineResult result : results) {
-                for (PhotonTrackedTarget target : result.getTargets()) {
-                    Transform3d camToTarget = target.getBestCameraToTarget();
-                    Mat vec1 = new Mat(3, 1, CvType.CV_64F);
-                    vec1.put(0, 0, -camToTarget.getX(), -camToTarget.getY(), -camToTarget.getZ());
-                    tTcTranslations.add(vec1);
-                    Mat mat1 = new Mat(3, 3, CvType.CV_64F);
-                    Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix().inv();
-                    for (int row = 0; row < 3; row++) {
-                        for (int col = 0; col < 3; col++) {
-                            mat1.put(row, col, mat.get(row, col));
-                        }
+            for (PhotonTrackedTarget target : results.get(results.size() - 1).getTargets()) {
+                Transform3d camToTarget = target.getBestCameraToTarget();
+                Mat vec1 = new Mat(3, 1, CvType.CV_64F);
+                vec1.put(0, 0, -camToTarget.getX(), -camToTarget.getY(), -camToTarget.getZ());
+                tTcTranslations.add(vec1);
+                Mat mat1 = new Mat(3, 3, CvType.CV_64F);
+                Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix().inv();
+                for (int row = 0; row < 3; row++) {
+                    for (int col = 0; col < 3; col++) {
+                        mat1.put(row, col, mat.get(row, col));
                     }
-                    tTcRotations.add(mat1);
                 }
+                tTcRotations.add(mat1);
             }
             Mat vec2 = new Mat(3, 1, CvType.CV_64F);
             vec2.put(0, 0, -getXOdoState(), -getYOdoState(), 0);
