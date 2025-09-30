@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Camera.HandEyeCalibration;
 import frc.robot.commands.Camera.UpdateOdoFromVision;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.*;
@@ -191,7 +192,7 @@ public class RobotContainer {
     if(Constants.debugMode) {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
       operatorController.leftBumper().whileTrue(new ApproachObject(driveTrain, camera));
-      //operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));
+      operatorController.rightBumper().toggleOnTrue(new HandEyeCalibration(camera));
       //operatorController.leftBumper().whileTrue(new ApproachObject(driveTrain, camera));
     }
 

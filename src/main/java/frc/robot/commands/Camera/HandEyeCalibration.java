@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.sensors.Camera;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -33,7 +32,7 @@ public  class HandEyeCalibration extends Command
     private ArrayList<Mat> gTbRotations;
     private Mat hTeRotation;
 
- public HandEyeCalibration(Camera camera, CommandSwerveDrivetrain commandSwerveDrivetrain)
+ public HandEyeCalibration(Camera camera)
     {
           this.camera = camera;
         // each subsystem used by the command must be passed into the
