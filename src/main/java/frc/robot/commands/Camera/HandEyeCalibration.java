@@ -75,6 +75,8 @@ public  class HandEyeCalibration extends Command
     public void end(boolean interrupted)
     {
         Calib3d.calibrateHandEye(gTbRotations, gTbTranslations, tTcRotations, tTcTranslations, hTeRotation, hTeTranslation);
+        System.out.println("Hand to Eye Translation Matrix =\n" + hTeTranslation.dump());
+        System.out.println("Hand to Eye Rotation Matrix =\n" + hTeRotation.dump());
     }
 
     public double timeSincePrevMeasurement() {
