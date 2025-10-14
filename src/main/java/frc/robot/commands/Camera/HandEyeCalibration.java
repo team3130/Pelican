@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.sensors.Camera;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -22,6 +23,7 @@ import java.util.List;
 public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
+    private final CommandSwerveDrivetrain drivetrain;
     private final double[] xOdo = new double[100];
     private final double[] yOdo = new double[100];
     private double timeOfPrevMeasurement = 0;
@@ -33,9 +35,10 @@ public  class HandEyeCalibration extends Command
     private Mat hTeRotation = new Mat(3, 3, CvType.CV_64F);
     private boolean gotPhotonMeasurement = false;
 
- public HandEyeCalibration(Camera camera)
+ public HandEyeCalibration(Camera camera, CommandSwerveDrivetrain drivetrain)
     {
           this.camera = camera;
+          this.drivetrain = drivetrain;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.camera);
@@ -54,8 +57,8 @@ public  class HandEyeCalibration extends Command
             xOdo[i + 1] = xOdo[i];
             yOdo[i + 1] = yOdo[i];
         }
-        xOdo[0] = camera.getXOdoState();
-        yOdo[0] = camera.getYOdoState();
+        xOdo[0] = drivetrain.getStatePose().getX();
+        yOdo[0] = drivetrain.getStatePose().getY();
 
         if(isSlow() && (timeSincePrevMeasurement() > 5)) {
             gotPhotonMeasurement = false;
@@ -125,11 +128,11 @@ public  class HandEyeCalibration extends Command
 
     public void odometryMeasurement() {
         Mat vec2 = new Mat(3, 1, CvType.CV_64F);
-        vec2.put(0, 0, -camera.getXOdoState(), -camera.getYOdoState(), 0);
+        vec2.put(0, 0, -drivetrain.getStatePose().getX(), -drivetrain.getStatePose().getY(), 0);
         gTbTranslations.add(vec2);
         System.out.println("Added Odometry Vec " + vec2.dump());
         Mat mat2 = new Mat(3, 3, CvType.CV_64F);
-        Matrix<N3, N3> mat = (new Rotation3d(new Rotation2d(camera.getRotationDegreesOdoState()))).toMatrix().inv();
+        Matrix<N3, N3> mat = (new Rotation3d(drivetrain.getStatePose().getRotation())).toMatrix().inv();
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 mat2.put(row, col, mat.get(row, col));

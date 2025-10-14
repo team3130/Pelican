@@ -192,7 +192,7 @@ public class RobotContainer {
     if(Constants.debugMode) {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
       operatorController.leftBumper().whileTrue(new ApproachObject(driveTrain, camera));
-      operatorController.rightBumper().toggleOnTrue(new HandEyeCalibration(camera));
+      operatorController.rightBumper().toggleOnTrue(new HandEyeCalibration(camera, driveTrain));
       //operatorController.leftBumper().whileTrue(new ApproachObject(driveTrain, camera));
     }
 
