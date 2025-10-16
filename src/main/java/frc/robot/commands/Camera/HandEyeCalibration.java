@@ -3,6 +3,8 @@ package frc.robot.commands.Camera;
 
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -57,10 +59,11 @@ public  class HandEyeCalibration extends Command
             xOdo[i + 1] = xOdo[i];
             yOdo[i + 1] = yOdo[i];
         }
-        xOdo[0] = drivetrain.getStatePose().getX();
-        yOdo[0] = drivetrain.getStatePose().getY();
+        Pose2d statePose = drivetrain.getStatePose();
+        xOdo[0] = statePose.getX();
+        yOdo[0] = statePose.getY();
 
-        if(isSlow() && (timeSincePrevMeasurement() > 5)) {
+        if(isSlow() && (timeSincePrevMeasurement() > 0.5)) {
             gotPhotonMeasurement = false;
             timeOfPrevMeasurement = MathSharedStore.getTimestamp();
             photonVisionMeasurement();
@@ -84,11 +87,21 @@ public  class HandEyeCalibration extends Command
             Calib3d.calibrateHandEye(gTbRotations, gTbTranslations, tTcRotations, tTcTranslations, hTeRotation, hTeTranslation);
             System.out.println("Hand to Eye Translation Matrix =\n" + hTeTranslation.dump());
             System.out.println("Hand to Eye Rotation Matrix =\n" + hTeRotation.dump());
+            /*
+            double[] entries = new double[9];
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+
+                }
+            }
+            Matrix<N3, N3> matrix = new Matrix<>(new Nat.N3(), 3);
+            Rotation3d rotation = new Rotation3d();
+            System.out.println("Pitch");
         } else {
             System.out.println("Matrices are Empty");
             System.out.println(MathSharedStore.getTimestamp());
         }
-
+        */
         tTcTranslations = new ArrayList<>();
         gTbTranslations = new ArrayList<>();
         hTeTranslation = new Mat(3, 1, CvType.CV_64F);
@@ -102,20 +115,23 @@ public  class HandEyeCalibration extends Command
     }
 
     public boolean isSlow() {
-        return Math.hypot(xOdo[0] - xOdo[99], yOdo[0] - yOdo[99]) <= 1;
+        return Math.hypot(xOdo[0] - xOdo[99], yOdo[0] - yOdo[99]) <= 0.005;
     }
 
     public void photonVisionMeasurement() {
         List<PhotonPipelineResult> results = camera.getResults();
+        if(results.isEmpty()) {
+            return;
+        }
         for (PhotonTrackedTarget target : results.get(results.size() - 1).getTargets()) {
             gotPhotonMeasurement = true;
             Transform3d camToTarget = target.getBestCameraToTarget();
             Mat vec1 = new Mat(3, 1, CvType.CV_64F);
-            vec1.put(0, 0, -camToTarget.getX(), -camToTarget.getY(), -camToTarget.getZ());
+            vec1.put(0, 0, camToTarget.getX(), camToTarget.getY(), camToTarget.getZ());
             tTcTranslations.add(vec1);
             System.out.println("Added Vision Vec " + vec1.dump());
             Mat mat1 = new Mat(3, 3, CvType.CV_64F);
-            Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix().inv();
+            Matrix<N3, N3> mat = camToTarget.getRotation().toMatrix();
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 3; col++) {
                     mat1.put(row, col, mat.get(row, col));
@@ -127,12 +143,13 @@ public  class HandEyeCalibration extends Command
     }
 
     public void odometryMeasurement() {
+        Pose2d statePose = drivetrain.getStatePose();
         Mat vec2 = new Mat(3, 1, CvType.CV_64F);
-        vec2.put(0, 0, -drivetrain.getStatePose().getX(), -drivetrain.getStatePose().getY(), 0);
+        vec2.put(0, 0, statePose.getX(), statePose.getY(), 0);
         gTbTranslations.add(vec2);
         System.out.println("Added Odometry Vec " + vec2.dump());
         Mat mat2 = new Mat(3, 3, CvType.CV_64F);
-        Matrix<N3, N3> mat = (new Rotation3d(drivetrain.getStatePose().getRotation())).toMatrix().inv();
+        Matrix<N3, N3> mat = (new Rotation3d(statePose.getRotation())).toMatrix();
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 mat2.put(row, col, mat.get(row, col));
