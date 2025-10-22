@@ -26,8 +26,8 @@ public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
     private final CommandSwerveDrivetrain drivetrain;
-    private final double[] xOdo = new double[100];
-    private final double[] yOdo = new double[100];
+    private final double[] xOdo = new double[50];
+    private final double[] yOdo = new double[50];
     private double timeOfPrevMeasurement = 0;
     private ArrayList<Mat> tTcTranslations = new ArrayList<>();
     private ArrayList<Mat> gTbTranslations = new ArrayList<>();
@@ -55,7 +55,7 @@ public  class HandEyeCalibration extends Command
     @Override
     public void execute()
     {
-        for(int i = 98; i >= 0; i--) {
+        for(int i = 48; i >= 0; i--) {
             xOdo[i + 1] = xOdo[i];
             yOdo[i + 1] = yOdo[i];
         }
@@ -115,11 +115,15 @@ public  class HandEyeCalibration extends Command
     }
 
     public boolean isSlow() {
-        return Math.hypot(xOdo[0] - xOdo[99], yOdo[0] - yOdo[99]) <= 0.005;
+        return Math.hypot(xOdo[0] - xOdo[49], yOdo[0] - yOdo[49]) <= 0.005;
     }
 
     public void photonVisionMeasurement() {
+        double time = MathSharedStore.getTimestamp();
         List<PhotonPipelineResult> results = camera.getResults();
+        while(results.get(results.size() - 1).getTimestampSeconds() < time) {
+            results = camera.getResults();
+        }
         if(results.isEmpty()) {
             return;
         }
