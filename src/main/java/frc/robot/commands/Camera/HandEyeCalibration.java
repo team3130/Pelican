@@ -26,9 +26,10 @@ public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
     private final CommandSwerveDrivetrain drivetrain;
+    Pose2d statePose = new Pose2d();
     private double time = Math.pow(10, 8);
-    private final double[] xOdo = new double[50];
-    private final double[] yOdo = new double[50];
+    private final double[] xOdo = new double[5];
+    private final double[] yOdo = new double[5];
     private double timeOfPrevMeasurement = 0;
     private ArrayList<Mat> tTcTranslations = new ArrayList<>();
     private ArrayList<Mat> gTbTranslations = new ArrayList<>();
@@ -57,7 +58,7 @@ public  class HandEyeCalibration extends Command
     public void execute()
     {
         List<PhotonPipelineResult> results = camera.getResults();
-        for(int i = 48; i >= 0; i--) {
+        for(int i = 3; i >= 0; i--) {
             xOdo[i + 1] = xOdo[i];
             yOdo[i + 1] = yOdo[i];
         }
@@ -90,6 +91,7 @@ public  class HandEyeCalibration extends Command
             Calib3d.calibrateHandEye(gTbRotations, gTbTranslations, tTcRotations, tTcTranslations, hTeRotation, hTeTranslation);
             System.out.println("Hand to Eye Translation Matrix =\n" + hTeTranslation.dump());
             System.out.println("Hand to Eye Rotation Matrix =\n" + hTeRotation.dump());
+        }
             /*
             double[] entries = new double[9];
             for (int row = 0; row < 3; row++) {
@@ -118,18 +120,19 @@ public  class HandEyeCalibration extends Command
     }
 
     public boolean isSlow() {
-        return Math.hypot(xOdo[0] - xOdo[49], yOdo[0] - yOdo[49]) <= 0.005;
+        return Math.hypot(xOdo[0] - xOdo[4], yOdo[0] - yOdo[4]) <= 0.001;
     }
 
     public void photonVisionMeasurement(List<PhotonPipelineResult> results) {
         time = Math.min(MathSharedStore.getTimestamp(), time);
-        if(results.get(results.size() - 1).getTimestampSeconds() > time) {
-            return;
-        }
         if(results.isEmpty()) {
             return;
         }
+        if(results.get(results.size() - 1).getTimestampSeconds() < time) {
+            return;
+        }
         for (PhotonTrackedTarget target : results.get(results.size() - 1).getTargets()) {
+            statePose = drivetrain.getStatePose();
             gotPhotonMeasurement = true;
             Transform3d camToTarget = target.getBestCameraToTarget();
             Mat vec1 = new Mat(3, 1, CvType.CV_64F);
@@ -149,7 +152,6 @@ public  class HandEyeCalibration extends Command
     }
 
     public void odometryMeasurement() {
-        Pose2d statePose = drivetrain.getStatePose();
         Mat vec2 = new Mat(3, 1, CvType.CV_64F);
         vec2.put(0, 0, statePose.getX(), statePose.getY(), 0);
         gTbTranslations.add(vec2);
