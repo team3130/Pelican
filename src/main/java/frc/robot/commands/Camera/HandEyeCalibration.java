@@ -55,6 +55,7 @@ public  class HandEyeCalibration extends Command
     @Override
     public void execute()
     {
+        List<PhotonPipelineResult> results = camera.getResults();
         for(int i = 48; i >= 0; i--) {
             xOdo[i + 1] = xOdo[i];
             yOdo[i + 1] = yOdo[i];
@@ -66,7 +67,7 @@ public  class HandEyeCalibration extends Command
         if(isSlow() && (timeSincePrevMeasurement() > 0.5)) {
             gotPhotonMeasurement = false;
             timeOfPrevMeasurement = MathSharedStore.getTimestamp();
-            photonVisionMeasurement();
+            photonVisionMeasurement(results);
             if(gotPhotonMeasurement) {
                 odometryMeasurement();
             }
@@ -118,11 +119,10 @@ public  class HandEyeCalibration extends Command
         return Math.hypot(xOdo[0] - xOdo[49], yOdo[0] - yOdo[49]) <= 0.005;
     }
 
-    public void photonVisionMeasurement() {
+    public void photonVisionMeasurement(List<PhotonPipelineResult> results) {
         double time = MathSharedStore.getTimestamp();
-        List<PhotonPipelineResult> results = camera.getResults();
-        while(results.get(results.size() - 1).getTimestampSeconds() < time) {
-            results = camera.getResults();
+        if(results.get(results.size() - 1).getTimestampSeconds() < time) {
+            return;
         }
         if(results.isEmpty()) {
             return;
