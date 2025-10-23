@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.DynamicMotionMagicDutyCycle;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
 public class Elevator_1 {
@@ -23,6 +24,9 @@ public class Elevator_1 {
     private double targetVelocity = 100;
     private double targetAcceleration = 50;
 
+    private final DigitalInput bottomLimitSwitch;
+    private final DigitalInput topLimitSwitch;
+
     private boolean atL1 = false;
     private boolean atL2 = false;
     private boolean atL3 = false;
@@ -34,10 +38,10 @@ public class Elevator_1 {
     private TalonFXConfiguration config;
     private Slot0Configs slot0Configs;
 
-    private double slot0kG = 1;
-    private double slot0kP = 1;
-    private double slot0kI = 1;
-    private double slot0kD = 1;
+    private double slot0kG = 1;  //Gravity keeps position in place
+    private double slot0kP = 1;  //Proportion gives output/voltage proportional to error based on the error - immediate error
+    private double slot0kI = 1;  //Integral calculates difference/error over time between desired and actual, and adjusts output/voltage accordingly - past error
+    private double slot0kD = 1;  //Derivative finds the rate of change of the error and makes a prediction in order to dampen/counteract rapid changes (jerk) - future error
 
     public Elevator_1() {
         leftMotor = new TalonFX(Constants.CAN.ElevatorLeft);
@@ -52,6 +56,8 @@ public class Elevator_1 {
         slot0Configs.kD = slot0kD;
 
         config.MotionMagic.withMotionMagicCruiseVelocity(targetVelocity).withMotionMagicAcceleration(targetAcceleration);
+        bottomLimitSwitch = new DigitalInput(Constants.IDs.ElevatorBottomLimitSwitch);
+        topLimitSwitch = new DigitalInput(Constants.IDs.ElevatorTopLimitSwitch);
     }
 
     public void goUp(){
@@ -70,4 +76,6 @@ public class Elevator_1 {
     public void stop() {
         leftMotor.set(0);
     }
+    public boolean brokeBottomLimitSwitch() {return !bottomLimitSwitch.get();}
+    public boolean brokeTopLimitSwitch() {return topLimitSwitch.get();}
 }
