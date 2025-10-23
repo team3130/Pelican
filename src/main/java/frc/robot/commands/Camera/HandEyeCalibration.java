@@ -26,6 +26,7 @@ public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
     private final CommandSwerveDrivetrain drivetrain;
+    private double time = Math.pow(10, 8);
     private final double[] xOdo = new double[50];
     private final double[] yOdo = new double[50];
     private double timeOfPrevMeasurement = 0;
@@ -70,6 +71,7 @@ public  class HandEyeCalibration extends Command
             photonVisionMeasurement(results);
             if(gotPhotonMeasurement) {
                 odometryMeasurement();
+                time = Math.pow(10, 9);
             }
         }
     }
@@ -120,8 +122,8 @@ public  class HandEyeCalibration extends Command
     }
 
     public void photonVisionMeasurement(List<PhotonPipelineResult> results) {
-        double time = MathSharedStore.getTimestamp();
-        if(results.get(results.size() - 1).getTimestampSeconds() < time) {
+        time = Math.min(MathSharedStore.getTimestamp(), time);
+        if(results.get(results.size() - 1).getTimestampSeconds() > time) {
             return;
         }
         if(results.isEmpty()) {
