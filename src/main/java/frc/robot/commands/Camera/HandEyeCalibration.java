@@ -1,6 +1,7 @@
 
 package frc.robot.commands.Camera;
 
+import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -8,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.sensors.Camera;
@@ -26,10 +28,10 @@ public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
     private final CommandSwerveDrivetrain drivetrain;
-    Pose2d statePose = new Pose2d();
+    Pose2d position = new Pose2d();
+    Pose2d measuredPosition = new Pose2d();
+    ChassisSpeeds velocity = new ChassisSpeeds();
     private double time = Math.pow(10, 8);
-    private final double[] xOdo = new double[5];
-    private final double[] yOdo = new double[5];
     private double timeOfPrevMeasurement = 0;
     private ArrayList<Mat> tTcTranslations = new ArrayList<>();
     private ArrayList<Mat> gTbTranslations = new ArrayList<>();
@@ -58,15 +60,11 @@ public  class HandEyeCalibration extends Command
     public void execute()
     {
         List<PhotonPipelineResult> results = camera.getResults();
-        for(int i = 3; i >= 0; i--) {
-            xOdo[i + 1] = xOdo[i];
-            yOdo[i + 1] = yOdo[i];
-        }
-        Pose2d statePose = drivetrain.getStatePose();
-        xOdo[0] = statePose.getX();
-        yOdo[0] = statePose.getY();
+        SwerveDrivetrain.SwerveDriveState statePose = drivetrain.getState();
+        position = statePose.Pose;
+        velocity = statePose.Speeds;
 
-        if(isSlow() && (timeSincePrevMeasurement() > 0.5)) {
+        if(isSlow(velocity) && (timeSincePrevMeasurement() > 0.5)) {
             gotPhotonMeasurement = false;
             timeOfPrevMeasurement = MathSharedStore.getTimestamp();
             photonVisionMeasurement(results);
@@ -119,8 +117,8 @@ public  class HandEyeCalibration extends Command
         return MathSharedStore.getTimestamp() - timeOfPrevMeasurement;
     }
 
-    public boolean isSlow() {
-        return Math.hypot(xOdo[0] - xOdo[4], yOdo[0] - yOdo[4]) <= 0.001;
+    public boolean isSlow(ChassisSpeeds velocity) {
+        return (Math.hypot(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond) <= 0.01) && velocity.omegaRadiansPerSecond <= 0.02;
     }
 
     public void photonVisionMeasurement(List<PhotonPipelineResult> results) {
@@ -132,7 +130,7 @@ public  class HandEyeCalibration extends Command
             return;
         }
         for (PhotonTrackedTarget target : results.get(results.size() - 1).getTargets()) {
-            statePose = drivetrain.getStatePose();
+            measuredPosition = drivetrain.getStatePose();
             gotPhotonMeasurement = true;
             Transform3d camToTarget = target.getBestCameraToTarget();
             Mat vec1 = new Mat(3, 1, CvType.CV_64F);
@@ -153,11 +151,11 @@ public  class HandEyeCalibration extends Command
 
     public void odometryMeasurement() {
         Mat vec2 = new Mat(3, 1, CvType.CV_64F);
-        vec2.put(0, 0, statePose.getX(), statePose.getY(), 0);
+        vec2.put(0, 0, measuredPosition.getX(), measuredPosition.getY(), 0);
         gTbTranslations.add(vec2);
         System.out.println("Added Odometry Vec " + vec2.dump());
         Mat mat2 = new Mat(3, 3, CvType.CV_64F);
-        Matrix<N3, N3> mat = (new Rotation3d(statePose.getRotation())).toMatrix();
+        Matrix<N3, N3> mat = (new Rotation3d(measuredPosition.getRotation())).toMatrix();
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 mat2.put(row, col, mat.get(row, col));
