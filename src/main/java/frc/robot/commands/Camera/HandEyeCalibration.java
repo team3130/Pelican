@@ -62,7 +62,7 @@ public  class HandEyeCalibration extends Command
         SwerveDrivetrain.SwerveDriveState statePose = drivetrain.getState();
         velocity = statePose.Speeds;
 
-        if(isSlow(velocity) && (timeSincePrevMeasurement() > 0.5)) {
+        if(isSlow(velocity) && (timeSincePrevMeasurement() > 0.4)) {
             gotPhotonMeasurement = false;
             timeOfPrevMeasurement = MathSharedStore.getTimestamp();
             photonVisionMeasurement(results);
@@ -70,6 +70,8 @@ public  class HandEyeCalibration extends Command
                 odometryMeasurement();
                 time = Math.pow(10, 9);
             }
+        } else {
+            time = Math.pow(10, 9);
         }
     }
     
