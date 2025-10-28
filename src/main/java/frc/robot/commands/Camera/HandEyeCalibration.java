@@ -28,7 +28,6 @@ public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
     private final CommandSwerveDrivetrain drivetrain;
-    Pose2d position = new Pose2d();
     Pose2d measuredPosition = new Pose2d();
     ChassisSpeeds velocity = new ChassisSpeeds();
     private double time = Math.pow(10, 8);
@@ -61,7 +60,6 @@ public  class HandEyeCalibration extends Command
     {
         List<PhotonPipelineResult> results = camera.getResults();
         SwerveDrivetrain.SwerveDriveState statePose = drivetrain.getState();
-        position = statePose.Pose;
         velocity = statePose.Speeds;
 
         if(isSlow(velocity) && (timeSincePrevMeasurement() > 0.5)) {
