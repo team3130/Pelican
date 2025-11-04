@@ -2,6 +2,8 @@
 package frc.robot.commands.Camera;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -17,24 +19,29 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 public  class HandEyeCalibration extends Command
 {
     private final Camera camera;
+    private final Transform3d robotToCamera = new Transform3d(0.287, 0.275, 0.395, new Rotation3d(3.0042,0.2186,-0.2814+0.0268-0.0642));
     private final CommandSwerveDrivetrain drivetrain;
+    private final PhotonPoseEstimator photonPoseEstimator;
     Pose2d measuredPosition = new Pose2d();
     ChassisSpeeds velocity = new ChassisSpeeds();
     private double time = Math.pow(10, 8);
     private double timeOfPrevMeasurement = 0;
     private ArrayList<Mat> tTcTranslations = new ArrayList<>();
     private ArrayList<Mat> gTbTranslations = new ArrayList<>();
-    private Mat hTeTranslation = new Mat(3, 3, CvType.CV_64F);
+    private Mat hTeTranslation = new Mat(3, 1, CvType.CV_64F);
     private ArrayList<Mat> tTcRotations = new ArrayList<>();
     private ArrayList<Mat> gTbRotations = new ArrayList<>();
     private Mat hTeRotation = new Mat(3, 3, CvType.CV_64F);
@@ -44,6 +51,8 @@ public  class HandEyeCalibration extends Command
     {
           this.camera = camera;
           this.drivetrain = drivetrain;
+        AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+        photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCamera);
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.camera);
@@ -62,7 +71,7 @@ public  class HandEyeCalibration extends Command
         SwerveDrivetrain.SwerveDriveState statePose = drivetrain.getState();
         velocity = statePose.Speeds;
 
-        if(isSlow(velocity) && (timeSincePrevMeasurement() > 0.4)) {
+        if(isSlow(velocity) && (timeSincePrevMeasurement() > 0)) {
             gotPhotonMeasurement = false;
             timeOfPrevMeasurement = MathSharedStore.getTimestamp();
             photonVisionMeasurement(results);
@@ -118,7 +127,7 @@ public  class HandEyeCalibration extends Command
     }
 
     public boolean isSlow(ChassisSpeeds velocity) {
-        return (Math.hypot(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond) <= 0.01) && velocity.omegaRadiansPerSecond <= 0.02;
+        return (Math.hypot(velocity.vxMetersPerSecond, velocity.vyMetersPerSecond) <= 0.04) && velocity.omegaRadiansPerSecond <= 0.05;
     }
 
     public void photonVisionMeasurement(List<PhotonPipelineResult> results) {
@@ -126,7 +135,7 @@ public  class HandEyeCalibration extends Command
         if(results.isEmpty()) {
             return;
         }
-        if(results.get(results.size() - 1).getTimestampSeconds() < time) {
+        if(results.get(results.size() - 1).getTimestampSeconds() < time + 0.5) {
             return;
         }
         for (PhotonTrackedTarget target : results.get(results.size() - 1).getTargets()) {
@@ -146,6 +155,11 @@ public  class HandEyeCalibration extends Command
             }
             tTcRotations.add(mat1);
             System.out.println("Added Vision Mat " + mat1.dump());
+
+            Optional<EstimatedRobotPose> optionalOdoState = photonPoseEstimator.update(results.get(results.size() - 1));
+            System.out.println("Estimated Odometry X: " + optionalOdoState.get().estimatedPose.toPose2d().getX());
+            System.out.println("Estimated Odometry Y: " + optionalOdoState.get().estimatedPose.toPose2d().getY());
+            System.out.println("Estimated Odometry Rotation: " + new Rotation3d(optionalOdoState.get().estimatedPose.toPose2d().getRotation()).toMatrix());
         }
     }
 
