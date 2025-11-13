@@ -23,7 +23,7 @@ import frc.robot.Constants;
 public class AlgaeIntake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   private final TalonFX intake;
-  private double intakeSpeed = 0.75;
+  private double intakeSpeed = 1.0;
   private boolean algaeMode = false;
   public AlgaeIntake() {
     intake = new TalonFX(Constants.CAN.AlgaeIntake);
