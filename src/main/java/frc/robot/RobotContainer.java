@@ -125,6 +125,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    algaeIntake.setDefaultCommand(new AlgaeOscilate(algaeIntake));
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));

@@ -33,6 +33,7 @@ public class AlgaeOscilate extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    currentPosition -= 0.01;
     if(algaeIntake.getPosition() < currentPosition - 0.5) {
       algaeIntake.runIntake();
     } else if(algaeIntake.getPosition() > currentPosition + 0.5) {
