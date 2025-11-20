@@ -43,46 +43,32 @@ public class LimitedManipIntake extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(!algaeIntake.getAlgaeMode()) {
-      if (elevator.isAtMinPosition()) {
-        manip.runManip();
-      }
+    if (elevator.isAtMinPosition()) {
+      manip.runManip();
     }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!algaeIntake.getAlgaeMode()) {
-      if (elevator.isAtMinPosition()) {
-        if (!manip.getFirstBeam() && !manip.getSecondBeam()) {
-          manip.manipAtSpeed(0.4);
-        } else {
-          manip.runManip();
-        }
+    if (elevator.isAtMinPosition()) {
+      if (!manip.getFirstBeam() && !manip.getSecondBeam()) {
+        manip.manipAtSpeed(0.4);
+      } else {
+        manip.runManip();
       }
-    } else {
-      algaeIntake.runIntake();
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if (!algaeIntake.getAlgaeMode()) {
-      manip.stopManip();
-    } else {
-      algaeIntake.stopIntake();
-    }
+    manip.stopManip();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(!algaeIntake.getAlgaeMode()) {
-      return manip.getFirstBeam() && !manip.getSecondBeam();
-    } else {
-      return !controller.L2().getAsBoolean();
-    }
+    return manip.getFirstBeam() && !manip.getSecondBeam();
   }
 }

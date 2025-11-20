@@ -4,6 +4,10 @@
 
 package frc.robot.commands.AlgaeIntake;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.AlgaeIntake;
 
@@ -27,18 +31,14 @@ public class AlgaeOscilate extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    currentPosition = algaeIntake.getPosition();
+    currentPosition = algaeIntake.getPosition() + 1;
+    System.out.println(algaeIntake.getPosition());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    currentPosition -= 0.01;
-    if(algaeIntake.getPosition() < currentPosition - 0.5) {
-      algaeIntake.runIntake();
-    } else if(algaeIntake.getPosition() > currentPosition + 0.5) {
-      algaeIntake.runOuttake();
-    }
+    algaeIntake.intakeSetpoint(currentPosition);
   }
 
   // Called once the command ends or is interrupted.

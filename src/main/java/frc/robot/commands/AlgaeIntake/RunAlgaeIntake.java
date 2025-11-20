@@ -5,6 +5,7 @@
 package frc.robot.commands.AlgaeIntake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.ExampleSubsystem;
 
@@ -12,14 +13,16 @@ import frc.robot.subsystems.ExampleSubsystem;
 public class RunAlgaeIntake extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final AlgaeIntake algaeIntake;
+  private final CommandPS5Controller controller;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param algaeIntake The subsystem used by this command.
    */
-  public RunAlgaeIntake(AlgaeIntake algaeIntake) {
+  public RunAlgaeIntake(AlgaeIntake algaeIntake, CommandPS5Controller controller) {
     this.algaeIntake = algaeIntake;
+    this.controller = controller;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(algaeIntake);
   }
@@ -43,6 +46,6 @@ public class RunAlgaeIntake extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return !controller.L2().getAsBoolean();
   }
 }

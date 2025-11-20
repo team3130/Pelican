@@ -35,48 +35,34 @@ public class LimitedManipOuttake extends Command {
     this.LED = LED;
     this.algaeIntake = algaeIntake;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(manip, algaeIntake);
+    addRequirements(manip);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(!algaeIntake.getAlgaeMode()) {
-      timer.restart();
-    }
+    timer.restart();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!algaeIntake.getAlgaeMode()) {
-      if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
-        manip.runManip();
-      }
-    } else {
-      algaeIntake.runOuttake();
+    if (elevator.isAtL1() || elevator.isAtL2() || elevator.isAtL3() || elevator.isAtL4()) {
+      manip.runManip();
     }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if(!algaeIntake.getAlgaeMode()) {
-      manip.stopManip();
-      timer.stop();
-      manip.setIsOuttaking(true);
-    } else {
-      algaeIntake.stopIntake();
-    }
+    manip.stopManip();
+    timer.stop();
+    manip.setIsOuttaking(true);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (!algaeIntake.getAlgaeMode()) {
-      return (manip.getSecondBeam() && manip.getFirstBeam()) || timer.hasElapsed(0.5);
-    } else {
-      return false;
-    }
+    return (manip.getSecondBeam() && manip.getFirstBeam()) || timer.hasElapsed(0.5);
   }
 }

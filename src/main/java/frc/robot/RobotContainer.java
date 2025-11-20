@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.button.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AlgaeIntake.*;
 import frc.robot.commands.Autos;
+import frc.robot.commands.SwitchIntake;
+import frc.robot.commands.SwitchOuttake;
 import frc.robot.commands.Chassis.*;
 import frc.robot.commands.Climber.*;
 import frc.robot.commands.CoralIntake.*;
@@ -30,8 +32,9 @@ import frc.robot.commands.Manipulator.*;
 import frc.robot.commands.ToggleAlgaeMode;
 import frc.robot.sensors.Camera;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.LEDs;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
@@ -101,8 +104,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Go L4 Basic", new GoToL4Basic(elevator, LED));
     NamedCommands.registerCommand("Go L3 Basic", new GoToL3Basic(elevator, LED));
 
-    NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake));
-    NamedCommands.registerCommand("Run Algae Outtake", new RunAlgaeOuttake(algaeIntake));
+    NamedCommands.registerCommand("Run Algae Intake", new RunAlgaeIntake(algaeIntake, driverController));
+    NamedCommands.registerCommand("Run Algae Outtake", new RunAlgaeOuttake(algaeIntake, driverController));
 
     NamedCommands.registerCommand("Limited Coral Intake", new LimitedCoralIntake(coralIntake, manip));
     NamedCommands.registerCommand("UnLimited Coral Outtake", new UnlimitedCoralOuttake(coralIntake));
@@ -129,11 +132,20 @@ public class RobotContainer {
     //driverController.R2().whileTrue(new UnlimitedRunManip(manip, elevator));
     driverController.L3().whileTrue(new UnlimitedReverseRunManip(manip, elevator));
     //driverController.R2().whileTrue(new OneSwitchLimitedManipIntake(manip, elevator));
-    driverController.L2().onTrue(new SequentialCommandGroup(
-            new LimitedManipIntake(manip, elevator, LED, algaeIntake, driverController),
-            new LimitedManipIntakeReverse(manip, LED, algaeIntake)
-    ));
-    driverController.R2().whileTrue(new LimitedManipOuttake(manip, elevator, LED, algaeIntake));
+    //driverController.L2().onTrue(new SwitchIntake(algaeIntake, manip, elevator, LED, driverController));
+    //
+    driverController.R2().whileTrue(new SwitchOuttake(algaeIntake, manip, elevator, LED, driverController));
+    driverController.L2().onTrue(Commands.either(
+      new RunAlgaeIntake(algaeIntake, driverController), 
+      new SequentialCommandGroup(
+        new LimitedManipIntake(manip, elevator, LED, algaeIntake, driverController), 
+        new LimitedManipIntakeReverse(manip, LED, algaeIntake)),
+      algaeIntake::getAlgaeMode));
+
+    driverController.R2().onTrue(Commands.either(
+      new RunAlgaeOuttake(algaeIntake, driverController), 
+      new LimitedManipOuttake(manip, elevator, LED, algaeIntake),
+      algaeIntake::getAlgaeMode));
 
     //driverController.R2().whileTrue(new UnlimitedCoralIntake(coralIntake));
 
@@ -187,7 +199,6 @@ public class RobotContainer {
 
     operatorController.a().whileTrue(new IntakeActuate(coralIntake));
     operatorController.povLeft().whileTrue(new BasicClimberUp(climber, LED));
-    operatorController.rightBumper().whileTrue(new RunAlgaeIntake(algaeIntake));
     if(Constants.debugMode) {
       operatorController.b().whileTrue(new IntakeActuateToSetpoint(coralIntake, 0));
       //operatorController.leftBumper().whileTrue(new DriveWithTransPID(driveTrain, drive));

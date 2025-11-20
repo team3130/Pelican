@@ -4,18 +4,26 @@
 
 package frc.robot.subsystems;
 
+import java.io.ObjectInputFilter.Config;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -25,10 +33,27 @@ public class AlgaeIntake extends SubsystemBase {
   private final TalonFX intake;
   private double intakeSpeed = 1.0;
   private boolean algaeMode = false;
+
+  private final PositionDutyCycle voltRequest;
+  private TalonFXConfiguration config;
+  private Slot0Configs slot0Configs;
+  private double slot0kP = 0.1;
+  private double slot0kI = 0;
+  private double slot0kD = 0;
+
   public AlgaeIntake() {
     intake = new TalonFX(Constants.CAN.AlgaeIntake);
-    intake.getConfigurator().apply(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive).withNeutralMode(NeutralModeValue.Brake));
-    intake.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(true).withSupplyCurrentLimit(40));
+
+    voltRequest = new PositionDutyCycle(0);
+    slot0Configs = new Slot0Configs();
+    slot0Configs.kP = slot0kP;
+    slot0Configs.kI = slot0kI;
+    slot0Configs.kD = slot0kD;
+    config = new TalonFXConfiguration();
+    config.Slot0 = slot0Configs;
+    config.MotorOutput.withInverted(InvertedValue.Clockwise_Positive).withNeutralMode(NeutralModeValue.Brake);
+
+    intake.getConfigurator().apply(config);
   }
 
   public void runIntake() {
@@ -39,6 +64,9 @@ public class AlgaeIntake extends SubsystemBase {
   }
   public void stopIntake() {
     intake.set(0);
+  }
+  public void intakeSetpoint(double setpoint) {
+    intake.setControl(voltRequest.withPosition(setpoint));
   }
 
   public double getIntakeSpeed() {return intakeSpeed;}
@@ -58,6 +86,7 @@ public class AlgaeIntake extends SubsystemBase {
     if (Constants.debugMode) {
       builder.setSmartDashboardType("Algae Intake");
 
+      SmartDashboard.putData(intake);
       builder.addDoubleProperty("Intake Speed", this::getIntakeSpeed, this::setIntakeSpeed);
       builder.addDoubleProperty("Algae Position", this::getPosition, null);
       builder.addBooleanProperty("Algae Mode", this::getAlgaeMode, this::setAlgaeMode);
