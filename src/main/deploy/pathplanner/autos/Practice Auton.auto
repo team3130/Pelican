@@ -23,9 +23,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "Go Home"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Go Home"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "New New Path"
+                }
+              }
+            ]
           }
         }
       ]
