@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.207,
-        "y": 3.861
+        "x": 5.168,
+        "y": 5.185
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.457,
-        "y": 3.861
+        "x": 4.82625,
+        "y": 6.41375
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.207,
-        "y": 3.861
+        "x": 1.2675,
+        "y": 6.66725
       },
       "prevControl": {
-        "x": 2.957,
-        "y": 3.861
+        "x": 2.5934999999999997,
+        "y": 5.9750000000000005
       },
       "nextControl": null,
       "isLocked": false,
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
-    "rotation": 0.0
+    "velocity": 0,
+    "rotation": -54.46232220802559
   },
   "reversed": false,
-  "folder": "Reef Followers",
+  "folder": "Tester",
   "idealStartingState": {
-    "velocity": 0.0,
-    "rotation": 0.0
+    "velocity": 0,
+    "rotation": -127.87498365109816
   },
   "useDefaultConstraints": true
 }

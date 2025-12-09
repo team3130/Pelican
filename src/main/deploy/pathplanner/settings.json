@@ -3,11 +3,11 @@
   "robotLength": 0.9144,
   "holonomicMode": true,
   "pathFolders": [
-    "Feeder Follower Paths",
-    "'Dead Reckoning'",
-    "Reef Followers"
+    "Tester"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "test"
+  ],
   "defaultMaxVel": 2.0,
   "defaultMaxAccel": 2.0,
   "defaultMaxAngVel": 360.0,
