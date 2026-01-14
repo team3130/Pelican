@@ -12,6 +12,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -57,7 +58,7 @@ public class Elevator extends SubsystemBase {
     bottomLimitSwitch = new DigitalInput(Constants.IDs.ElevatorBottomLimitSwitch);
     topLimitSwitch = new DigitalInput(Constants.IDs.ElevatorTopLimitSwitch);
 
-    rightMotor.setControl(new Follower(leftMotor.getDeviceID(), true));
+    rightMotor.setControl(new Follower(leftMotor.getDeviceID(), MotorAlignmentValue.Aligned));
 
     voltRequest0 = new MotionMagicDutyCycle(0);
     slot0Configs = new Slot0Configs().withGravityType(GravityTypeValue.Elevator_Static);
